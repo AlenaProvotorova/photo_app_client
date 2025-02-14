@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_app/data/folders/models/folder.dart';
-import 'package:photo_app/presentation/folders_storage/widgets/delete_folder.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/delete_folder.dart';
 
 class FolderTile extends StatelessWidget {
   final Folder folder;
@@ -13,11 +13,9 @@ class FolderTile extends StatelessWidget {
       title: Text(folder.name),
       trailing: DeleteFolder(folder: folder),
       onTap: () {
-        // TODO Добавьте здесь навигацию в папку
         Navigator.pushNamed(
           context,
-          '/folder-details',
-          arguments: folder,
+          '/folder/${folder.id}',
         );
       },
     );
