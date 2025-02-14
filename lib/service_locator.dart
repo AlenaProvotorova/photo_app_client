@@ -2,9 +2,14 @@ import 'package:get_it/get_it.dart';
 import 'package:photo_app/core/network/dio_client.dart';
 import 'package:photo_app/data/auth/repositories/auth.dart';
 import 'package:photo_app/data/auth/sources/auth_api_service.dart';
+import 'package:photo_app/data/folders/repositories/folders.dart';
+import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';
 import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
+import 'package:photo_app/domain/folders/repositories/folders.dart';
+import 'package:photo_app/domain/folders/usecases/create_folder.dart';
+import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
 
 final sl = GetIt.instance;
 
@@ -13,11 +18,15 @@ void setupServiceLocator() {
 
   //services
   sl.registerSingleton<AuthApiService>(AuthApiServiceImplementation());
+  sl.registerSingleton<FoldersApiService>(FoldersApiServiceImplementation());
 
   //repositories
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
+  sl.registerSingleton<FoldersRepository>(FoldersRepositoryImplementation());
 
   //usecases
   sl.registerSingleton<SignUpUseCase>(SignUpUseCase());
   sl.registerSingleton<SignInUseCase>(SignInUseCase());
+  sl.registerSingleton<CreateFolderUseCase>(CreateFolderUseCase());
+  sl.registerSingleton<GetAllFoldersUseCase>(GetAllFoldersUseCase());
 }

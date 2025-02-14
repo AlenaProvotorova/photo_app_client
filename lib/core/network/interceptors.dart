@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
+import 'package:photo_app/core/utils/token_storage.dart';
 
 /// This interceptor is used to show request and response logs
 class LoggerInterceptor extends Interceptor {
@@ -17,8 +18,13 @@ class LoggerInterceptor extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  void onRequest(
+      RequestOptions options, RequestInterceptorHandler handler) async {
+    final token = await TokenStorage.loadToken();
+    print('TOKEN: $token');
+    options.headers['Authorization'] = 'Bearer $token';
     final requestPath = '${options.baseUrl}${options.path}';
+
     logger.i('${options.method} request ==> $requestPath'); //Info log
     handler.next(options); // continue with the Request
   }

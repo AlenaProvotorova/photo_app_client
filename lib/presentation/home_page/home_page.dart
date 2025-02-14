@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photo_app/presentation/profile/profile.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage.dart';
 import 'package:photo_app/presentation/settings/profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -18,7 +18,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  final List _pages = [const ProfilePage(), const SettingsPage()];
+  final List _pages = [
+    const FoldersStorageScreen(),
+    const SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +32,8 @@ class _HomePageState extends State<HomePage> {
         onTap: navigateBottomBar,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Пользователь',
+            icon: Icon(Icons.folder),
+            label: 'Главная',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

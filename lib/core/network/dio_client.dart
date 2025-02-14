@@ -5,11 +5,14 @@ import 'interceptors.dart';
 
 class DioClient {
   late final Dio _dio;
+
   DioClient()
       : _dio = Dio(
           BaseOptions(
               baseUrl: ApiUrl.baseURL,
-              headers: {'Content-Type': 'application/json; charset=UTF-8'},
+              headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
               responseType: ResponseType.json,
               sendTimeout: const Duration(seconds: 10),
               receiveTimeout: const Duration(seconds: 10)),
@@ -23,6 +26,7 @@ class DioClient {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
+    print('Options get: $options');
     try {
       final Response response = await _dio.get(
         url,
@@ -46,6 +50,8 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    print('Options post: $options');
+    print('data post: $data');
     try {
       final Response response = await _dio.post(
         url,

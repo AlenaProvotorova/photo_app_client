@@ -97,8 +97,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   const SizedBox(height: 16),
                   PrimaryButton(
                       title: 'Sign up',
-                      onPress: () async {
-                        await _singUp(context);
+                      onPress: () {
+                        _singUp(context);
                       }),
                   Text(_errorMessage)
                 ],
