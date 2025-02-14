@@ -25,10 +25,10 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'PhotoApp',
-      theme: darkTheme,
-      routes: routes,
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'PhotoApp',
+        theme: darkTheme,
+        routes: routes,
+        onGenerateRoute: onGenerateRoute);
   }
 }

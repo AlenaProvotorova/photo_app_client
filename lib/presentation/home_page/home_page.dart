@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folders_storage.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/folders_storage.dart';
 import 'package:photo_app/presentation/settings/profile.dart';
 
 class HomePage extends StatefulWidget {
