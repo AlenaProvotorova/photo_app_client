@@ -19,6 +19,10 @@ dependencies:
   logger: ^2.5.0
   # State:
   flutter_bloc: ^9.0.0
+  # Upload images for mobile:
+  image_picker: ^1.0.7
+  # Upload images for web:
+  file_picker: ^5.2.5
 
   dartz: ^0.10.1
   get_it: ^8.0.3
