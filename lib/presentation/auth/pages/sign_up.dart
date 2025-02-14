@@ -3,7 +3,7 @@ import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/core/components/input_field.dart';
 import 'package:photo_app/core/components/input_field_with_label.dart';
 import 'package:photo_app/core/components/primary_button.dart';
-import 'package:photo_app/core/helpers/message/dispay_message.dart';
+import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/auth/models/signup_req_params.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
 import 'package:photo_app/service_locator.dart';
