@@ -9,6 +9,7 @@ import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
 import 'package:photo_app/domain/folders/repositories/folders.dart';
 import 'package:photo_app/domain/folders/usecases/create_folder.dart';
+import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
 import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
 
 final sl = GetIt.instance;
@@ -29,4 +30,5 @@ void setupServiceLocator() {
   sl.registerSingleton<SignInUseCase>(SignInUseCase());
   sl.registerSingleton<CreateFolderUseCase>(CreateFolderUseCase());
   sl.registerSingleton<GetAllFoldersUseCase>(GetAllFoldersUseCase());
+  sl.registerSingleton<DeleteFolderUseCase>(DeleteFolderUseCase());
 }
