@@ -5,4 +5,5 @@ class ApiUrl {
   static const String signIn = 'auth/login';
 
   static const String folders = 'folders';
+  static const String files = 'files';
 }
