@@ -22,7 +22,7 @@ dependencies:
   # Upload images for mobile:
   image_picker: ^1.0.7
   # Upload images for web:
-  file_picker: ^5.2.5
+  file_picker: ^6.1.1
 
   dartz: ^0.10.1
   get_it: ^8.0.3
@@ -44,3 +44,4 @@ flutter:
 
   assets:
     - assets/images/
+
