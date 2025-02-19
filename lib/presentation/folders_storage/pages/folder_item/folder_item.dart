@@ -1,9 +1,11 @@
-import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/core/components/image_container.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
+import 'package:photo_app/data/files/models/upload_file_req_params.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker%20copy.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
@@ -11,6 +13,7 @@ import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_state.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 import 'package:photo_app/service_locator.dart';
 
 class FolderItemScreen extends StatefulWidget {
@@ -23,6 +26,7 @@ class FolderItemScreen extends StatefulWidget {
 
 class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
+  late final FilesBloc _filesBloc;
 
   @override
   void initState() {
@@ -30,61 +34,66 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     _imagePickerService = kIsWeb
         ? WebImagePickerRepositoryImplementation()
         : MobileImagePickerRepositoryImplementation();
+    _filesBloc = FilesBloc()..add(LoadFiles());
   }
 
-  Future<void> _pickImages() async {
-    try {
-      final selectedImages = await _imagePickerService.pickImages();
-      if (selectedImages.isNotEmpty) {
-        context.read<FilesBloc>().add(AddImages(selectedImages, context));
+//   Future<void> _handleCreateFolder(
+//     BuildContext context, TextEditingController controller) async {
+//   final result = await sl<CreateFolderUseCase>().call(
+//     params: CreateFolderReqParams(name: controller.text),
+//   );
+
+//   result.fold(
+//     (error) => DisplayMessage.showMessage(context, error),
+//     (success) {
+//       context.read<FolderBloc>().add(LoadFolders());
+//       DisplayMessage.showMessage(context, 'Folder created successfully');
+//     },
+//   );
+// }
+
+  Future<void> _pickImages(context) async {
+    final selectedImages = await _imagePickerService.pickImages();
+    if (selectedImages.isNotEmpty) {
+      for (var image in selectedImages) {
+        final result = await sl<UploadFileUseCase>().call(
+          params: UploadFileReqParams(
+            formData: FormData.fromMap({
+              'file': MultipartFile.fromBytes(
+                image.bytes!,
+                filename: image.path,
+              ),
+              // 'folderId': widget.folderId,
+            }),
+          ),
+        );
+
+        result.fold(
+          (error) => DisplayMessage.showMessage(context, error),
+          (success) {
+            _filesBloc.add(LoadFiles());
+            DisplayMessage.showMessage(context, 'File loaded successfully');
+          },
+        );
       }
-    } catch (e) {
-      DisplayMessage.showMessage(context, 'Error picking images: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => FilesBloc(
-        imagePickerService: _imagePickerService,
-        uploadFileUseCase: sl<UploadFileUseCase>(),
-      )..add(LoadFiles()),
-      child: Scaffold(
-        appBar: AppBarCustom(
-          title: '',
-          onPress: () {
-            Navigator.pop(context);
-          },
-          showLeading: true,
-        ),
-        body: BlocBuilder<FilesBloc, FilesState>(
+    return Scaffold(
+      appBar: AppBarCustom(
+        title: '',
+        onPress: () => Navigator.pop(context),
+        showLeading: true,
+      ),
+      body: BlocProvider(
+        create: (context) => _filesBloc,
+        child: BlocBuilder<FilesBloc, FilesState>(
           builder: (context, state) {
             if (state is FilesLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FilesLoaded) {
-              print('state.files1: ${state.files}');
-              print('state.images1: ${state.images}');
-              final List<dynamic> combined = [];
-
-              combined.addAll(state.images);
-              combined.addAll(state.files);
-              print('state.combined: $combined');
-              if (combined.isEmpty) {
-                return const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Папка пуста',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                );
-              }
               return Column(
                 children: [
                   Expanded(
@@ -96,53 +105,20 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
                       ),
-                      itemCount: combined.length,
+                      itemCount: state.files.length,
                       itemBuilder: (context, index) {
-                        final imageData = combined[index];
-                        if (kIsWeb) {
-                          if (imageData.bytes != null) {
-                            return Image.memory(
-                              imageData.bytes!,
-                              fit: BoxFit.cover,
-                            );
-                          } else {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.red,
-                              ),
-                            );
-                          }
-                        } else {
-                          if (imageData.path != null) {
-                            return Image.file(
-                              File(imageData.path!),
-                              fit: BoxFit.cover,
-                            );
-                          } else {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.red,
-                              ),
-                            );
-                          }
-                        }
+                        final imageData = state.files[index];
+                        print('imageData: $imageData');
+                        // if (kIsWeb) {
+                        //   return ImageContainer(url: imageData.url);
+                        // } else {
+                        //   return Text('image not kIsWeb');
+                        // }
+                        return ImageContainer(url: imageData.url);
                       },
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _pickImages,
-                        child: const Text('Загрузить фотографии'),
-                      ),
-                    ),
-                  ),
+                  UploadFileButton(pickImages: _pickImages),
                 ],
               );
             } else if (state is FilesError) {
