@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/folders/models/folder.dart';
 import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
-import 'package:photo_app/presentation/folders_storage/bloc/folder_event.dart';
-import 'package:photo_app/presentation/folders_storage/bloc/folder_state.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_event.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_state.dart';
 import 'package:photo_app/service_locator.dart';
 
 class FolderBloc extends Bloc<FolderEvent, FolderState> {

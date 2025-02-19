@@ -5,6 +5,7 @@ class File {
   final int size;
   final String mimetype;
   final String? deletedAt;
+  final String url;
   File({
     required this.id,
     required this.filename,
@@ -12,6 +13,7 @@ class File {
     required this.size,
     required this.mimetype,
     this.deletedAt,
+    required this.url,
   });
 
   factory File.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class File {
       size: json['size'],
       mimetype: json['mimetype'],
       deletedAt: json['deletedAt'],
+      url: json['url'],
     );
   }
 }
