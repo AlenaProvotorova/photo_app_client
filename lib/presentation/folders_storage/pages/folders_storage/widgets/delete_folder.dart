@@ -4,8 +4,8 @@ import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/folders/models/delete_folder_req_params.dart';
 import 'package:photo_app/data/folders/models/folder.dart';
 import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
-import 'package:photo_app/presentation/folders_storage/bloc/folder_bloc.dart';
-import 'package:photo_app/presentation/folders_storage/bloc/folder_event.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_event.dart';
 import 'package:photo_app/service_locator.dart';
 
 class DeleteFolder extends StatelessWidget {
