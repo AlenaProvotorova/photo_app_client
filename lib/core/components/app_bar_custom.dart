@@ -11,7 +11,10 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppBar(
-      title: Text(title, style: TextStyle(color: theme.colorScheme.primary)),
+      title: Text(
+        title,
+        style: theme.textTheme.headlineMedium,
+      ),
       centerTitle: true,
       elevation: 0,
       backgroundColor: theme.colorScheme.surface,

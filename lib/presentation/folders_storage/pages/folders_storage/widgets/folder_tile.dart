@@ -8,8 +8,19 @@ class FolderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ListTile(
-      leading: const Icon(Icons.folder, color: Colors.blue),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer,
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.folder,
+          color: Colors.white,
+        ),
+      ),
       title: Text(folder.name),
       trailing: DeleteFolder(folder: folder),
       onTap: () {

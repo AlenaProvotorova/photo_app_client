@@ -23,14 +23,18 @@ class FoldersList extends StatelessWidget {
             if (state.folders.isEmpty) {
               return const Center(child: Text('Пустота'));
             }
-            return ListView.builder(
-              itemCount: state.folders.length,
-              itemBuilder: (context, index) {
-                final folder = state.folders[index];
-                return MouseRegion(
-                  child: FolderTile(folder: folder),
-                );
-              },
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ListView.separated(
+                itemCount: state.folders.length,
+                separatorBuilder: (context, index) => const Divider(),
+                itemBuilder: (context, index) {
+                  final folder = state.folders[index];
+                  return MouseRegion(
+                    child: FolderTile(folder: folder),
+                  );
+                },
+              ),
             );
           } else if (state is FolderError) {
             return Center(child: Text(state.message));
