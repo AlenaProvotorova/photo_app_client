@@ -51,7 +51,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                 image.bytes!,
                 filename: image.path,
               ),
-              // 'folderId': widget.folderId,
             }),
           ),
         );
@@ -104,7 +103,11 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                               // } else {
                               //   return Text('image not kIsWeb');
                               // }
-                              return ImageContainer(url: imageData.url);
+                              return ImageContainer(
+                                url: imageData.url,
+                                id: imageData.id,
+                                folderId: int.parse(widget.folderId),
+                              );
                             },
                           ),
                         ),
