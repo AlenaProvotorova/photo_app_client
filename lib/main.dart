@@ -8,7 +8,6 @@ import 'package:photo_app/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // setUrlStrategy(PathUrlStrategy());
   setupServiceLocator();
   await Hive.initFlutter();
   await TokenStorage.init();

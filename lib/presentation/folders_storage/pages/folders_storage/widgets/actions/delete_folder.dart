@@ -12,26 +12,6 @@ class DeleteFolder {
   final Folder folder;
   const DeleteFolder({required this.folder});
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Column(
-  //     children: [
-  //       PopupMenuAction(
-  //         title: 'Удалить папку',
-  //         onTap: () {
-  //           _handleDeleteFolder(context, folder.id);
-  //         },
-  //       ),
-  //     ],
-  //   );
-  //   // return IconButton(
-  //   //   icon: Icon(Icons.delete, color: theme.colorScheme.error),
-  //   //   onPressed: () {
-  //   //     _handleDeleteFolder(context, folder.id);
-  //   //   },
-  //   // );
-  // }
-
   Future<void> handleDeleteFolder(BuildContext context, int id) async {
     final result = await sl<DeleteFolderUseCase>()
         .call(params: DeleteFolderReqParams(id: id));

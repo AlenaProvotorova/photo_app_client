@@ -16,6 +16,7 @@ import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
 import 'package:photo_app/domain/files/repositories/files.dart';
 import 'package:photo_app/domain/files/usecases/get_all_files.dart';
+import 'package:photo_app/domain/files/usecases/remove_files.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
 import 'package:photo_app/domain/folders/repositories/folders.dart';
 
@@ -63,4 +64,5 @@ void setupServiceLocator() {
   //files
   sl.registerSingleton<UploadFileUseCase>(UploadFileUseCase());
   sl.registerSingleton<GetAllFilesUseCase>(GetAllFilesUseCase());
+  sl.registerSingleton<RemoveFilesUseCase>(RemoveFilesUseCase());
 }
