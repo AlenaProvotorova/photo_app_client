@@ -2,12 +2,13 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:photo_app/core/constants/api_url.dart';
 import 'package:photo_app/core/network/dio_client.dart';
+import 'package:photo_app/data/files/models/get_all_files_req_params.dart';
 import 'package:photo_app/data/files/models/upload_file_req_params.dart';
 import 'package:photo_app/service_locator.dart';
 
 abstract class FilesApiService {
   Future<Either> uploadFile(UploadFileReqParams params);
-  Future<Either> getAllFiles();
+  Future<Either> getAllFiles(GetAllFilesReqParams params);
 }
 
 class FilesApiServiceImplementation extends FilesApiService {
@@ -15,7 +16,7 @@ class FilesApiServiceImplementation extends FilesApiService {
   Future<Either> uploadFile(UploadFileReqParams params) async {
     try {
       var response = await sl<DioClient>().post(
-        ApiUrl.files,
+        '${ApiUrl.files}?folderId=${params.folderId}',
         data: params.formData,
       );
       return Right(response.data);
@@ -25,10 +26,13 @@ class FilesApiServiceImplementation extends FilesApiService {
   }
 
   @override
-  Future<Either> getAllFiles() async {
+  Future<Either> getAllFiles(GetAllFilesReqParams params) async {
     try {
       var response = await sl<DioClient>().get(
         ApiUrl.files,
+        queryParameters: {
+          'folderId': params.folderId,
+        },
       );
       return Right(response.data);
     } on DioException catch (e) {
