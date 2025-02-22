@@ -5,8 +5,6 @@ class AppImages {
 
   static final SvgPicture arrowBackImage =
       SvgPicture.asset('${basepath}arrow_back.svg');
-  static final SvgPicture logoutImage =
-      SvgPicture.asset('${basepath}logout.svg');
 
-  static const splashBg = '${basepath}splash_bg.jpg';
+  static const splashBg = '${basepath}bg-abstract.png';
 }

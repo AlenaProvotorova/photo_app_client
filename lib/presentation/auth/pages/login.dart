@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photo_app/core/components/input_field.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
+import 'package:photo_app/core/theme/app_images.dart';
 import 'package:photo_app/data/auth/models/signin_req_params.dart';
 import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/service_locator.dart';
@@ -67,7 +68,12 @@ class _LoginPageState extends State<LoginPage> {
         Expanded(
           flex: 1,
           child: Container(
-            color: Colors.blue[100],
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(AppImages.splashBg),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
         _loginForm(context),

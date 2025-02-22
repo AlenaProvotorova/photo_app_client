@@ -12,8 +12,11 @@ class CreateFolderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FloatingActionButton(
       onPressed: () => _showCreateFolderDialog(context),
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: Colors.white,
       child: const Icon(Icons.create_new_folder),
     );
   }

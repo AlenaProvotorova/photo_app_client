@@ -9,6 +9,8 @@ import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker%20copy.dart';
+import 'package:photo_app/data/user/repositories/user.dart';
+import 'package:photo_app/data/user/sources/user_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';
 import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
@@ -21,6 +23,8 @@ import 'package:photo_app/domain/folders/usecases/create_folder.dart';
 import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
 import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
+import 'package:photo_app/domain/user/repositories/user.dart';
+import 'package:photo_app/domain/user/usecases/get_user.dart';
 
 final sl = GetIt.instance;
 
@@ -29,6 +33,7 @@ void setupServiceLocator() {
 
   //services
   sl.registerSingleton<AuthApiService>(AuthApiServiceImplementation());
+  sl.registerSingleton<UserApiService>(UserApiServiceImplementation());
   sl.registerSingleton<FoldersApiService>(FoldersApiServiceImplementation());
   sl.registerSingleton<FilesApiService>(FilesApiServiceImplementation());
 
@@ -43,11 +48,14 @@ void setupServiceLocator() {
     sl.registerSingleton<ImagePickerRepository>(
         MobileImagePickerRepositoryImplementation());
   }
+  sl.registerSingleton<UserRepository>(UserRepositoryImplementation());
 
   //usecases
   //auth
   sl.registerSingleton<SignUpUseCase>(SignUpUseCase());
   sl.registerSingleton<SignInUseCase>(SignInUseCase());
+  //user
+  sl.registerSingleton<GetUserUseCase>(GetUserUseCase());
   //folders
   sl.registerSingleton<CreateFolderUseCase>(CreateFolderUseCase());
   sl.registerSingleton<GetAllFoldersUseCase>(GetAllFoldersUseCase());
