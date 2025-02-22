@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/folders_storage.dart';
 import 'package:photo_app/presentation/settings/pages/settings.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedPageIndex = 0;
 
   void navigateBottomBar(int index) {
@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
 
   final List _pages = [
     const FoldersStorageScreen(),
-    const SettingsPage(),
+    const SettingsScreen(),
   ];
 
   @override
@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.folder),
-            label: 'Главная',
+            label: 'Файлы',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

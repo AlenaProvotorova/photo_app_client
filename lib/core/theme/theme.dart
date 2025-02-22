@@ -49,8 +49,19 @@ final darkTheme = ThemeData(
         fontWeight: FontWeight.w900,
       ),
       titleMedium: TextStyle(
-          color: Colors.black, fontSize: 12, fontWeight: FontWeight.w700),
+        color: Colors.black,
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+      ),
+      titleSmall: TextStyle(
+        color: Colors.black,
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+      ),
       bodyMedium: TextStyle(
-          color: Colors.black, fontSize: 20, fontWeight: FontWeight.w400),
+        color: Colors.black,
+        fontSize: 20,
+        fontWeight: FontWeight.w400,
+      ),
       bodySmall: TextStyle(color: Colors.blueGrey, fontSize: 12),
     ));

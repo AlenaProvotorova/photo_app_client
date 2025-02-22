@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/core/components/input_field.dart';
 import 'package:photo_app/core/components/input_field_with_label.dart';
@@ -21,7 +22,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _userEmailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> _singUp(context) async {
+  Future<void> _singUp(appContext) async {
     final result = await sl<SignUpUseCase>().call(
         params: SignUpReqParams(
       email: _userEmailController.text,
@@ -30,10 +31,10 @@ class _SignUpPageState extends State<SignUpPage> {
     ));
 
     result.fold((e) {
-      DisplayMessage.showMessage(context, e);
+      DisplayMessage.showMessage(appContext, e);
     }, (data) {
-      DisplayMessage.showMessage(context, 'Sign up successful');
-      Navigator.of(context).pushNamed('/');
+      DisplayMessage.showMessage(appContext, 'Sign up successful');
+      context.go('/');
     });
   }
 
@@ -43,7 +44,7 @@ class _SignUpPageState extends State<SignUpPage> {
       appBar: AppBarCustom(
         title: '',
         onPress: () {
-          Navigator.pop(context);
+          context.go('/');
         },
         showLeading: true,
       ),
@@ -58,31 +59,31 @@ class _SignUpPageState extends State<SignUpPage> {
               Column(
                 children: [
                   InputFieldWithLabel(
-                      label: 'Name',
+                      label: 'Имя',
                       child: TextFormField(
                         controller: _usernameController,
                         decoration: const InputDecoration(
-                            hintText: 'Name',
+                            hintText: 'Введите имя',
                             border: InputBorder.none,
                             hintStyle: TextStyle(color: Colors.grey)),
                       )),
                   const SizedBox(height: 16),
                   InputFieldWithLabel(
-                      label: 'Email Address',
+                      label: 'Email',
                       child: TextFormField(
                         controller: _userEmailController,
                         decoration: const InputDecoration(
-                            hintText: 'Email Address',
+                            hintText: 'Введите email',
                             border: InputBorder.none,
                             hintStyle: TextStyle(color: Colors.grey)),
                       )),
                   const SizedBox(height: 16),
                   InputFieldWithLabel(
-                      label: 'Password',
+                      label: 'Пароль',
                       child: TextFormField(
                         controller: _passwordController,
                         decoration: const InputDecoration(
-                            hintText: 'Create a password',
+                            hintText: 'Введите пароль',
                             border: InputBorder.none,
                             hintStyle: TextStyle(color: Colors.grey)),
                       )),
@@ -90,13 +91,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   InputField(
                       child: TextFormField(
                     decoration: const InputDecoration(
-                        hintText: 'Confirm a password',
+                        hintText: 'Подтвердите пароль',
                         border: InputBorder.none,
                         hintStyle: TextStyle(color: Colors.grey)),
                   )),
                   const SizedBox(height: 16),
                   PrimaryButton(
-                      title: 'Sign up',
+                      title: 'Зарегистрироваться',
                       onPress: () {
                         _singUp(context);
                       }),
@@ -116,12 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Sign up',
-          style: theme.textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Create an account to get started',
+          'Создайте аккаунт, чтобы начать',
           style: theme.textTheme.bodySmall,
         ),
       ],

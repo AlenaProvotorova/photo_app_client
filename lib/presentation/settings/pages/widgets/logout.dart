@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/utils/token_storage.dart';
 
 class Logout extends StatelessWidget {
@@ -10,7 +11,7 @@ class Logout extends StatelessWidget {
     return ListTile(
         onTap: () {
           TokenStorage.deleteToken();
-          Navigator.of(context).pushNamed('/');
+          context.go('/');
         },
         title: Row(
           children: [

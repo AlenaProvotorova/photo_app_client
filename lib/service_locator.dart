@@ -8,7 +8,7 @@ import 'package:photo_app/data/files/sourses/files_api_service.dart';
 import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
-import 'package:photo_app/data/image_picker/repositories/web_image_picker%20copy.dart';
+import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/data/user/repositories/user.dart';
 import 'package:photo_app/data/user/sources/user_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';

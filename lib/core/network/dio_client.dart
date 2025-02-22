@@ -50,8 +50,6 @@ class DioClient {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    print('Options post: $options');
-    print('data post: $data');
     try {
       final Response response = await _dio.post(
         url,

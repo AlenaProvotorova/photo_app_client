@@ -1,3 +1,4 @@
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_app/core/components/input_field.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
@@ -35,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool get isLoginButtonEnabled => isLoginEnabled && isPasswordEnabled;
-  Future<void> _login(context) async {
+  Future<void> _login() async {
     final result = await sl<SignInUseCase>().call(
         params: SignInReqParams(
       email: _userEmailController.text,
@@ -45,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
     result.fold((e) {
       DisplayMessage.showMessage(context, e);
     }, (data) {
-      Navigator.of(context).pushNamed('/home');
+      context.go('/home');
     });
   }
 
@@ -81,11 +82,11 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _loginForm(context) {
-    final theme = Theme.of(context);
+  Widget _loginForm(BuildContext appContext) {
+    final theme = Theme.of(appContext);
     final VoidCallback? onPressed = isLoginButtonEnabled
         ? () {
-            _login(context);
+            _login();
           }
         : null;
     return Expanded(
@@ -97,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome!',
+                'Добро пожаловать!',
                 style: theme.textTheme.headlineLarge,
               ),
               const SizedBox(height: 24),
@@ -117,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                     obscureText: true,
                     controller: _passwordController,
                     decoration: const InputDecoration(
-                        hintText: 'Password',
+                        hintText: 'Пароль',
                         border: InputBorder.none,
                         hintStyle: TextStyle(color: Colors.grey)),
                   )),
@@ -132,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: TextButton(
                         onPressed: onPressed,
                         child: const Text(
-                          'Sign in',
+                          'Войти',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -142,19 +143,19 @@ class _LoginPageState extends State<LoginPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Not a member? ',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
+                      Text(
+                        'Еще не зарегистрированы? ',
+                        style: theme.textTheme.titleSmall,
                       ),
                       TextButton(
-                        child: Text('Register now',
+                        child: Text('Зарегистриоваться',
                             style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                               color: theme.colorScheme.primary,
                             )),
                         onPressed: () {
-                          Navigator.of(context).pushNamed('/sign-up');
+                          context.go('/sign-up');
                         },
                       ),
                     ],

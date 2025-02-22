@@ -14,7 +14,8 @@ class UploadFileButton extends StatelessWidget {
           onPressed: () {
             pickImages(context);
           },
-          child: const Text('Загрузить фотографии'),
+          child: const Text('Загрузить фотографии',
+              style: TextStyle(color: Colors.white)),
         ),
       ),
     );

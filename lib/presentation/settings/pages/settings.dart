@@ -3,8 +3,8 @@ import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/presentation/settings/pages/widgets/profile.dart';
 import 'package:photo_app/presentation/settings/pages/widgets/settings_list.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
