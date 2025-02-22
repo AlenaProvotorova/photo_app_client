@@ -66,7 +66,6 @@ Future<void> _handleCreateFolder(
     (error) => DisplayMessage.showMessage(context, error),
     (success) {
       context.read<FolderBloc>().add(LoadFolders());
-      DisplayMessage.showMessage(context, 'Folder created successfully');
     },
   );
 }

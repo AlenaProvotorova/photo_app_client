@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/folders_list.dart';
@@ -14,9 +15,14 @@ class FoldersStorageScreen extends StatefulWidget {
 class _FoldersStorageScreenState extends State<FoldersStorageScreen> {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => FolderBloc()..add(LoadFolders()),
-      child: const FoldersList(),
+    return Scaffold(
+      appBar: const AppBarCustom(
+        title: 'Файлы',
+      ),
+      body: BlocProvider(
+        create: (context) => FolderBloc()..add(LoadFolders()),
+        child: const FoldersList(),
+      ),
     );
   }
 }

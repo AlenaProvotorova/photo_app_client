@@ -2,12 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/core/components/empty_container.dart';
 import 'package:photo_app/core/components/image_container.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/files/models/upload_file_req_params.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
-import 'package:photo_app/data/image_picker/repositories/web_image_picker%20copy.dart';
+import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
@@ -58,7 +60,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           (error) => DisplayMessage.showMessage(context, error),
           (success) {
             _filesBloc.add(LoadFiles(folderId: widget.folderId));
-            DisplayMessage.showMessage(context, 'File loaded successfully');
           },
         );
       }
@@ -70,7 +71,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     return Scaffold(
       appBar: AppBarCustom(
         title: '',
-        onPress: () => Navigator.pop(context),
+        onPress: () => {context.go('/home')},
         showLeading: true,
       ),
       body: BlocProvider(
@@ -82,28 +83,31 @@ class FolderItemScreenState extends State<FolderItemScreen> {
             } else if (state is FilesLoaded) {
               return Column(
                 children: [
-                  Expanded(
-                    child: GridView.builder(
-                      padding: const EdgeInsets.all(10),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: state.files.length,
-                      itemBuilder: (context, index) {
-                        final imageData = state.files[index];
-                        print('imageData: $imageData');
-                        // if (kIsWeb) {
-                        //   return ImageContainer(url: imageData.url);
-                        // } else {
-                        //   return Text('image not kIsWeb');
-                        // }
-                        return ImageContainer(url: imageData.url);
-                      },
-                    ),
-                  ),
+                  state.files.isEmpty
+                      ? const Expanded(
+                          child: EmptyContainer(text: 'Папка пуста'))
+                      : Expanded(
+                          child: GridView.builder(
+                            padding: const EdgeInsets.all(10),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
+                            itemCount: state.files.length,
+                            itemBuilder: (context, index) {
+                              final imageData = state.files[index];
+                              print('imageData: $imageData');
+                              // if (kIsWeb) {
+                              //   return ImageContainer(url: imageData.url);
+                              // } else {
+                              //   return Text('image not kIsWeb');
+                              // }
+                              return ImageContainer(url: imageData.url);
+                            },
+                          ),
+                        ),
                   UploadFileButton(pickImages: _pickImages),
                 ],
               );

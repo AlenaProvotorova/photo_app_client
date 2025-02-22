@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:photo_app/data/folders/models/folder.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/delete_folder.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/actions/delete_folder.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/actions/popup_menu_action.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/actions/popup_menu_action_button.dart';
 
 class FolderTile extends StatelessWidget {
   final Folder folder;
@@ -22,12 +25,23 @@ class FolderTile extends StatelessWidget {
         ),
       ),
       title: Text(folder.name),
-      trailing: DeleteFolder(folder: folder),
+      trailing: PopupMenuButtonWidget(
+        actions: [
+          PopupMenuAction(
+            title: 'Удалить',
+            onTap: () {
+              DeleteFolder(folder: folder)
+                  .handleDeleteFolder(context, folder.id);
+            },
+          ),
+          PopupMenuAction(
+            title: 'Переименовать',
+            onTap: () {},
+          ),
+        ],
+      ),
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/folder/${folder.id}',
-        );
+        context.go('/folder/${folder.id}');
       },
     );
   }

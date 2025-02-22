@@ -8,28 +8,37 @@ import 'package:photo_app/presentation/folders_storage/pages/folders_storage/blo
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_event.dart';
 import 'package:photo_app/service_locator.dart';
 
-class DeleteFolder extends StatelessWidget {
+class DeleteFolder {
   final Folder folder;
-  const DeleteFolder({super.key, required this.folder});
+  const DeleteFolder({required this.folder});
 
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.delete, color: Colors.red),
-      onPressed: () {
-        _handleDeleteFolder(context, folder.id);
-      },
-    );
-  }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Column(
+  //     children: [
+  //       PopupMenuAction(
+  //         title: 'Удалить папку',
+  //         onTap: () {
+  //           _handleDeleteFolder(context, folder.id);
+  //         },
+  //       ),
+  //     ],
+  //   );
+  //   // return IconButton(
+  //   //   icon: Icon(Icons.delete, color: theme.colorScheme.error),
+  //   //   onPressed: () {
+  //   //     _handleDeleteFolder(context, folder.id);
+  //   //   },
+  //   // );
+  // }
 
-  Future<void> _handleDeleteFolder(BuildContext context, int id) async {
+  Future<void> handleDeleteFolder(BuildContext context, int id) async {
     final result = await sl<DeleteFolderUseCase>()
         .call(params: DeleteFolderReqParams(id: id));
 
     result.fold(
       (error) => DisplayMessage.showMessage(context, error.toString()),
       (success) {
-        DisplayMessage.showMessage(context, 'Folder deleted successfully');
         context.read<FolderBloc>().add(LoadFolders());
       },
     );

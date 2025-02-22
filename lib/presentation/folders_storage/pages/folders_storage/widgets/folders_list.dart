@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/core/components/empty_container.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/create_folder_button.dart';
@@ -21,7 +22,7 @@ class FoldersList extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else if (state is FolderLoaded) {
             if (state.folders.isEmpty) {
-              return const Center(child: Text('Пустота'));
+              return const EmptyContainer(text: 'Папок нет');
             }
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
