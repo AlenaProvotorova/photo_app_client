@@ -34,23 +34,8 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     _imagePickerService = kIsWeb
         ? WebImagePickerRepositoryImplementation()
         : MobileImagePickerRepositoryImplementation();
-    _filesBloc = FilesBloc()..add(LoadFiles());
+    _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
   }
-
-//   Future<void> _handleCreateFolder(
-//     BuildContext context, TextEditingController controller) async {
-//   final result = await sl<CreateFolderUseCase>().call(
-//     params: CreateFolderReqParams(name: controller.text),
-//   );
-
-//   result.fold(
-//     (error) => DisplayMessage.showMessage(context, error),
-//     (success) {
-//       context.read<FolderBloc>().add(LoadFolders());
-//       DisplayMessage.showMessage(context, 'Folder created successfully');
-//     },
-//   );
-// }
 
   Future<void> _pickImages(context) async {
     final selectedImages = await _imagePickerService.pickImages();
@@ -58,6 +43,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       for (var image in selectedImages) {
         final result = await sl<UploadFileUseCase>().call(
           params: UploadFileReqParams(
+            folderId: int.parse(widget.folderId),
             formData: FormData.fromMap({
               'file': MultipartFile.fromBytes(
                 image.bytes!,
@@ -71,7 +57,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         result.fold(
           (error) => DisplayMessage.showMessage(context, error),
           (success) {
-            _filesBloc.add(LoadFiles());
+            _filesBloc.add(LoadFiles(folderId: widget.folderId));
             DisplayMessage.showMessage(context, 'File loaded successfully');
           },
         );

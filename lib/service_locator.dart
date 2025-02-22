@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:photo_app/core/network/dio_client.dart';
 import 'package:photo_app/data/auth/repositories/auth.dart';
@@ -35,18 +36,23 @@ void setupServiceLocator() {
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
   sl.registerSingleton<FoldersRepository>(FoldersRepositoryImplementation());
   sl.registerSingleton<FilesRepository>(FilesRepositoryImplementation());
-  // sl.registerSingleton<ImagePickerRepository>(
-  //     MobileImagePickerRepositoryImplementation());
-  sl.registerSingleton<ImagePickerRepository>(
-      WebImagePickerRepositoryImplementation());
+  if (kIsWeb) {
+    sl.registerSingleton<ImagePickerRepository>(
+        WebImagePickerRepositoryImplementation());
+  } else {
+    sl.registerSingleton<ImagePickerRepository>(
+        MobileImagePickerRepositoryImplementation());
+  }
 
   //usecases
   //auth
   sl.registerSingleton<SignUpUseCase>(SignUpUseCase());
   sl.registerSingleton<SignInUseCase>(SignInUseCase());
+  //folders
   sl.registerSingleton<CreateFolderUseCase>(CreateFolderUseCase());
   sl.registerSingleton<GetAllFoldersUseCase>(GetAllFoldersUseCase());
   sl.registerSingleton<DeleteFolderUseCase>(DeleteFolderUseCase());
+  //files
   sl.registerSingleton<UploadFileUseCase>(UploadFileUseCase());
   sl.registerSingleton<GetAllFilesUseCase>(GetAllFilesUseCase());
 }

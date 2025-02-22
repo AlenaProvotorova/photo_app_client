@@ -8,7 +8,7 @@ import 'package:photo_app/core/utils/auth_guard.dart';
 final routes = {
   '/': (context) => const AuthGuard(child: LoginPage()),
   '/home': (context) => const AuthGuard(child: HomePage()),
-  '/sign-up': (context) => const AuthGuard(child: SignUpPage()),
+  '/sign-up': (context) => const SignUpPage(),
 };
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
