@@ -22,10 +22,12 @@ import 'package:photo_app/domain/folders/repositories/folders.dart';
 
 import 'package:photo_app/domain/folders/usecases/create_folder.dart';
 import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
+import 'package:photo_app/domain/folders/usecases/edit_folder.dart';
 import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/domain/user/repositories/user.dart';
 import 'package:photo_app/domain/user/usecases/get_user.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -61,8 +63,12 @@ void setupServiceLocator() {
   sl.registerSingleton<CreateFolderUseCase>(CreateFolderUseCase());
   sl.registerSingleton<GetAllFoldersUseCase>(GetAllFoldersUseCase());
   sl.registerSingleton<DeleteFolderUseCase>(DeleteFolderUseCase());
+  sl.registerSingleton<EditFolderUseCase>(EditFolderUseCase());
   //files
   sl.registerSingleton<UploadFileUseCase>(UploadFileUseCase());
   sl.registerSingleton<GetAllFilesUseCase>(GetAllFilesUseCase());
   sl.registerSingleton<RemoveFilesUseCase>(RemoveFilesUseCase());
+
+  //bloc
+  sl.registerFactory(() => FolderBloc());
 }
