@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_app/core/router/router.dart';
 import 'package:photo_app/core/utils/token_storage.dart';
