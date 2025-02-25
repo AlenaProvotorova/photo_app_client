@@ -14,9 +14,12 @@ class DioClient {
                 'Content-Type': 'application/json; charset=UTF-8',
               },
               responseType: ResponseType.json,
-              sendTimeout: const Duration(seconds: 10),
               receiveTimeout: const Duration(seconds: 10)),
         )..interceptors.addAll([LoggerInterceptor()]);
+
+  Options get _sendTimeoutOption => Options(
+        sendTimeout: const Duration(seconds: 10),
+      );
 
   // GET METHOD
   Future<Response> get(
@@ -53,7 +56,9 @@ class DioClient {
       final Response response = await _dio.post(
         url,
         data: data,
-        options: options,
+        options:
+            options?.copyWith(sendTimeout: _sendTimeoutOption.sendTimeout) ??
+                _sendTimeoutOption,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
@@ -78,7 +83,9 @@ class DioClient {
         url,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options:
+            options?.copyWith(sendTimeout: _sendTimeoutOption.sendTimeout) ??
+                _sendTimeoutOption,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -104,7 +111,9 @@ class DioClient {
         url,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options:
+            options?.copyWith(sendTimeout: _sendTimeoutOption.sendTimeout) ??
+                _sendTimeoutOption,
         cancelToken: cancelToken,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -128,7 +137,9 @@ class DioClient {
         url,
         data: data,
         queryParameters: queryParameters,
-        options: options,
+        options:
+            options?.copyWith(sendTimeout: _sendTimeoutOption.sendTimeout) ??
+                _sendTimeoutOption,
         cancelToken: cancelToken,
       );
       return response.data;

@@ -28,6 +28,8 @@ dependencies:
   # Upload images for web:
   file_picker: ^6.1.1
 
+  equatable: ^2.0.5
+
 
   dartz: ^0.10.1
   get_it: ^8.0.3

@@ -4,8 +4,8 @@ import 'package:photo_app/data/clients/models/get_all_clients_req_params.dart';
 import 'package:photo_app/data/clients/models/update_clients_req_params.dart';
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_event.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_state.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/service_locator.dart';
 
 class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
@@ -43,7 +43,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
         },
       );
     } catch (e) {
-      emit(ClientsError(message: 'Ошибка загрузки клиентов'));
+      emit(const ClientsError(message: 'Ошибка загрузки клиентов'));
     }
   }
 
@@ -70,15 +70,16 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
         },
       );
     } catch (e) {
-      emit(ClientsError(message: 'Ошибка изменения списка клиентов'));
+      emit(const ClientsError(message: 'Ошибка изменения списка клиентов'));
     }
   }
 
   Future<void> _onAddNewClient(
       AddNewClient event, Emitter<ClientsState> emit) async {
     try {
-      _namesList.add(event.name);
-      emit(ClientsLoaded(namesList: _namesList));
+      final updatedList = List<String>.from(_namesList)..add(event.name);
+      _namesList = updatedList;
+      emit(ClientsLoaded(namesList: updatedList));
     } catch (e) {
       emit(ClientsError(message: e.toString()));
     }
@@ -89,8 +90,9 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     Emitter<ClientsState> emit,
   ) async {
     try {
-      _namesList.remove(event.name);
-      emit(ClientsLoaded(namesList: _namesList));
+      final updatedList = List<String>.from(_namesList)..remove(event.name);
+      _namesList = updatedList;
+      emit(ClientsLoaded(namesList: updatedList));
     } catch (e) {
       emit(ClientsError(message: e.toString()));
     }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart' as router;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_bloc.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/clients_list/widgets/clients_list.dart';
 
 class ClientsListScreen extends StatelessWidget {

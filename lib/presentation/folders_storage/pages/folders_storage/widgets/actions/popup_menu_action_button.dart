@@ -17,8 +17,8 @@ class PopupMenuButtonWidget extends StatelessWidget {
         Icons.more_vert,
         color: Colors.black,
       ),
-      splashRadius: 20, // уменьшаем радиус сплеша
-      padding: EdgeInsets.zero, // убираем отступы
+      splashRadius: 20,
+      padding: EdgeInsets.zero,
       iconSize: 24,
       itemBuilder: (context) => actions.map((action) {
         return PopupMenuItem(
