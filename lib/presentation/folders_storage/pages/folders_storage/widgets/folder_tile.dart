@@ -57,13 +57,13 @@ class FolderTile extends StatelessWidget {
           PopupMenuAction(
             title: 'Просмотреть список фамилий',
             onTap: () {
-              context.go('/folder/${folder.id}/clients');
+              context.go('/folder/${folder.url}/clients');
             },
           ),
         ],
       ),
       onTap: () {
-        context.go('/folder/${folder.id}');
+        context.go('/folder/${folder.url}');
       },
     );
   }

@@ -26,16 +26,18 @@ final router = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/folder/:folderId',
+      path: '/folder/:folderPath',
       builder: (context, state) {
-        final folderId = state.pathParameters['folderId']!;
+        final folderPath = state.pathParameters['folderPath']!;
+        final folderId = folderPath.split('_').first;
         return FolderItemScreen(folderId: folderId);
       },
     ),
     GoRoute(
-      path: '/folder/:folderId/clients',
+      path: '/folder/:folderPath/clients',
       builder: (context, state) {
-        final folderId = state.pathParameters['folderId']!;
+        final folderPath = state.pathParameters['folderPath']!;
+        final folderId = folderPath.split('_').first;
         return ClientsListScreen(folderId: folderId);
       },
     ),
