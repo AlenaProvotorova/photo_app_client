@@ -7,18 +7,6 @@ class RenameFolder {
       editFolder;
   RenameFolder({required this.folder, required this.editFolder});
 
-  // Future<void> editFolder(BuildContext context, int id, String name) async {
-  //   final result = await sl<EditFolderUseCase>()
-  //       .call(params: EditFolderReqParams(id: id, name: name));
-
-  //   result.fold(
-  //     (error) => DisplayMessage.showMessage(context, error.toString()),
-  //     (success) {
-  //       context.read<FolderBloc>().add(LoadFolders());
-  //     },
-  //   );
-  // }
-
   Future<void> handleRenameFolder(BuildContext context, int id) async {
     showDialog(
       context: context,

@@ -21,9 +21,14 @@ class ImageContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageSize = (screenWidth - 32 - 16) / 3;
+
     return Stack(
       children: [
         Container(
+          width: imageSize,
+          height: imageSize,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade300),
@@ -32,6 +37,8 @@ class ImageContainer extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: Image.network(
               url,
+              width: imageSize,
+              height: imageSize,
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
@@ -66,6 +73,7 @@ class ImageContainer extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
+                //TODO delete depracated withOpacity
                 color: Colors.white.withOpacity(0.8),
                 shape: BoxShape.circle,
               ),

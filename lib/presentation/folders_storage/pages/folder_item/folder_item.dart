@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/core/components/empty_container.dart';
+import 'package:photo_app/core/components/image_carousel.dart';
 import 'package:photo_app/core/components/image_container.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/files/models/upload_file_req_params.dart';
@@ -87,29 +88,34 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                           child: EmptyContainer(text: 'Папка пуста'))
                       : Expanded(
                           child: GridView.builder(
-                            padding: const EdgeInsets.all(10),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
-                            itemCount: state.files.length,
-                            itemBuilder: (context, index) {
-                              final imageData = state.files[index];
-                              print('imageData: $imageData');
-                              // if (kIsWeb) {
-                              //   return ImageContainer(url: imageData.url);
-                              // } else {
-                              //   return Text('image not kIsWeb');
-                              // }
-                              return ImageContainer(
-                                url: imageData.url,
-                                id: imageData.id,
-                                folderId: int.parse(widget.folderId),
-                              );
-                            },
-                          ),
+                              padding: const EdgeInsets.all(10),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                              itemCount: state.files.length,
+                              itemBuilder: (context, index) {
+                                final imageData = state.files[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => ImageCarousel(
+                                          images: state.files,
+                                          initialIndex: index,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: ImageContainer(
+                                    url: imageData.url,
+                                    id: imageData.id,
+                                    folderId: int.parse(widget.folderId),
+                                  ),
+                                );
+                              }),
                         ),
                   UploadFileButton(pickImages: _pickImages),
                 ],
