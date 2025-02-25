@@ -54,6 +54,12 @@ class FolderTile extends StatelessWidget {
                   .handleRenameFolder(context, folder.id);
             },
           ),
+          PopupMenuAction(
+            title: 'Просмотреть список фамилий',
+            onTap: () {
+              context.go('/folder/${folder.id}/clients');
+            },
+          ),
         ],
       ),
       onTap: () {

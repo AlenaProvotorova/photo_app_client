@@ -1,31 +1,9 @@
-// import 'package:flutter/material.dart';
-// import 'package:photo_app/presentation/folders_storage/pages/folder_item/folder_item.dart';
-// import 'package:photo_app/presentation/home/pages/home.dart';
-// import 'package:photo_app/presentation/auth/pages/login.dart';
-// import 'package:photo_app/presentation/auth/pages/sign_up.dart';
-// import 'package:photo_app/core/utils/auth_guard.dart';
-
-// final routes = {
-//   '/': (context) => const AuthGuard(child: LoginPage()),
-//   '/home': (context) => const AuthGuard(child: HomeScreen()),
-//   '/sign-up': (context) => const SignUpPage(),
-// };
-
-// Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-//   if (settings.name?.startsWith('/folder/') ?? false) {
-//     final folderId = settings.name!.split('/').last;
-//     return MaterialPageRoute(
-//       builder: (context) => FolderItemScreen(folderId: folderId),
-//     );
-//   }
-//   return null;
-// }
-
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/utils/auth_guard.dart';
 import 'package:photo_app/presentation/auth/pages/login.dart';
 import 'package:photo_app/presentation/auth/pages/sign_up.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/folder_item.dart';
+import 'package:photo_app/presentation/folders_storage/pages/clients_list/clients_list_screen.dart';
 import 'package:photo_app/presentation/home/pages/home.dart';
 
 final router = GoRouter(
@@ -52,6 +30,13 @@ final router = GoRouter(
       builder: (context, state) {
         final folderId = state.pathParameters['folderId']!;
         return FolderItemScreen(folderId: folderId);
+      },
+    ),
+    GoRoute(
+      path: '/folder/:folderId/clients',
+      builder: (context, state) {
+        final folderId = state.pathParameters['folderId']!;
+        return ClientsListScreen(folderId: folderId);
       },
     ),
   ],
