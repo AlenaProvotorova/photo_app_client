@@ -11,7 +11,10 @@ class SurnameListTile extends StatelessWidget {
     return ListTile(
       title: Text(name),
       trailing: IconButton(
-        icon: const Icon(Icons.delete, color: Colors.red),
+        splashRadius: 20,
+        padding: EdgeInsets.zero,
+        iconSize: 24,
+        icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
         onPressed: () {
           onDelete(context);
         },

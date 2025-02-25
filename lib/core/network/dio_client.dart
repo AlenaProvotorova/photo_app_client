@@ -26,7 +26,6 @@ class DioClient {
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
   }) async {
-    print('Options get: $options');
     try {
       final Response response = await _dio.get(
         url,
