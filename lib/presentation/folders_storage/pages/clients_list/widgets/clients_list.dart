@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_bloc.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_event.dart';
-import 'package:photo_app/presentation/folders_storage/pages/clients_list/bloc/clients_state.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/clients_list/widgets/add_client_field.dart';
 import 'package:photo_app/presentation/folders_storage/pages/clients_list/widgets/list_tile.dart';
 

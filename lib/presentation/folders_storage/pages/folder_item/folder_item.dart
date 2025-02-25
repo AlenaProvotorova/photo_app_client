@@ -4,19 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
-import 'package:photo_app/core/components/empty_container.dart';
-import 'package:photo_app/core/components/image_carousel.dart';
-import 'package:photo_app/core/components/image_container.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/files/models/upload_file_req_params.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_state.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files_list.dart';
 import 'package:photo_app/service_locator.dart';
 
 class FolderItemScreen extends StatefulWidget {
@@ -30,6 +29,8 @@ class FolderItemScreen extends StatefulWidget {
 class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
+  late final ClientsBloc _clientsBloc;
+  final isAdmin = false;
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         ? WebImagePickerRepositoryImplementation()
         : MobileImagePickerRepositoryImplementation();
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
+    _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
   }
 
   Future<void> _pickImages(context) async {
@@ -71,60 +73,24 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     return Scaffold(
       appBar: AppBarCustom(
         title: '',
-        onPress: () => {context.go('/home')},
+        onPress: () => context.go('/home'),
         showLeading: true,
       ),
-      body: BlocProvider(
-        create: (context) => _filesBloc,
-        child: BlocBuilder<FilesBloc, FilesState>(
-          builder: (context, state) {
-            if (state is FilesLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is FilesLoaded) {
-              return Column(
-                children: [
-                  state.files.isEmpty
-                      ? const Expanded(
-                          child: EmptyContainer(text: 'Папка пуста'))
-                      : Expanded(
-                          child: GridView.builder(
-                              padding: const EdgeInsets.all(10),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
-                              itemCount: state.files.length,
-                              itemBuilder: (context, index) {
-                                final imageData = state.files[index];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => ImageCarousel(
-                                          images: state.files,
-                                          initialIndex: index,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ImageContainer(
-                                    url: imageData.url,
-                                    id: imageData.id,
-                                    folderId: int.parse(widget.folderId),
-                                  ),
-                                );
-                              }),
-                        ),
-                  UploadFileButton(pickImages: _pickImages),
-                ],
-              );
-            } else if (state is FilesError) {
-              return Center(child: Text(state.message));
-            }
-            return const Center(child: Text('No files found'));
-          },
+      body: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => _filesBloc),
+          BlocProvider(create: (context) => _clientsBloc),
+        ],
+        child: Column(
+          children: [
+            const ClientSelector(),
+            Expanded(
+              child: FilesList(
+                folderId: widget.folderId,
+                onPickImages: (context) => _pickImages(context),
+              ),
+            ),
+          ],
         ),
       ),
     );
