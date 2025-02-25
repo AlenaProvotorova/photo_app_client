@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_event.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/create_folder_button.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/widgets/folders_list.dart';
 import 'package:photo_app/service_locator.dart';
 
@@ -23,6 +24,7 @@ class _FoldersStorageScreenState extends State<FoldersStorageScreen> {
           title: 'Файлы',
         ),
         body: FoldersList(),
+        floatingActionButton: CreateFolderButton(),
       ),
     );
   }
