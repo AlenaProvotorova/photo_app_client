@@ -30,7 +30,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
   late final ClientsBloc _clientsBloc;
-  final isAdmin = false;
 
   @override
   void initState() {
