@@ -72,9 +72,8 @@ class ImageContainer extends StatelessWidget {
             onTap: () => _handleDeleteFile(context, id),
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                //TODO delete depracated withOpacity
-                color: Colors.white.withOpacity(0.8),
+              decoration: const BoxDecoration(
+                color: Color.fromRGBO(255, 255, 255, 0.8),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

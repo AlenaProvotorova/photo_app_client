@@ -21,7 +21,6 @@ class LoggerInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await TokenStorage.loadToken();
-    print('TOKEN: $token');
     options.headers['Authorization'] = 'Bearer $token';
     final requestPath = '${options.baseUrl}${options.path}';
 
