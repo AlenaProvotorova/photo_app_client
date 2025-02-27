@@ -13,11 +13,24 @@ class ClientsLoading extends ClientsState {}
 
 class ClientsLoaded extends ClientsState {
   final List<String> namesList;
+  final String? selectedClient;
 
-  const ClientsLoaded({required this.namesList});
+  const ClientsLoaded({
+    required this.namesList,
+    this.selectedClient,
+  });
 
   @override
-  List<Object?> get props => [namesList];
+  List<Object?> get props => [namesList, selectedClient];
+}
+
+class ClientSelected extends ClientsState {
+  final String? name;
+
+  const ClientSelected({required this.name});
+
+  @override
+  List<Object?> get props => [name];
 }
 
 class ClientsError extends ClientsState {

@@ -3,12 +3,14 @@ import 'package:photo_app/data/files/models/file.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<File> images;
+  final Widget? child;
   final int initialIndex;
 
   const ImageCarousel({
     super.key,
     required this.images,
     required this.initialIndex,
+    required this.child,
   });
 
   @override
@@ -41,21 +43,39 @@ class _ImageCarouselState extends State<ImageCarousel> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: widget.images.length,
-        itemBuilder: (context, index) {
-          return InteractiveViewer(
-            minScale: 0.5,
-            maxScale: 4.0,
-            child: Center(
-              child: Image.network(
-                widget.images[index].url,
-                fit: BoxFit.contain,
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.images.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    Expanded(
+                      child: InteractiveViewer(
+                        minScale: 0.5,
+                        maxScale: 4.0,
+                        child: Center(
+                          child: Image.network(
+                            widget.images[index].url,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                    widget.child ??
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          color: Colors.black,
+                          child: widget.child,
+                        ),
+                  ],
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

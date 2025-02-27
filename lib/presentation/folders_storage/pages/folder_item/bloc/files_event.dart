@@ -9,14 +9,26 @@ class LoadFiles extends FilesEvent {
   LoadFiles({required this.folderId});
 }
 
-class UploadImage extends FilesEvent {
-  final ImageData image;
-  final BuildContext context;
+class UploadFiles extends FilesEvent {
   final String folderId;
+  final List<ImageData> images;
+  final BuildContext context;
 
-  UploadImage({
-    required this.image,
-    required this.context,
+  UploadFiles({
     required this.folderId,
+    required this.images,
+    required this.context,
+  });
+}
+
+class UpdateFilePrintedFormats extends FilesEvent {
+  final int fileId;
+  final String sizeType; // '1', '2', или '3'
+  final String printFormat; // 1-10
+
+  UpdateFilePrintedFormats({
+    required this.fileId,
+    required this.sizeType,
+    required this.printFormat,
   });
 }

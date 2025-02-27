@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 
 class ClientSelector extends StatelessWidget {
@@ -43,7 +44,11 @@ class ClientSelector extends StatelessWidget {
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
-                    // Здесь можно добавить логику обработки выбора клиента
+                    if (newValue != null) {
+                      context
+                          .read<ClientsBloc>()
+                          .add(SelectClient(name: newValue));
+                    }
                   },
                 ),
               ),
