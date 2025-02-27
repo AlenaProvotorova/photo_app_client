@@ -10,12 +10,14 @@ import 'package:photo_app/service_locator.dart';
 
 class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
   List<String> _namesList = [];
+  String? _selectedClient;
 
   ClientsBloc() : super(ClientsInitial()) {
     on<LoadClients>(_onLoadClients);
     on<UpdateClients>(_onUpdateClients);
     on<AddNewClient>(_onAddNewClient);
     on<DeleteClient>(_onDeleteClient);
+    on<SelectClient>(_onSelectClient);
   }
 
   Future<void> _onLoadClients(
@@ -96,5 +98,16 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     } catch (e) {
       emit(ClientsError(message: e.toString()));
     }
+  }
+
+  void _onSelectClient(
+    SelectClient event,
+    Emitter<ClientsState> emit,
+  ) {
+    _selectedClient = event.name;
+    emit(ClientsLoaded(
+      namesList: _namesList,
+      selectedClient: _selectedClient,
+    ));
   }
 }

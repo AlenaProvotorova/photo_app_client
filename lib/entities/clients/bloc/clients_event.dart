@@ -23,3 +23,9 @@ class DeleteClient extends ClientsEvent {
 
   DeleteClient({required this.name});
 }
+
+class SelectClient extends ClientsEvent {
+  final String name;
+
+  SelectClient({required this.name});
+}

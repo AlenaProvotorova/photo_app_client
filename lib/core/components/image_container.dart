@@ -86,7 +86,7 @@ class ImageContainer extends StatelessWidget {
                   ),
                 ),
               )
-            : const SizedBox(),
+            : const SizedBox.shrink(),
       ],
     );
   }

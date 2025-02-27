@@ -140,15 +140,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
                       Text(
                         'Еще не зарегистрированы? ',
                         style: theme.textTheme.titleSmall,
                       ),
                       TextButton(
-                        child: Text('Зарегистриоваться',
+                        child: Text('Зарегистрироваться',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,

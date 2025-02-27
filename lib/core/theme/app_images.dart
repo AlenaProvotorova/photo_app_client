@@ -1,7 +1,7 @@
 import 'package:flutter_svg/svg.dart';
 
 class AppImages {
-  static const basepath = 'images/';
+  static const basepath = 'assets/images/';
 
   static final SvgPicture arrowBackImage =
       SvgPicture.asset('${basepath}arrow_back.svg');

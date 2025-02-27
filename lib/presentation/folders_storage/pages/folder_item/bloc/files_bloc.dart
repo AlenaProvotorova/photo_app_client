@@ -1,7 +1,12 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/files/models/file.dart';
 import 'package:photo_app/data/files/models/get_all_files_req_params.dart';
+import 'package:photo_app/data/files/models/upload_file_req_params.dart';
 import 'package:photo_app/domain/files/usecases/get_all_files.dart';
+import 'package:photo_app/domain/files/usecases/upload_file.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_state.dart';
 import 'package:photo_app/service_locator.dart';
@@ -9,6 +14,8 @@ import 'package:photo_app/service_locator.dart';
 class FilesBloc extends Bloc<FilesEvent, FilesState> {
   FilesBloc() : super(FilesLoading()) {
     on<LoadFiles>(_onLoadFiles);
+    on<UploadFiles>(_onUploadFiles);
+    on<UpdateFilePrintedFormats>(_onUpdateFilePrintedFormats);
   }
 
   Future<void> _onLoadFiles(
@@ -29,11 +36,70 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
             throw Exception('Неверный формат данных от сервера');
           }
           final files = data.map((json) => File.fromJson(json)).toList();
-          emit(FilesLoaded(files: files));
+          final printedFormats = <String, Map<String, String>>{};
+          for (var file in files) {
+            printedFormats[file.id.toString()] = {
+              '1': '5', // Default values
+              '2': '5',
+              '3': '5',
+            };
+          }
+          emit(FilesLoaded(files: files, printedFormats: printedFormats));
         },
       );
     } catch (e) {
       emit(FilesError('Ошибка загрузки файлов'));
+    }
+  }
+
+  Future<void> _onUploadFiles(
+    UploadFiles event,
+    Emitter<FilesState> emit,
+  ) async {
+    for (var image in event.images) {
+      final result = await sl<UploadFileUseCase>().call(
+        params: UploadFileReqParams(
+          folderId: int.parse(event.folderId),
+          formData: FormData.fromMap({
+            'file': kIsWeb
+                ? MultipartFile.fromBytes(
+                    image.bytes!,
+                    filename: image.path,
+                  )
+                : await MultipartFile.fromFile(image.path!),
+          }),
+        ),
+      );
+
+      result.fold(
+        (error) => DisplayMessage.showMessage(event.context, error),
+        (success) {
+          add(LoadFiles(folderId: event.folderId));
+        },
+      );
+    }
+  }
+
+  void _onUpdateFilePrintedFormats(
+    UpdateFilePrintedFormats event,
+    Emitter<FilesState> emit,
+  ) {
+    if (state is FilesLoaded) {
+      final currentState = state as FilesLoaded;
+      final updatedPrintedFormats =
+          Map<String, Map<String, String>>.from(currentState.printedFormats);
+
+      if (!updatedPrintedFormats.containsKey(event.fileId.toString())) {
+        updatedPrintedFormats[event.fileId.toString()] = {};
+      }
+
+      updatedPrintedFormats[event.fileId.toString()]![event.sizeType] =
+          event.printFormat;
+
+      emit(FilesLoaded(
+        files: currentState.files,
+        printedFormats: updatedPrintedFormats,
+      ));
     }
   }
 }
