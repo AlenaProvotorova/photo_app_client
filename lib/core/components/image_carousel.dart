@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:photo_app/data/files/models/file.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/image_print_selector_container.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<File> images;
-  final Widget? child;
   final int initialIndex;
 
   const ImageCarousel({
     super.key,
     required this.images,
     required this.initialIndex,
-    required this.child,
   });
 
   @override
@@ -64,12 +63,13 @@ class _ImageCarouselState extends State<ImageCarousel> {
                         ),
                       ),
                     ),
-                    widget.child ??
-                        Container(
-                          padding: const EdgeInsets.all(16.0),
-                          color: Colors.black,
-                          child: widget.child,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      color: Colors.black,
+                      child: ImagePrintSelectorContainer(
+                        imageId: widget.images[index].id,
+                      ),
+                    ),
                   ],
                 );
               },

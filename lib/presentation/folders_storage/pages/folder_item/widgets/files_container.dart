@@ -32,10 +32,6 @@ class FilesContainer extends StatelessWidget {
                           builder: (context) => ImageCarousel(
                             images: files,
                             initialIndex: index,
-                            child: Text(
-                              'test',
-                              style: TextStyle(color: Colors.white),
-                            ),
                           ),
                         ),
                       );

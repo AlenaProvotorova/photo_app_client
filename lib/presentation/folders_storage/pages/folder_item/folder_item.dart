@@ -64,7 +64,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         child: Column(
           children: [
             const ClientSelector(),
-            SwitchAllDigital(),
+            const SwitchAllDigital(),
             Expanded(
               child: FilesList(
                 folderId: widget.folderId,
