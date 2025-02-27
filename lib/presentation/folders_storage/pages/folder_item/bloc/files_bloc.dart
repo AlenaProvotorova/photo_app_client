@@ -15,7 +15,6 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
   FilesBloc() : super(FilesLoading()) {
     on<LoadFiles>(_onLoadFiles);
     on<UploadFiles>(_onUploadFiles);
-    on<UpdateFilePrintedFormats>(_onUpdateFilePrintedFormats);
   }
 
   Future<void> _onLoadFiles(
@@ -36,15 +35,7 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
             throw Exception('Неверный формат данных от сервера');
           }
           final files = data.map((json) => File.fromJson(json)).toList();
-          final printedFormats = <String, Map<String, String>>{};
-          for (var file in files) {
-            printedFormats[file.id.toString()] = {
-              '1': '5', // Default values
-              '2': '5',
-              '3': '5',
-            };
-          }
-          emit(FilesLoaded(files: files, printedFormats: printedFormats));
+          emit(FilesLoaded(files: files));
         },
       );
     } catch (e) {
@@ -77,29 +68,6 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
           add(LoadFiles(folderId: event.folderId));
         },
       );
-    }
-  }
-
-  void _onUpdateFilePrintedFormats(
-    UpdateFilePrintedFormats event,
-    Emitter<FilesState> emit,
-  ) {
-    if (state is FilesLoaded) {
-      final currentState = state as FilesLoaded;
-      final updatedPrintedFormats =
-          Map<String, Map<String, String>>.from(currentState.printedFormats);
-
-      if (!updatedPrintedFormats.containsKey(event.fileId.toString())) {
-        updatedPrintedFormats[event.fileId.toString()] = {};
-      }
-
-      updatedPrintedFormats[event.fileId.toString()]![event.sizeType] =
-          event.printFormat;
-
-      emit(FilesLoaded(
-        files: currentState.files,
-        printedFormats: updatedPrintedFormats,
-      ));
     }
   }
 }
