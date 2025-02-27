@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photo_app/core/constants/for_test.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/files/models/remove_files_req_params.dart';
 import 'package:photo_app/domain/files/usecases/remove_files.dart';
@@ -65,25 +66,27 @@ class ImageContainer extends StatelessWidget {
             ),
           ),
         ),
-        Positioned(
-          top: 8,
-          right: 8,
-          child: GestureDetector(
-            onTap: () => _handleDeleteFile(context, id),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(255, 255, 255, 0.8),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.delete,
-                color: Colors.red,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
+        TEST_CONSTANTS.isAdmin
+            ? Positioned(
+                top: 8,
+                right: 8,
+                child: GestureDetector(
+                  onTap: () => _handleDeleteFile(context, id),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Color.fromRGBO(255, 255, 255, 0.8),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              )
+            : const SizedBox(),
       ],
     );
   }

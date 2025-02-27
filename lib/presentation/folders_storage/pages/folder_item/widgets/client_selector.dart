@@ -16,7 +16,6 @@ class ClientSelector extends StatelessWidget {
           return Align(
             alignment: Alignment.centerLeft,
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.4,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: DropdownButtonFormField<String>(
