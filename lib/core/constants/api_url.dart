@@ -10,4 +10,6 @@ class ApiUrl {
   static const String files = 'files';
 
   static const String clients = 'clients/folder';
+
+  static const String sizes = 'sizes';
 }

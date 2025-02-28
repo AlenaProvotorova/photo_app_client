@@ -11,6 +11,8 @@ import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
+import 'package:photo_app/data/sizes/repositories/size.dart';
+import 'package:photo_app/data/sizes/sources/size_api_service.dart';
 import 'package:photo_app/data/user/repositories/user.dart';
 import 'package:photo_app/data/user/sources/user_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';
@@ -30,6 +32,8 @@ import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
 import 'package:photo_app/domain/folders/usecases/edit_folder.dart';
 import 'package:photo_app/domain/folders/usecases/get_all_folders.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
+import 'package:photo_app/domain/sizes/repositories/sizes.dart';
+import 'package:photo_app/domain/sizes/usecases/get_sizes.dart';
 import 'package:photo_app/domain/user/repositories/user.dart';
 import 'package:photo_app/domain/user/usecases/get_user.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
@@ -45,6 +49,7 @@ void setupServiceLocator() {
   sl.registerSingleton<FoldersApiService>(FoldersApiServiceImplementation());
   sl.registerSingleton<FilesApiService>(FilesApiServiceImplementation());
   sl.registerSingleton<ClientsApiService>(ClientsApiServiceImplementation());
+  sl.registerSingleton<SizeApiService>(SizeApiServiceImplementation());
 
   //repositories
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
@@ -59,6 +64,7 @@ void setupServiceLocator() {
   }
   sl.registerSingleton<UserRepository>(UserRepositoryImplementation());
   sl.registerSingleton<ClientsRepository>(ClientsRepositoryImplementation());
+  sl.registerSingleton<SizeRepository>(SizeRepositoryImplementation());
 
   //usecases
   //auth
@@ -78,6 +84,8 @@ void setupServiceLocator() {
   //clients
   sl.registerSingleton<GetAllClientsUseCase>(GetAllClientsUseCase());
   sl.registerSingleton<UpdateClientsUseCase>(UpdateClientsUseCase());
+  //sizes
+  sl.registerSingleton<GetSizesUseCase>(GetSizesUseCase());
 
   //bloc
   sl.registerFactory(() => FolderBloc());
