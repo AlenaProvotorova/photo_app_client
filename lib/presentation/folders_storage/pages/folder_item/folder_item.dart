@@ -8,11 +8,14 @@ import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
+import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files_list.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 
 class FolderItemScreen extends StatefulWidget {
   final String folderId;
@@ -26,6 +29,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
   late final ClientsBloc _clientsBloc;
+  late final SizesBloc _sizesBloc;
 
   @override
   void initState() {
@@ -35,6 +39,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         : MobileImagePickerRepositoryImplementation();
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
+    _sizesBloc = SizesBloc()..add(LoadSizes());
   }
 
   Future<void> _pickImages(context) async {
@@ -60,6 +65,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         providers: [
           BlocProvider(create: (context) => _filesBloc),
           BlocProvider(create: (context) => _clientsBloc),
+          BlocProvider(create: (context) => _sizesBloc),
         ],
         child: Column(
           children: [
@@ -68,8 +74,12 @@ class FolderItemScreenState extends State<FolderItemScreen> {
             Expanded(
               child: FilesList(
                 folderId: widget.folderId,
-                onPickImages: (context) => _pickImages(context),
               ),
+            ),
+            UploadFileButton(
+              pickImages: (context) async {
+                await _pickImages(context);
+              },
             ),
           ],
         ),
