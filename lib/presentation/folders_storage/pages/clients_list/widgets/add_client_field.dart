@@ -8,22 +8,34 @@ class AddClientField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: TextField(
-            controller: controllerName,
-            decoration: const InputDecoration(
-              hintText: 'Введите имя и фамилию',
-              border: OutlineInputBorder(),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controllerName,
+                decoration: const InputDecoration(
+                  hintText: 'Введите имя и фамилию',
+                  border: OutlineInputBorder(),
+                ),
+                onSubmitted: (_) => onSubmit(),
+              ),
             ),
-            onSubmitted: (_) => onSubmit(),
-          ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: onSubmit,
+              child:
+                  const Text('Добавить', style: TextStyle(color: Colors.white)),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        ElevatedButton(
-          onPressed: onSubmit,
-          child: const Text('Добавить', style: TextStyle(color: Colors.white)),
+        const Text(
+          'Вы можете добавить несколько клиентов, разделяя их запятыми',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 12,
+          ),
         ),
       ],
     );

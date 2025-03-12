@@ -1,3 +1,5 @@
+import 'package:photo_app/data/clients/models/client.dart';
+
 abstract class ClientsEvent {}
 
 class LoadClients extends ClientsEvent {
@@ -8,24 +10,13 @@ class LoadClients extends ClientsEvent {
 
 class UpdateClients extends ClientsEvent {
   final String folderId;
+  final List<String> clients;
 
-  UpdateClients({required this.folderId});
-}
-
-class AddNewClient extends ClientsEvent {
-  final String name;
-
-  AddNewClient({required this.name});
-}
-
-class DeleteClient extends ClientsEvent {
-  final String name;
-
-  DeleteClient({required this.name});
+  UpdateClients({required this.folderId, required this.clients});
 }
 
 class SelectClient extends ClientsEvent {
-  final String name;
+  final Client client;
 
-  SelectClient({required this.name});
+  SelectClient({required this.client});
 }

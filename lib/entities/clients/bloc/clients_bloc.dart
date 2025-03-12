@@ -9,14 +9,12 @@ import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/service_locator.dart';
 
 class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
-  List<String> _namesList = [];
-  String? _selectedClient;
+  List<Client> _namesList = [];
+  Client? _selectedClient;
 
   ClientsBloc() : super(ClientsInitial()) {
     on<LoadClients>(_onLoadClients);
     on<UpdateClients>(_onUpdateClients);
-    on<AddNewClient>(_onAddNewClient);
-    on<DeleteClient>(_onDeleteClient);
     on<SelectClient>(_onSelectClient);
   }
 
@@ -40,7 +38,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
           }
 
           final clients = data.map((json) => Client.fromJson(json)).toList();
-          _namesList = List<String>.from(clients.map((client) => client.name));
+          _namesList = clients;
           emit(ClientsLoaded(namesList: _namesList));
         },
       );
@@ -58,7 +56,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
       final response = await sl<UpdateClientsUseCase>().call(
         params: UpdateClientsReqParams(
           folderId: int.parse(event.folderId),
-          clients: _namesList.map((name) => {'name': name}).toList(),
+          clients: event.clients.map((name) => {'name': name}).toList(),
         ),
       );
 
@@ -76,35 +74,11 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     }
   }
 
-  Future<void> _onAddNewClient(
-      AddNewClient event, Emitter<ClientsState> emit) async {
-    try {
-      final updatedList = List<String>.from(_namesList)..add(event.name);
-      _namesList = updatedList;
-      emit(ClientsLoaded(namesList: updatedList));
-    } catch (e) {
-      emit(ClientsError(message: e.toString()));
-    }
-  }
-
-  Future<void> _onDeleteClient(
-    DeleteClient event,
-    Emitter<ClientsState> emit,
-  ) async {
-    try {
-      final updatedList = List<String>.from(_namesList)..remove(event.name);
-      _namesList = updatedList;
-      emit(ClientsLoaded(namesList: updatedList));
-    } catch (e) {
-      emit(ClientsError(message: e.toString()));
-    }
-  }
-
   void _onSelectClient(
     SelectClient event,
     Emitter<ClientsState> emit,
   ) {
-    _selectedClient = event.name;
+    _selectedClient = event.client;
     emit(ClientsLoaded(
       namesList: _namesList,
       selectedClient: _selectedClient,

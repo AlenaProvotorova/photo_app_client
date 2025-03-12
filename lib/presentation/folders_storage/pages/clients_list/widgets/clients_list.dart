@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
@@ -18,6 +17,7 @@ class ClientsList extends StatefulWidget {
 
 class ClientsListState extends State<ClientsList> {
   final TextEditingController _clientNameController = TextEditingController();
+  List<String> _namesList = [];
 
   @override
   void dispose() {
@@ -25,25 +25,12 @@ class ClientsListState extends State<ClientsList> {
     super.dispose();
   }
 
-  void _addName() {
-    if (_clientNameController.text.isNotEmpty) {
-      context
-          .read<ClientsBloc>()
-          .add(AddNewClient(name: _clientNameController.text));
-      _clientNameController.clear();
-    }
-  }
-
-  void _deleteName(String name) {
-    context.read<ClientsBloc>().add(DeleteClient(name: name));
-  }
-
   void _updateClients() {
     try {
       context.read<ClientsBloc>().add(UpdateClients(
             folderId: widget.folderId,
+            clients: _namesList,
           ));
-      context.go('/home');
       DisplayMessage.showMessage(context, 'Список клиентов успешно обновлен');
     } catch (e) {
       DisplayMessage.showMessage(
@@ -59,7 +46,18 @@ class ClientsListState extends State<ClientsList> {
         children: [
           AddClientField(
             controllerName: _clientNameController,
-            onSubmit: _addName,
+            onSubmit: () {
+              final names = _clientNameController.text
+                  .split(',')
+                  .map((name) => name.trim())
+                  .where((name) => name.isNotEmpty)
+                  .toList();
+              setState(() {
+                _namesList.addAll(names);
+              });
+              _clientNameController.clear();
+              _updateClients();
+            },
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -68,14 +66,21 @@ class ClientsListState extends State<ClientsList> {
                 if (state is ClientsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ClientsLoaded) {
+                  if (_namesList.isEmpty) {
+                    _namesList =
+                        state.namesList.map((client) => client.name).toList();
+                  }
                   return ListView.separated(
-                    itemCount: state.namesList.length,
+                    itemCount: _namesList.length,
                     separatorBuilder: (context, index) => const Divider(),
                     itemBuilder: (context, index) {
                       return SurnameListTile(
-                        name: state.namesList[index],
+                        name: _namesList[index],
                         onDelete: (context) {
-                          _deleteName(state.namesList[index]);
+                          setState(() {
+                            _namesList.removeAt(index);
+                          });
+                          _updateClients();
                         },
                       );
                     },
@@ -85,15 +90,6 @@ class ClientsListState extends State<ClientsList> {
                 }
                 return const SizedBox();
               },
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _updateClients,
-              child: const Text('Сохранить изменения',
-                  style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
