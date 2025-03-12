@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/empty_container.dart';
-import 'package:photo_app/core/components/image_carousel.dart';
-import 'package:photo_app/core/components/image_container.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_carousel.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_container.dart';
 import 'package:photo_app/data/files/models/file.dart';
 
 class FilesContainer extends StatelessWidget {
@@ -27,12 +30,23 @@ class FilesContainer extends StatelessWidget {
                   final imageData = files[index];
                   return GestureDetector(
                     onTap: () {
+                      final sizesBloc = context.read<SizesBloc>();
+                      final clientsBloc = context.read<ClientsBloc>();
+
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => ImageCarousel(
-                            images: files,
-                            initialIndex: index,
-                          ),
+                          builder: (context) {
+                            return MultiBlocProvider(
+                              providers: [
+                                BlocProvider.value(value: sizesBloc),
+                                BlocProvider.value(value: clientsBloc),
+                              ],
+                              child: ImageCarousel(
+                                images: files,
+                                initialIndex: index,
+                              ),
+                            );
+                          },
                         ),
                       );
                     },

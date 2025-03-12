@@ -13,7 +13,7 @@ import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files_list.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 
