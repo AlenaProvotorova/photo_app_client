@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/data/clients/models/client.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
@@ -34,20 +35,24 @@ class ClientSelector extends StatelessWidget {
                     color: Colors.black,
                     fontSize: 16,
                   ),
-                  items: state.namesList.map((String name) {
+                  items: state.namesList
+                      .map<DropdownMenuItem<String>>((Client client) {
                     return DropdownMenuItem<String>(
-                      value: name,
+                      value: client.name,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(name),
+                        child: Text(client.name),
                       ),
                     );
                   }).toList(),
                   onChanged: (String? newValue) {
                     if (newValue != null) {
+                      final selectedClient = state.namesList.firstWhere(
+                        (client) => client.name == newValue,
+                      );
                       context
                           .read<ClientsBloc>()
-                          .add(SelectClient(name: newValue));
+                          .add(SelectClient(client: selectedClient));
                     }
                   },
                 ),

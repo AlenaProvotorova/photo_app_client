@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:photo_app/data/clients/models/client.dart';
 
 abstract class ClientsState extends Equatable {
   const ClientsState();
@@ -12,8 +13,8 @@ class ClientsInitial extends ClientsState {}
 class ClientsLoading extends ClientsState {}
 
 class ClientsLoaded extends ClientsState {
-  final List<String> namesList;
-  final String? selectedClient;
+  final List<Client> namesList;
+  final Client? selectedClient;
 
   const ClientsLoaded({
     required this.namesList,
@@ -25,12 +26,12 @@ class ClientsLoaded extends ClientsState {
 }
 
 class ClientSelected extends ClientsState {
-  final String? name;
+  final Client? client;
 
-  const ClientSelected({required this.name});
+  const ClientSelected({required this.client});
 
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [client];
 }
 
 class ClientsError extends ClientsState {
