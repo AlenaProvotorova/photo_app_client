@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/data/sizes/models/size.dart';
 import 'package:photo_app/domain/sizes/usecases/get_sizes.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_state.dart';
@@ -22,7 +23,8 @@ class SizesBloc extends Bloc<SizesEvent, SizesState> {
           if (data == null) {
             throw Exception('Неверный формат данных от сервера');
           }
-          final sizes = data;
+          final sizes = List<Size>.from(
+              data.map((json) => Size.fromJson(json as Map<String, dynamic>)));
           emit(SizesLoaded(sizes));
         },
       );

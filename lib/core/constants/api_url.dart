@@ -12,4 +12,5 @@ class ApiUrl {
   static const String clients = 'clients/folder';
 
   static const String sizes = 'sizes';
+  static const String orders = 'orders';
 }
