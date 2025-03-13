@@ -8,6 +8,8 @@ import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
@@ -30,6 +32,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final FilesBloc _filesBloc;
   late final ClientsBloc _clientsBloc;
   late final SizesBloc _sizesBloc;
+  late final OrderBloc _orderBloc;
 
   @override
   void initState() {
@@ -40,6 +43,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
+    _orderBloc = OrderBloc();
   }
 
   Future<void> _pickImages(context) async {
@@ -51,6 +55,13 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         context: context,
       ));
     }
+  }
+
+  void initOrderBloc(clientId) {
+    _orderBloc.add(LoadOrder(
+      folderId: widget.folderId,
+      clientId: clientId,
+    ));
   }
 
   @override
@@ -66,14 +77,18 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           BlocProvider(create: (context) => _filesBloc),
           BlocProvider(create: (context) => _clientsBloc),
           BlocProvider(create: (context) => _sizesBloc),
+          BlocProvider(create: (context) => _orderBloc),
         ],
         child: Column(
           children: [
-            const ClientSelector(),
+            ClientSelector(
+              initOrderBloc: initOrderBloc,
+            ),
             const SwitchAllDigital(),
             Expanded(
               child: FilesList(
                 folderId: widget.folderId,
+                orderBloc: _orderBloc,
               ),
             ),
             UploadFileButton(

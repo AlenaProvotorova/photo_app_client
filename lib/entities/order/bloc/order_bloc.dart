@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/order/models/create_or_update_order_req_params.dart';
 import 'package:photo_app/data/order/models/get_order_req_params.dart';
+import 'package:photo_app/data/order/models/order.dart';
 import 'package:photo_app/domain/order/usecases/get_order.dart';
 import 'package:photo_app/domain/order/usecases/update_order.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
@@ -10,7 +11,9 @@ import 'package:photo_app/service_locator.dart';
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   OrderBloc() : super(OrderInitial()) {
     on<LoadOrder>(_onLoadOrder);
-    on<UpdateOrder>(_onUpdateOrder);
+    on<UpdateOrder>((event, emit) {
+      return _onUpdateOrder(event, emit);
+    });
   }
 
   Future<void> _onLoadOrder(
@@ -32,9 +35,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           if (data == null || data is! List) {
             throw Exception('Неверный формат данных от сервера');
           }
-
-          // final order = Order.fromJson(data[0]);
-          // emit(OrderLoaded(order));
+          final orders = data.map((e) => Order.fromJson(e)).toList();
+          emit(OrderLoaded(orders));
         },
       );
     } catch (e) {
@@ -53,19 +55,19 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           fileId: int.parse(event.fileId),
           clientId: int.parse(event.clientId),
           folderId: int.parse(event.folderId),
-          sizeId: int.parse(event.sizeId),
+          sizeId: event.sizeId,
           count: int.parse(event.count),
         ),
       );
 
       response.fold(
-        (error) => emit(OrderError(error.toString())),
+        (error) {
+          emit(OrderError(error.toString()));
+        },
         (data) {
           if (data == null) {
             throw Exception('Неверный формат данных от сервера');
           }
-          // final order = Order.fromJson(data);
-          // emit(OrderLoaded(order));
         },
       );
     } catch (e) {

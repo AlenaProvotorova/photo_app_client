@@ -17,7 +17,7 @@ class OrderApiServiceImplementation extends OrderApiService {
       CreateOrUpdateOrderReqParams params) async {
     try {
       var response = await sl<DioClient>().put(
-        '$ApiUrl.orders',
+        ApiUrl.orders,
         data: params.toMap(),
       );
       return Right(response.data);
@@ -30,7 +30,7 @@ class OrderApiServiceImplementation extends OrderApiService {
   Future<Either> getOrder(GetOrderReqParams params) async {
     try {
       var response = await sl<DioClient>().get(
-        '${ApiUrl.orders}/folder${params.folderId}',
+        '${ApiUrl.orders}/folder/${params.folderId}',
         queryParameters: {
           'clientId': params.clientId,
         },

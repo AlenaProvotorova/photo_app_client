@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/empty_container.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_carousel.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_container.dart';
@@ -10,8 +11,12 @@ import 'package:photo_app/data/files/models/file.dart';
 class FilesContainer extends StatelessWidget {
   final List<File> files;
   final String folderId;
+  final OrderBloc orderBloc;
   const FilesContainer(
-      {super.key, required this.files, required this.folderId});
+      {super.key,
+      required this.files,
+      required this.folderId,
+      required this.orderBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,7 @@ class FilesContainer extends StatelessWidget {
                     onTap: () {
                       final sizesBloc = context.read<SizesBloc>();
                       final clientsBloc = context.read<ClientsBloc>();
+                      final orderBloc = context.read<OrderBloc>();
 
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -40,10 +46,12 @@ class FilesContainer extends StatelessWidget {
                               providers: [
                                 BlocProvider.value(value: sizesBloc),
                                 BlocProvider.value(value: clientsBloc),
+                                BlocProvider.value(value: orderBloc),
                               ],
                               child: ImageCarousel(
                                 images: files,
                                 initialIndex: index,
+                                folderId: int.parse(folderId),
                               ),
                             );
                           },
