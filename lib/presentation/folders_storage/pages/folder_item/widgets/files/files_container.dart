@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/empty_container.dart';
+import 'package:photo_app/core/constants/for_test.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_carousel.dart';
@@ -20,6 +22,10 @@ class FilesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(!TEST_CONSTANTS.isAdmin &&
+        context.read<ClientsBloc>().state is ClientsLoaded &&
+        (context.read<ClientsBloc>().state as ClientsLoaded).selectedClient ==
+            null);
     return files.isEmpty
         ? const Expanded(child: EmptyContainer(text: 'Папка пуста'))
         : Expanded(
@@ -39,6 +45,12 @@ class FilesContainer extends StatelessWidget {
                       final clientsBloc = context.read<ClientsBloc>();
                       final orderBloc = context.read<OrderBloc>();
 
+                      if (!TEST_CONSTANTS.isAdmin &&
+                          clientsBloc.state is ClientsLoaded &&
+                          (clientsBloc.state as ClientsLoaded).selectedClient ==
+                              null) {
+                        return;
+                      }
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) {
@@ -62,6 +74,7 @@ class FilesContainer extends StatelessWidget {
                       url: imageData.url,
                       id: imageData.id,
                       folderId: int.parse(folderId),
+                      originalName: imageData.originalName,
                     ),
                   );
                 }),
