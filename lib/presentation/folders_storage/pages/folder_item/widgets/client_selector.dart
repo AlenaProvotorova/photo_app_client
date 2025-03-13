@@ -6,7 +6,11 @@ import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 
 class ClientSelector extends StatelessWidget {
-  const ClientSelector({super.key});
+  final Function(String) initOrderBloc;
+  const ClientSelector({
+    super.key,
+    required this.initOrderBloc,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +57,7 @@ class ClientSelector extends StatelessWidget {
                       context
                           .read<ClientsBloc>()
                           .add(SelectClient(client: selectedClient));
+                      initOrderBloc(selectedClient.id.toString());
                     }
                   },
                 ),

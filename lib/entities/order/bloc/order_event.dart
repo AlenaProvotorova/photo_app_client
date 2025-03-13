@@ -14,7 +14,7 @@ class UpdateOrder extends OrderEvent {
   final String fileId;
   final String clientId;
   final String folderId;
-  final String sizeId;
+  final int sizeId;
   final String count;
 
   UpdateOrder({

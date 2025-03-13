@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
+import 'package:photo_app/data/sizes/models/size.dart';
 
 class ImagePrintSelector extends StatefulWidget {
-  final String size;
+  final Size size;
   final int imageId;
+  final int folderId;
   const ImagePrintSelector({
     super.key,
     required this.size,
     required this.imageId,
+    required this.folderId,
   });
 
   @override
@@ -20,7 +28,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
     return Row(
       children: [
         Text(
-          'Заказать фото ${widget.size}',
+          'Заказать фото ${widget.size.name}',
           style: const TextStyle(color: Colors.white),
         ),
         const SizedBox(width: 8),
@@ -46,6 +54,21 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                 setState(() {
                   selectedQuantity = value;
                 });
+                final clientState = context.read<ClientsBloc>().state;
+                if (clientState is ClientsLoaded &&
+                    clientState.selectedClient != null) {
+                  final orderBloc = context.read<OrderBloc>();
+
+                  final event = UpdateOrder(
+                    fileId: widget.imageId.toString(),
+                    clientId: clientState.selectedClient!.id.toString(),
+                    folderId: widget.folderId.toString(),
+                    sizeId: widget.size.id,
+                    count: selectedQuantity.toString(),
+                  );
+
+                  orderBloc.add(event);
+                }
               }
             },
           ),

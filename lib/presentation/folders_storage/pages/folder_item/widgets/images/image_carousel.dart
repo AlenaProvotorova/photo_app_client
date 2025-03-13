@@ -8,11 +8,13 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 class ImageCarousel extends StatefulWidget {
   final List<File> images;
   final int initialIndex;
+  final int folderId;
 
   const ImageCarousel({
     super.key,
     required this.images,
     required this.initialIndex,
+    required this.folderId,
   });
 
   @override
@@ -79,6 +81,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                         color: Colors.black,
                         child: ImagePrintSelectorContainer(
                           imageId: widget.images[index].id,
+                          folderId: widget.folderId,
                         ),
                       ),
                     ],
