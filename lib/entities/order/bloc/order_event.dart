@@ -2,11 +2,11 @@ abstract class OrderEvent {}
 
 class LoadOrder extends OrderEvent {
   final String folderId;
-  final String clientId;
+  final int? clientId;
 
   LoadOrder({
     required this.folderId,
-    required this.clientId,
+    this.clientId,
   });
 }
 

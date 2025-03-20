@@ -10,11 +10,13 @@ class ImagePrintSelector extends StatefulWidget {
   final Size size;
   final int imageId;
   final int folderId;
+  final int defaultQuantity;
   const ImagePrintSelector({
     super.key,
     required this.size,
     required this.imageId,
     required this.folderId,
+    this.defaultQuantity = 0,
   });
 
   @override
@@ -22,7 +24,14 @@ class ImagePrintSelector extends StatefulWidget {
 }
 
 class _ImagePrintSelectorState extends State<ImagePrintSelector> {
-  int selectedQuantity = 0;
+  late int selectedQuantity;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedQuantity = widget.defaultQuantity;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(

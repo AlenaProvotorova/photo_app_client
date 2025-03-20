@@ -1,10 +1,10 @@
 class GetOrderReqParams {
   final int folderId;
-  final int clientId;
+  final int? clientId;
 
   GetOrderReqParams({
     required this.folderId,
-    required this.clientId,
+    this.clientId,
   });
 
   Map<String, dynamic> toMap() {

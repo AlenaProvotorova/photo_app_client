@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/files/models/file.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector_container.dart';
 
@@ -9,12 +11,14 @@ class ImageCarousel extends StatefulWidget {
   final List<File> images;
   final int initialIndex;
   final int folderId;
+  final int? clientId;
 
   const ImageCarousel({
     super.key,
     required this.images,
     required this.initialIndex,
     required this.folderId,
+    required this.clientId,
   });
 
   @override
@@ -52,7 +56,13 @@ class _ImageCarouselState extends State<ImageCarousel> {
           backgroundColor: Colors.black,
           leading: IconButton(
             icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => {
+              Navigator.of(context).pop(),
+              context.read<OrderBloc>().add(LoadOrder(
+                    folderId: widget.folderId.toString(),
+                    clientId: widget.clientId,
+                  )),
+            },
           ),
         ),
         body: Column(
