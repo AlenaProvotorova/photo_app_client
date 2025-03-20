@@ -1,5 +1,3 @@
-import 'package:photo_app/data/order/models/order.dart';
-
 abstract class OrderState {}
 
 class OrderInitial extends OrderState {}
@@ -7,7 +5,8 @@ class OrderInitial extends OrderState {}
 class OrderLoading extends OrderState {}
 
 class OrderLoaded extends OrderState {
-  final List<Order> orders;
+  final Map<String, Map<String, int>> orders;
+
   OrderLoaded(this.orders);
 }
 

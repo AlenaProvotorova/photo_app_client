@@ -7,18 +7,20 @@ import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_carousel.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_container.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_card_container.dart';
 import 'package:photo_app/data/files/models/file.dart';
 
 class FilesContainer extends StatelessWidget {
   final List<File> files;
   final String folderId;
   final OrderBloc orderBloc;
+  final ClientsBloc clientsBloc;
   const FilesContainer(
       {super.key,
       required this.files,
       required this.folderId,
-      required this.orderBloc});
+      required this.orderBloc,
+      required this.clientsBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +41,11 @@ class FilesContainer extends StatelessWidget {
                 itemCount: files.length,
                 itemBuilder: (context, index) {
                   final imageData = files[index];
+                  final sizesBloc = context.read<SizesBloc>();
+                  final clientsBloc = context.read<ClientsBloc>();
+                  final orderBloc = context.read<OrderBloc>();
                   return GestureDetector(
                     onTap: () {
-                      final sizesBloc = context.read<SizesBloc>();
-                      final clientsBloc = context.read<ClientsBloc>();
-                      final orderBloc = context.read<OrderBloc>();
-
                       if (!TEST_CONSTANTS.isAdmin &&
                           clientsBloc.state is ClientsLoaded &&
                           (clientsBloc.state as ClientsLoaded).selectedClient ==
@@ -64,13 +65,21 @@ class FilesContainer extends StatelessWidget {
                                 images: files,
                                 initialIndex: index,
                                 folderId: int.parse(folderId),
+                                clientId: clientsBloc.state is ClientsLoaded &&
+                                        (clientsBloc.state as ClientsLoaded)
+                                                .selectedClient !=
+                                            null
+                                    ? (clientsBloc.state as ClientsLoaded)
+                                        .selectedClient!
+                                        .id
+                                    : null,
                               ),
                             );
                           },
                         ),
                       );
                     },
-                    child: ImageContainer(
+                    child: ImageCardContainer(
                       url: imageData.url,
                       id: imageData.id,
                       folderId: int.parse(folderId),

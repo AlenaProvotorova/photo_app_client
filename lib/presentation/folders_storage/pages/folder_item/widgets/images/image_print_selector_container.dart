@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector.dart';
@@ -18,6 +19,25 @@ class ImagePrintSelectorContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final sizesBloc = context.read<SizesBloc>();
     final orderBloc = context.read<OrderBloc>();
+    // final defaultQuantity = orderBloc.state is OrderLoaded &&
+    //         (orderBloc.state as OrderLoaded).orders[imageId.toString()] != null
+    //     ? (orderBloc.state as OrderLoaded)
+    //         .orders[imageId.toString()]!
+    //         .values
+    //     : 0;
+    int getDefaultQuantity(String sizeName) {
+      if (orderBloc.state is! OrderLoaded) return 0;
+
+      final orders =
+          (orderBloc.state as OrderLoaded).orders[imageId.toString()];
+      if (orders == null) return 0;
+
+      final result = orders.entries
+          .where((element) => element.key == sizeName)
+          .fold(0, (sum, entry) => sum + entry.value);
+      print('getDefaultQuantity: $orders');
+      return result;
+    }
 
     return MultiBlocProvider(
       providers: [
@@ -38,6 +58,8 @@ class ImagePrintSelectorContainer extends StatelessWidget {
                     size: state.sizes[index],
                     imageId: imageId,
                     folderId: folderId,
+                    defaultQuantity:
+                        getDefaultQuantity(state.sizes[index].name),
                   );
                 },
               ),

@@ -89,6 +89,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
               child: FilesList(
                 folderId: widget.folderId,
                 orderBloc: _orderBloc,
+                clientsBloc: _clientsBloc,
               ),
             ),
             UploadFileButton(
