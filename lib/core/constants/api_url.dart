@@ -9,7 +9,7 @@ class ApiUrl {
   static const String folders = 'folders';
   static const String files = 'files';
 
-  static const String clients = 'clients/folder';
+  static const String clients = 'clients';
 
   static const String sizes = 'sizes';
   static const String orders = 'orders';

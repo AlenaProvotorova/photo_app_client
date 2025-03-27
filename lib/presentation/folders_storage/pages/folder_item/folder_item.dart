@@ -21,7 +21,12 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 
 class FolderItemScreen extends StatefulWidget {
   final String folderId;
-  const FolderItemScreen({super.key, required this.folderId});
+  final String folderPath;
+  const FolderItemScreen({
+    super.key,
+    required this.folderId,
+    required this.folderPath,
+  });
 
   @override
   FolderItemScreenState createState() => FolderItemScreenState();
@@ -57,13 +62,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     }
   }
 
-  void initOrderBloc(clientId) {
-    _orderBloc.add(LoadOrder(
-      folderId: widget.folderId,
-      clientId: clientId,
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,6 +69,17 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         title: '',
         onPress: () => context.go('/home'),
         showLeading: true,
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+            onPressed: () {
+              context.go('/folder/${widget.folderPath}/full-order');
+            },
+            child: const Text('Весь заказ'),
+          ),
+        ],
       ),
       body: MultiBlocProvider(
         providers: [
@@ -82,7 +91,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         child: Column(
           children: [
             ClientSelector(
-              initOrderBloc: initOrderBloc,
+              folderId: widget.folderId,
             ),
             const SwitchAllDigital(),
             Expanded(

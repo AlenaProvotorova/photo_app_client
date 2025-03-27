@@ -5,8 +5,13 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final Function()? onPress;
   final bool showLeading;
+  final List<Widget>? actions;
   const AppBarCustom(
-      {super.key, required this.title, this.onPress, this.showLeading = false});
+      {super.key,
+      required this.title,
+      this.onPress,
+      this.showLeading = false,
+      this.actions});
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -19,6 +24,7 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       backgroundColor: theme.colorScheme.surface,
       automaticallyImplyLeading: showLeading,
+      actions: actions,
       leading: showLeading
           ? IconButton(
               onPressed: onPress,

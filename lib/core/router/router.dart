@@ -4,6 +4,7 @@ import 'package:photo_app/presentation/auth/pages/login.dart';
 import 'package:photo_app/presentation/auth/pages/sign_up.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/folder_item.dart';
 import 'package:photo_app/presentation/folders_storage/pages/clients_list/clients_list_screen.dart';
+import 'package:photo_app/presentation/folders_storage/pages/full_order.dart/full_order_screen.dart';
 import 'package:photo_app/presentation/home/pages/home.dart';
 
 final router = GoRouter(
@@ -30,7 +31,7 @@ final router = GoRouter(
       builder: (context, state) {
         final folderPath = state.pathParameters['folderPath']!;
         final folderId = folderPath.split('_').first;
-        return FolderItemScreen(folderId: folderId);
+        return FolderItemScreen(folderId: folderId, folderPath: folderPath);
       },
     ),
     GoRoute(
@@ -39,6 +40,14 @@ final router = GoRouter(
         final folderPath = state.pathParameters['folderPath']!;
         final folderId = folderPath.split('_').first;
         return ClientsListScreen(folderId: folderId);
+      },
+    ),
+    GoRoute(
+      path: '/folder/:folderPath/full-order',
+      builder: (context, state) {
+        final folderPath = state.pathParameters['folderPath']!;
+        final folderId = folderPath.split('_').first;
+        return FullOrderScreen(folderId: folderId, folderPath: folderPath);
       },
     ),
   ],

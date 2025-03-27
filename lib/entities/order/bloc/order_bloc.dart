@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/order/models/create_or_update_order_req_params.dart';
 import 'package:photo_app/data/order/models/get_order_req_params.dart';
@@ -36,27 +35,44 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           if (data == null || data is! List) {
             throw Exception('Неверный формат данных от сервера');
           }
-          final Map<String, Map<String, int>> transformedData = {};
-
+          final Map<String, Map<String, int>> orderForCarusel = {};
           for (final item in data) {
             try {
               final order = Order.fromJson(item);
               final fileId = order.file.id.toString();
               final sizeName = order.size.name;
               final count = order.count;
-              if (!transformedData.containsKey(fileId)) {
-                transformedData[fileId] = {};
+              if (!orderForCarusel.containsKey(fileId)) {
+                orderForCarusel[fileId] = {};
               }
-              transformedData[fileId]![sizeName] = count;
-            } catch (e) {
-              debugPrint('===_onLoadOrder error: $e');
-            }
+              orderForCarusel[fileId]![sizeName] = count;
+            } catch (e) {}
           }
-          emit(OrderLoaded(transformedData));
+          final fullOrderForTable = <String, Map<String, dynamic>>{};
+          for (final item in data) {
+            try {
+              final order = Order.fromJson(item);
+              final fileIdentifier = '${order.file.id}_${order.client.name}';
+              final fileName = order.file.originalName;
+              final clientName = order.client.name;
+
+              if (!fullOrderForTable.containsKey(fileIdentifier)) {
+                fullOrderForTable[fileIdentifier] = {
+                  'fileName': fileName,
+                  'clientName': clientName,
+                  'sizes': <String, int>{},
+                };
+              }
+              fullOrderForTable[fileIdentifier]!['sizes'][order.size.name] =
+                  order.count;
+            } catch (e) {}
+          }
+          emit(OrderLoaded(orderForCarusel, fullOrderForTable));
         },
       );
     } catch (e) {
-      emit(OrderError('Ошибка загрузки клиентов'));
+      print('=== Error in _onLoadOrder: $e');
+      emit(OrderError('Ошибка загрузки заказа'));
     }
   }
 

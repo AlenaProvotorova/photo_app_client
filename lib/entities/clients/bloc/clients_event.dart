@@ -20,3 +20,13 @@ class SelectClient extends ClientsEvent {
 
   SelectClient({required this.client});
 }
+
+class UpdateSelectedClient extends ClientsEvent {
+  final String clientId;
+  final bool orderDigital;
+
+  UpdateSelectedClient({
+    required this.clientId,
+    required this.orderDigital,
+  });
+}

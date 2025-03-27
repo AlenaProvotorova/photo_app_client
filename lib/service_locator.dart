@@ -23,6 +23,7 @@ import 'package:photo_app/domain/auth/usecases/signup.dart';
 import 'package:photo_app/domain/clients/repositories/clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
+import 'package:photo_app/domain/clients/usecases/update_selected_client.dart';
 import 'package:photo_app/domain/files/repositories/files.dart';
 import 'package:photo_app/domain/files/usecases/get_all_files.dart';
 import 'package:photo_app/domain/files/usecases/remove_files.dart';
@@ -90,6 +91,8 @@ void setupServiceLocator() {
   //clients
   sl.registerSingleton<GetAllClientsUseCase>(GetAllClientsUseCase());
   sl.registerSingleton<UpdateClientsUseCase>(UpdateClientsUseCase());
+  sl.registerSingleton<UpdateSelectedClientUseCase>(
+      UpdateSelectedClientUseCase());
   //sizes
   sl.registerSingleton<GetSizesUseCase>(GetSizesUseCase());
   //orders

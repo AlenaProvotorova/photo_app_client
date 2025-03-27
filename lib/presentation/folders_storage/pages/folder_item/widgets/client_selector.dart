@@ -4,12 +4,14 @@ import 'package:photo_app/data/clients/models/client.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
 
 class ClientSelector extends StatelessWidget {
-  final Function(String) initOrderBloc;
+  final String folderId;
   const ClientSelector({
     super.key,
-    required this.initOrderBloc,
+    required this.folderId,
   });
 
   @override
@@ -57,7 +59,13 @@ class ClientSelector extends StatelessWidget {
                       context
                           .read<ClientsBloc>()
                           .add(SelectClient(client: selectedClient));
-                      initOrderBloc(selectedClient.id.toString());
+
+                      context.read<OrderBloc>().add(
+                            LoadOrder(
+                              folderId: folderId,
+                              clientId: selectedClient.id,
+                            ),
+                          );
                     }
                   },
                 ),
