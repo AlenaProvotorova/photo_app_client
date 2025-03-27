@@ -1,5 +1,3 @@
-import 'package:photo_app/data/folders/models/folder.dart';
-
 class Client {
   final int id;
   final String name;

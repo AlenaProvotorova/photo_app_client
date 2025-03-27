@@ -71,7 +71,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         },
       );
     } catch (e) {
-      print('=== Error in _onLoadOrder: $e');
       emit(OrderError('Ошибка загрузки заказа'));
     }
   }

@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_app/core/components/input_field.dart';
+import 'package:photo_app/core/components/primary_button.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/core/theme/app_images.dart';
 import 'package:photo_app/data/auth/models/signin_req_params.dart';
@@ -91,78 +92,77 @@ class _LoginPageState extends State<LoginPage> {
         : null;
     return Expanded(
       flex: 1,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Добро пожаловать!',
-                style: theme.textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 24),
-              Column(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InputField(
-                      child: TextFormField(
-                    controller: _userEmailController,
-                    decoration: const InputDecoration(
-                        hintText: 'Email',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey)),
-                  )),
-                  const SizedBox(height: 20),
-                  InputField(
-                      child: TextFormField(
-                    obscureText: true,
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                        hintText: 'Пароль',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey)),
-                  )),
-                  const SizedBox(height: 20),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: isLoginButtonEnabled
-                            ? theme.colorScheme.primary
-                            : Colors.grey,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Center(
-                      child: TextButton(
-                        onPressed: onPressed,
-                        child: const Text(
-                          'Войти',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                  Center(
+                    child: Text(
+                      'Добро пожаловать!',
+                      style: theme.textTheme.headlineLarge,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    alignment: WrapAlignment.center,
+                  const SizedBox(height: 24),
+                  Column(
                     children: [
-                      Text(
-                        'Еще не зарегистрированы? ',
-                        style: theme.textTheme.titleSmall,
+                      InputField(
+                          child: TextFormField(
+                        controller: _userEmailController,
+                        decoration: InputDecoration(
+                          hintText: 'Email',
+                          border: InputBorder.none,
+                          hintStyle: theme.textTheme.titleSmall,
+                        ),
+                      )),
+                      const SizedBox(height: 20),
+                      InputField(
+                          child: TextFormField(
+                        obscureText: true,
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          hintText: 'Пароль',
+                          border: InputBorder.none,
+                          hintStyle: theme.textTheme.titleSmall,
+                        ),
+                      )),
+                      const SizedBox(height: 20),
+                      PrimaryButton(
+                        title: 'Войти',
+                        onPress: onPressed,
+                        disabled: !isLoginButtonEnabled,
                       ),
-                      TextButton(
-                        child: Text('Зарегистрироваться',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: theme.colorScheme.primary,
-                            )),
-                        onPressed: () {
-                          context.go('/sign-up');
-                        },
+                      const SizedBox(height: 20),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            'Еще не зарегистрированы? ',
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          TextButton(
+                            child: Text('Зарегистрироваться',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                  color: theme.colorScheme.primary,
+                                )),
+                            onPressed: () {
+                              context.go('/sign-up');
+                            },
+                          ),
+                        ],
                       ),
                     ],
-                  ),
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
         ),
       ),

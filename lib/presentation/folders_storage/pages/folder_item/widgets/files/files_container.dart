@@ -24,10 +24,6 @@ class FilesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(!TEST_CONSTANTS.isAdmin &&
-        context.read<ClientsBloc>().state is ClientsLoaded &&
-        (context.read<ClientsBloc>().state as ClientsLoaded).selectedClient ==
-            null);
     return files.isEmpty
         ? const Expanded(child: EmptyContainer(text: 'Папка пуста'))
         : Expanded(

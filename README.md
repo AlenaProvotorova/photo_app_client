@@ -69,3 +69,14 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
  16. В папке data/auth/sources в файле auth_api_service.dart добавляем метод signIn(SignInReqParams params)
  17. В папке data/auth/models создаем файл signin_req_params.dart. Там создаем класс SignInReqParams, в котором создаем поля email и password.
  18. В ui добавляем контроллеры для ввода email и password. и обработчик нажатия(отправка запроса с параметрами на сервер)
+
+
+ текстовая ТЕМА
+APPBAR - headlineMedium
+
+
+
+
+
+
+

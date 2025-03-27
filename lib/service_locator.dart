@@ -7,6 +7,8 @@ import 'package:photo_app/data/clients/repositories/clients.dart';
 import 'package:photo_app/data/clients/sourses/clients_api_service.dart';
 import 'package:photo_app/data/files/repositories/files.dart';
 import 'package:photo_app/data/files/sourses/files_api_service.dart';
+import 'package:photo_app/data/folder_settings/repositories/folder_settings.dart';
+import 'package:photo_app/data/folder_settings/sourses/folder_settings_api_service.dart';
 import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
@@ -28,6 +30,9 @@ import 'package:photo_app/domain/files/repositories/files.dart';
 import 'package:photo_app/domain/files/usecases/get_all_files.dart';
 import 'package:photo_app/domain/files/usecases/remove_files.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
+import 'package:photo_app/domain/folder_settings/repositories/folder_settings.dart';
+import 'package:photo_app/domain/folder_settings/usecases/get_folder_settings.dart';
+import 'package:photo_app/domain/folder_settings/usecases/update_folder_settings.dart';
 import 'package:photo_app/domain/folders/repositories/folders.dart';
 import 'package:photo_app/domain/folders/usecases/create_folder.dart';
 import 'package:photo_app/domain/folders/usecases/delete_folder.dart';
@@ -56,6 +61,8 @@ void setupServiceLocator() {
   sl.registerSingleton<ClientsApiService>(ClientsApiServiceImplementation());
   sl.registerSingleton<SizeApiService>(SizeApiServiceImplementation());
   sl.registerSingleton<OrderApiService>(OrderApiServiceImplementation());
+  sl.registerSingleton<FolderSettingsApiService>(
+      FolderSettingsApiServiceImplementation());
 
   //repositories
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
@@ -72,7 +79,8 @@ void setupServiceLocator() {
   sl.registerSingleton<ClientsRepository>(ClientsRepositoryImplementation());
   sl.registerSingleton<SizeRepository>(SizeRepositoryImplementation());
   sl.registerSingleton<OrderRepository>(OrderRepositoryImplementation());
-
+  sl.registerSingleton<FolderSettingsRepository>(
+      FolderSettingsRepositoryImplementation());
   //usecases
   //auth
   sl.registerSingleton<SignUpUseCase>(SignUpUseCase());
@@ -99,6 +107,10 @@ void setupServiceLocator() {
   sl.registerSingleton<GetOrderUseCase>(GetOrderUseCase());
   sl.registerSingleton<CreateOrUpdateOrderUseCase>(
       CreateOrUpdateOrderUseCase());
+  //folder settings
+  sl.registerSingleton<GetFolderSettingsUseCase>(GetFolderSettingsUseCase());
+  sl.registerSingleton<UpdateFolderSettingsUseCase>(
+      UpdateFolderSettingsUseCase());
 
   //bloc
   sl.registerFactory(() => FolderBloc());

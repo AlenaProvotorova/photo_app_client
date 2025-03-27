@@ -13,4 +13,6 @@ class ApiUrl {
 
   static const String sizes = 'sizes';
   static const String orders = 'orders';
+
+  static const String folderSettings = 'folder-settings';
 }
