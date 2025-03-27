@@ -4,6 +4,7 @@ import 'package:photo_app/presentation/auth/pages/login.dart';
 import 'package:photo_app/presentation/auth/pages/sign_up.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/folder_item.dart';
 import 'package:photo_app/presentation/folders_storage/pages/clients_list/clients_list_screen.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/folder_settings_screen.dart';
 import 'package:photo_app/presentation/folders_storage/pages/full_order.dart/full_order_screen.dart';
 import 'package:photo_app/presentation/home/pages/home.dart';
 
@@ -40,6 +41,14 @@ final router = GoRouter(
         final folderPath = state.pathParameters['folderPath']!;
         final folderId = folderPath.split('_').first;
         return ClientsListScreen(folderId: folderId);
+      },
+    ),
+    GoRoute(
+      path: '/folder/:folderPath/settings',
+      builder: (context, state) {
+        final folderPath = state.pathParameters['folderPath']!;
+        final folderId = folderPath.split('_').first;
+        return FolderSettingsScreen(folderId: folderId, folderPath: folderPath);
       },
     ),
     GoRoute(

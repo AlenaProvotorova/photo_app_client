@@ -40,6 +40,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBarCustom(
         title: '',
@@ -48,65 +49,78 @@ class _SignUpPageState extends State<SignUpPage> {
         },
         showLeading: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _signUpTitle(),
-              const SizedBox(height: 24),
-              Column(
-                children: [
-                  InputFieldWithLabel(
-                      label: 'Имя',
-                      child: TextFormField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                            hintText: 'Введите имя',
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey)),
-                      )),
-                  const SizedBox(height: 16),
-                  InputFieldWithLabel(
-                      label: 'Email',
-                      child: TextFormField(
-                        controller: _userEmailController,
-                        decoration: const InputDecoration(
-                            hintText: 'Введите email',
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey)),
-                      )),
-                  const SizedBox(height: 16),
-                  InputFieldWithLabel(
-                      label: 'Пароль',
-                      child: TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                            hintText: 'Введите пароль',
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey)),
-                      )),
-                  const SizedBox(height: 16),
-                  InputField(
-                      child: TextFormField(
-                    decoration: const InputDecoration(
-                        hintText: 'Подтвердите пароль',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.grey)),
-                  )),
-                  const SizedBox(height: 16),
-                  PrimaryButton(
-                      title: 'Зарегистрироваться',
-                      onPress: () {
-                        _singUp(context);
-                      }),
-                  Text(_errorMessage)
-                ],
-              )
-            ],
+      body: Column(
+        children: [
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _signUpTitle(),
+                      const SizedBox(height: 24),
+                      Column(
+                        children: [
+                          InputFieldWithLabel(
+                              label: 'Имя',
+                              child: TextFormField(
+                                controller: _usernameController,
+                                decoration: InputDecoration(
+                                  hintText: 'Введите имя',
+                                  border: InputBorder.none,
+                                  hintStyle: theme.textTheme.titleSmall,
+                                ),
+                              )),
+                          const SizedBox(height: 16),
+                          InputFieldWithLabel(
+                              label: 'Email',
+                              child: TextFormField(
+                                controller: _userEmailController,
+                                decoration: InputDecoration(
+                                  hintText: 'Введите email',
+                                  border: InputBorder.none,
+                                  hintStyle: theme.textTheme.titleSmall,
+                                ),
+                              )),
+                          const SizedBox(height: 16),
+                          InputFieldWithLabel(
+                              label: 'Пароль',
+                              child: TextFormField(
+                                controller: _passwordController,
+                                decoration: InputDecoration(
+                                  hintText: 'Введите пароль',
+                                  border: InputBorder.none,
+                                  hintStyle: theme.textTheme.titleSmall,
+                                ),
+                              )),
+                          const SizedBox(height: 16),
+                          InputField(
+                              child: TextFormField(
+                            decoration: InputDecoration(
+                              hintText: 'Подтвердите пароль',
+                              border: InputBorder.none,
+                              hintStyle: theme.textTheme.titleSmall,
+                            ),
+                          )),
+                          const SizedBox(height: 32),
+                          PrimaryButton(
+                              title: 'Зарегистрироваться',
+                              onPress: () {
+                                _singUp(context);
+                              }),
+                          Text(_errorMessage)
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -118,7 +132,7 @@ class _SignUpPageState extends State<SignUpPage> {
       children: <Widget>[
         Text(
           'Создайте аккаунт, чтобы начать',
-          style: theme.textTheme.bodySmall,
+          style: theme.textTheme.bodyLarge,
         ),
       ],
     );

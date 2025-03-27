@@ -60,6 +60,12 @@ class FolderTile extends StatelessWidget {
               context.go('/folder/${folder.url}/clients');
             },
           ),
+          PopupMenuAction(
+            title: 'Настройки для папки',
+            onTap: () {
+              context.go('/folder/${folder.url}/settings');
+            },
+          ),
         ],
       ),
       onTap: () {

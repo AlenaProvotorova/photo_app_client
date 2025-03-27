@@ -20,7 +20,6 @@ class ImageOrderInfo extends StatelessWidget {
         builder: (context, state) {
           if (state is OrderLoaded &&
               state.orderForCarusel.containsKey(imageId.toString())) {
-            print('state.orderForCarusel: ${state.orderForCarusel}');
             final sizes = state.orderForCarusel[imageId.toString()]!;
             final sizeText = sizes.entries
                 .where((element) => element.value != 0)
