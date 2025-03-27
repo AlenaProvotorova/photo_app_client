@@ -5,9 +5,10 @@ class OrderInitial extends OrderState {}
 class OrderLoading extends OrderState {}
 
 class OrderLoaded extends OrderState {
-  final Map<String, Map<String, int>> orders;
+  final Map<String, Map<String, int>> orderForCarusel;
+  final Map<String, Map<String, dynamic>> fullOrderForTable;
 
-  OrderLoaded(this.orders);
+  OrderLoaded(this.orderForCarusel, this.fullOrderForTable);
 }
 
 class OrderError extends OrderState {

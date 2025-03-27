@@ -2,8 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/clients/models/client.dart';
 import 'package:photo_app/data/clients/models/get_all_clients_req_params.dart';
 import 'package:photo_app/data/clients/models/update_clients_req_params.dart';
+import 'package:photo_app/data/clients/models/update_selected_client_req_params.dart';
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
+import 'package:photo_app/domain/clients/usecases/update_selected_client.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/service_locator.dart';
@@ -16,6 +18,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     on<LoadClients>(_onLoadClients);
     on<UpdateClients>(_onUpdateClients);
     on<SelectClient>(_onSelectClient);
+    on<UpdateSelectedClient>(_onUpdateSelectedClient);
   }
 
   Future<void> _onLoadClients(
@@ -71,6 +74,27 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
       );
     } catch (e) {
       emit(const ClientsError(message: 'Ошибка изменения списка клиентов'));
+    }
+  }
+
+  Future<void> _onUpdateSelectedClient(
+    UpdateSelectedClient event,
+    Emitter<ClientsState> emit,
+  ) async {
+    try {
+      final response = await sl<UpdateSelectedClientUseCase>().call(
+        params: UpdateSelectedClientReqParams(
+          clientId: int.parse(event.clientId),
+          orderDigital: event.orderDigital,
+        ),
+      );
+
+      response.fold(
+        (error) => emit(ClientsError(message: error.toString())),
+        (data) {},
+      );
+    } catch (e) {
+      emit(const ClientsError(message: 'Ошибка изменения клиента'));
     }
   }
 

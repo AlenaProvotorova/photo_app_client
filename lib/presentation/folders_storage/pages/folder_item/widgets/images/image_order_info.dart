@@ -19,8 +19,9 @@ class ImageOrderInfo extends StatelessWidget {
       child: BlocBuilder<OrderBloc, OrderState>(
         builder: (context, state) {
           if (state is OrderLoaded &&
-              state.orders.containsKey(imageId.toString())) {
-            final sizes = state.orders[imageId.toString()]!;
+              state.orderForCarusel.containsKey(imageId.toString())) {
+            print('state.orderForCarusel: ${state.orderForCarusel}');
+            final sizes = state.orderForCarusel[imageId.toString()]!;
             final sizeText = sizes.entries
                 .where((element) => element.value != 0)
                 .map((e) => '${e.key} - ${e.value}')

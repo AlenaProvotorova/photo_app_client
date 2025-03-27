@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 
 class SwitchAllDigital extends StatefulWidget {
@@ -14,36 +15,50 @@ class SwitchAllDigital extends StatefulWidget {
 
 class _SwitchAllDigitalState extends State<SwitchAllDigital> {
   bool _printAll = false;
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ClientsBloc, ClientsState>(
-      builder: (context, state) {
+    return BlocListener<ClientsBloc, ClientsState>(
+      listener: (context, state) {
         if (state is ClientsLoaded && state.selectedClient != null) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Switch(
-                  value: _printAll,
-                  onChanged: (value) {
-                    setState(() {
-                      _printAll = value;
-                    });
-                  },
-                ),
-                const Text(
-                  'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
+          setState(() {
+            _printAll = state.selectedClient!.orderDigital;
+          });
         }
-        return const SizedBox.shrink();
       },
+      child: BlocBuilder<ClientsBloc, ClientsState>(
+        builder: (context, state) {
+          if (state is ClientsLoaded && state.selectedClient != null) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Switch(
+                    value: _printAll,
+                    onChanged: (value) {
+                      setState(() {
+                        _printAll = value;
+                      });
+                      context.read<ClientsBloc>().add(UpdateSelectedClient(
+                            clientId: state.selectedClient!.id.toString(),
+                            orderDigital: value,
+                          ));
+                    },
+                  ),
+                  const Text(
+                    'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
