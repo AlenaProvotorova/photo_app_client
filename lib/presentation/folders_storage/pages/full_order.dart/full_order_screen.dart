@@ -22,7 +22,8 @@ class FullOrderScreen extends StatelessWidget {
 
   @override
   // ignore: avoid_renaming_method_parameters
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -39,7 +40,7 @@ class FullOrderScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBarCustom(
           onPress: () {
-            ctx.go('/folder/$folderPath');
+            context.go('/folder/$folderPath');
           },
           showLeading: true,
           title: 'Весь заказ',
@@ -82,34 +83,29 @@ class FullOrderScreen extends StatelessWidget {
                             DataColumn(
                               label: SizedBox(
                                 width: columnWidth,
-                                child: const Text(
+                                child: Text(
                                   'В общую',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900,
-                                  ),
+                                  style: theme.textTheme.titleMedium,
                                 ),
                               ),
                             ),
                             DataColumn(
                               label: SizedBox(
                                 width: columnWidth,
-                                child: const Text('Список имен',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                    )),
+                                child: Text(
+                                  'Список имен',
+                                  style: theme.textTheme.titleMedium,
+                                ),
                               ),
                             ),
                             ...sizesState.sizes.map(
                               (size) => DataColumn(
                                 label: SizedBox(
                                   width: columnWidth,
-                                  child: Text(size.name,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900,
-                                      )),
+                                  child: Text(
+                                    size.name,
+                                    style: theme.textTheme.titleMedium,
+                                  ),
                                 ),
                               ),
                             ),
@@ -127,9 +123,7 @@ class FullOrderScreen extends StatelessWidget {
                                           message: details['fileName'],
                                           child: Text(
                                             details['fileName'],
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
+                                            style: theme.textTheme.labelLarge,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
@@ -138,9 +132,7 @@ class FullOrderScreen extends StatelessWidget {
                                     DataCell(
                                       Text(
                                         details['clientName'],
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                        ),
+                                        style: theme.textTheme.labelLarge,
                                       ),
                                     ),
                                     ...sizesState.sizes.map(
@@ -148,9 +140,7 @@ class FullOrderScreen extends StatelessWidget {
                                         details['sizes'][size.name]
                                                 ?.toString() ??
                                             '0',
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                        ),
+                                        style: theme.textTheme.labelLarge,
                                       )),
                                     ),
                                   ]),

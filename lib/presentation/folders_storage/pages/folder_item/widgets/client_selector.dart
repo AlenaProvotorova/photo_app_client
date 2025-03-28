@@ -16,6 +16,7 @@ class ClientSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return BlocBuilder<ClientsBloc, ClientsState>(
       builder: (context, state) {
         if (state is ClientsLoading) {
@@ -27,11 +28,17 @@ class ClientSelector extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Выберите фамилию',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                    ),
+                    enabledBorder: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
+                    labelStyle: theme.textTheme.titleSmall,
                   ),
                   dropdownColor: Colors.white,
                   menuMaxHeight: 300,

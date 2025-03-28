@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/empty_container.dart';
-import 'package:photo_app/core/constants/for_test.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_carousel.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_card_container.dart';
 import 'package:photo_app/data/files/models/file.dart';
@@ -24,6 +25,10 @@ class FilesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userBloc = context.read<UserBloc>();
+    final isAdmin = userBloc.state is UserLoaded
+        ? (userBloc.state as UserLoaded).user.isAdmin
+        : false;
     return files.isEmpty
         ? const Expanded(child: EmptyContainer(text: 'Папка пуста'))
         : Expanded(
@@ -42,7 +47,7 @@ class FilesContainer extends StatelessWidget {
                   final orderBloc = context.read<OrderBloc>();
                   return GestureDetector(
                     onTap: () {
-                      if (!TEST_CONSTANTS.isAdmin &&
+                      if (!isAdmin &&
                           clientsBloc.state is ClientsLoaded &&
                           (clientsBloc.state as ClientsLoaded).selectedClient ==
                               null) {

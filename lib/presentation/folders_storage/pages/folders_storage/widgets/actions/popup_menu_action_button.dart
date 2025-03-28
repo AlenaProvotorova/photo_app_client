@@ -11,6 +11,7 @@ class PopupMenuButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopupMenuButton(
       tooltip: 'Действия',
       icon: const Icon(
@@ -23,7 +24,10 @@ class PopupMenuButtonWidget extends StatelessWidget {
       itemBuilder: (context) => actions.map((action) {
         return PopupMenuItem(
           value: action,
-          child: Text(action.title),
+          child: Text(
+            action.title,
+            style: theme.textTheme.labelLarge,
+          ),
         );
       }).toList(),
       onSelected: (PopupMenuAction action) {
