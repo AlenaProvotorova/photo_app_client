@@ -94,8 +94,10 @@ class FolderSettingsScreen extends StatelessWidget {
                           checkboxShape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          title: Text(getCheckboxTileName(
-                              setting, state.folderSettings)),
+                          title: Text(
+                            getCheckboxTileName(setting, state.folderSettings),
+                            style: theme.textTheme.titleMedium,
+                          ),
                           value: state.folderSettings
                               .getProperty(setting['name'] ?? ''),
                           onChanged: (bool? value) {

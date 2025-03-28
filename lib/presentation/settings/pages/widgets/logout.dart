@@ -18,7 +18,7 @@ class Logout extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               'Выйти из профиля',
-              style: theme.textTheme.bodyMedium,
+              style: theme.textTheme.titleMedium,
             )
           ],
         ));

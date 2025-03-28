@@ -37,7 +37,7 @@ class Profile extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 state.user.email,
-                style: theme.textTheme.bodySmall,
+                style: theme.textTheme.titleSmall,
               )
             ],
           );

@@ -34,13 +34,14 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       children: [
         Text(
           'Заказать фото ${widget.size.name}',
-          style: const TextStyle(color: Colors.white),
+          style: theme.textTheme.titleMedium,
         ),
-        const SizedBox(width: 8),
+        // const SizedBox(width: ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
@@ -50,7 +51,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
             value: selectedQuantity,
             dropdownColor: Colors.black87,
             underline: const SizedBox(),
-            style: const TextStyle(color: Colors.white),
+            style: theme.textTheme.titleMedium,
             items: List.generate(
               10,
               (index) => DropdownMenuItem(

@@ -3,6 +3,7 @@ class User {
   final String email;
   final String password;
   final String name;
+  final bool isAdmin;
   final String createdAt;
   final String updatedAt;
   User({
@@ -10,6 +11,7 @@ class User {
     required this.email,
     required this.password,
     required this.name,
+    required this.isAdmin,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -20,6 +22,7 @@ class User {
       email: json['email'],
       password: json['password'],
       name: json['name'],
+      isAdmin: json['isAdmin'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
     );

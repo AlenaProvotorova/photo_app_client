@@ -42,19 +42,17 @@ class ImagePrintSelectorContainer extends StatelessWidget {
           if (state is SizesLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state is SizesLoaded) {
-            return SizedBox(
-              height: 200,
-              child: ListView.builder(
-                itemCount: state.sizes.length,
-                itemBuilder: (context, index) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: state.sizes.map((size) {
                   return ImagePrintSelector(
-                    size: state.sizes[index],
+                    size: size,
                     imageId: imageId,
                     folderId: folderId,
-                    defaultQuantity:
-                        getDefaultQuantity(state.sizes[index].name),
+                    defaultQuantity: getDefaultQuantity(size.name),
                   );
-                },
+                }).toList(),
               ),
             );
           }

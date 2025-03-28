@@ -8,6 +8,7 @@ class AddClientField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -15,9 +16,15 @@ class AddClientField extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controllerName,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Введите имя и фамилию',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                  ),
+                  hintStyle: theme.textTheme.titleSmall,
                 ),
                 onSubmitted: (_) => onSubmit(),
               ),
@@ -30,12 +37,9 @@ class AddClientField extends StatelessWidget {
             ),
           ],
         ),
-        const Text(
+        Text(
           'Вы можете добавить несколько клиентов, разделяя их запятыми',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 12,
-          ),
+          style: theme.textTheme.titleSmall,
         ),
       ],
     );

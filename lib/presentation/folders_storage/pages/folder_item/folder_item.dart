@@ -8,9 +8,13 @@ import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
@@ -34,9 +38,11 @@ class FolderItemScreen extends StatefulWidget {
 class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
+  late final UserBloc _userBloc;
   late final ClientsBloc _clientsBloc;
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
+  late final FolderSettingsBloc _folderSettingsBloc;
 
   @override
   void initState() {
@@ -44,8 +50,11 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     _imagePickerService = kIsWeb
         ? WebImagePickerRepositoryImplementation()
         : MobileImagePickerRepositoryImplementation();
+    _userBloc = UserBloc()..add(LoadUser());
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
+    _folderSettingsBloc = FolderSettingsBloc()
+      ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
     _orderBloc = OrderBloc();
   }
@@ -63,27 +72,38 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBarCustom(
         title: '',
         onPress: () => context.go('/home'),
         showLeading: true,
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          Container(
+            margin: const EdgeInsets.all(8),
+            height: 36, // Fixed height for the button
+            child: TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                side: BorderSide(color: theme.colorScheme.primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                context.go('/folder/${widget.folderPath}/full-order');
+              },
+              child: const Text('Весь заказ'),
             ),
-            onPressed: () {
-              context.go('/folder/${widget.folderPath}/full-order');
-            },
-            child: const Text('Весь заказ'),
           ),
         ],
       ),
       body: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (context) => _userBloc),
           BlocProvider(create: (context) => _filesBloc),
           BlocProvider(create: (context) => _clientsBloc),
+          BlocProvider(create: (context) => _folderSettingsBloc),
           BlocProvider(create: (context) => _sizesBloc),
           BlocProvider(create: (context) => _orderBloc),
         ],
