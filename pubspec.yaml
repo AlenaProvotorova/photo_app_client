@@ -27,9 +27,11 @@ dependencies:
   image_picker: ^1.0.7
   # Upload images for web:
   file_picker: ^6.1.1
+  # For adding watermark
+  image: ^4.5.4
 
+  
   equatable: ^2.0.5
-
 
   dartz: ^0.10.1
   get_it: ^8.0.3
@@ -52,3 +54,5 @@ flutter:
   assets:
     - assets/images/
 
+scripts:
+  start: flutter run -d chrome --web-port 8080

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
@@ -9,11 +11,17 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 class ImagePrintSelectorContainer extends StatelessWidget {
   final int imageId;
   final int folderId;
-  const ImagePrintSelectorContainer({
+  ImagePrintSelectorContainer({
     super.key,
     required this.imageId,
     required this.folderId,
   });
+
+  final Map<dynamic, dynamic> sizesDescriptionNames = {
+    0: 'sizeDescription1',
+    1: 'sizeDescription2',
+    2: 'sizeDescription3',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -37,26 +45,35 @@ class ImagePrintSelectorContainer extends StatelessWidget {
         BlocProvider.value(value: sizesBloc),
         BlocProvider.value(value: orderBloc),
       ],
-      child: BlocBuilder<SizesBloc, SizesState>(
-        builder: (context, state) {
-          if (state is SizesLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is SizesLoaded) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: state.sizes.map((size) {
-                  return ImagePrintSelector(
-                    size: size,
-                    imageId: imageId,
-                    folderId: folderId,
-                    defaultQuantity: getDefaultQuantity(size.name),
-                  );
-                }).toList(),
-              ),
-            );
-          }
-          return const Center(child: Text('Error'));
+      child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
+        builder: (context, folderSettingsState) {
+          return BlocBuilder<SizesBloc, SizesState>(
+            builder: (context, state) {
+              if (state is SizesLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is SizesLoaded &&
+                  folderSettingsState is FolderSettingsLoaded) {
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: state.sizes.map((size) {
+                      return ImagePrintSelector(
+                        size: size,
+                        imageId: imageId,
+                        folderId: folderId,
+                        description: folderSettingsState.folderSettings
+                            .getProperty(sizesDescriptionNames[
+                                    state.sizes.indexOf(size)] ??
+                                ''),
+                        defaultQuantity: getDefaultQuantity(size.name),
+                      );
+                    }).toList(),
+                  ),
+                );
+              }
+              return const Center(child: Text('Error'));
+            },
+          );
         },
       ),
     );
