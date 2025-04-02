@@ -11,12 +11,14 @@ class ImagePrintSelector extends StatefulWidget {
   final int imageId;
   final int folderId;
   final int defaultQuantity;
+  final String? description;
   const ImagePrintSelector({
     super.key,
     required this.size,
     required this.imageId,
     required this.folderId,
     this.defaultQuantity = 0,
+    this.description = '',
   });
 
   @override
@@ -35,13 +37,14 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final description =
+        widget.description?.isNotEmpty == true ? '(${widget.description})' : '';
     return Row(
       children: [
         Text(
-          'Заказать фото ${widget.size.name}',
+          'Заказать фото ${widget.size.name} $description',
           style: theme.textTheme.titleMedium,
         ),
-        // const SizedBox(width: ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(

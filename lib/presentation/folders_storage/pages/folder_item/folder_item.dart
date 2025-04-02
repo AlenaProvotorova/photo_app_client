@@ -1,10 +1,13 @@
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/data/image_picker/models/image_data.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
+import 'package:photo_app/data/watermarks/sourses/watermark_service.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
@@ -15,6 +18,8 @@ import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_event.dart';
+import 'package:photo_app/entities/watermark/watermark_bloc.dart';
+import 'package:photo_app/entities/watermark/watermark_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
@@ -43,6 +48,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
   late final FolderSettingsBloc _folderSettingsBloc;
+  late final WatermarkBloc _watermarkBloc;
 
   @override
   void initState() {
@@ -57,14 +63,31 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
     _orderBloc = OrderBloc();
+    _watermarkBloc = WatermarkBloc()..add(LoadWatermark(userId: '1'));
   }
 
-  Future<void> _pickImages(context) async {
+  Future<void> _pickImages(context, Uint8List watermarkBytes) async {
     final selectedImages = await _imagePickerService.pickImages();
+    List<ImageData> formattedImages = [];
     if (selectedImages.isNotEmpty) {
+      for (var file in selectedImages) {
+        if (file.bytes != null) {
+          final processedImage = ImageData(
+            bytes: await WatermarkService.applyWatermark(
+              originalImage: file.bytes!,
+              watermarkImage: watermarkBytes,
+            ),
+            path: file.path,
+          );
+          formattedImages.add(processedImage);
+        }
+      }
+    }
+
+    if (formattedImages.isNotEmpty) {
       _filesBloc.add(UploadFiles(
         folderId: widget.folderId,
-        images: selectedImages,
+        images: formattedImages,
         context: context,
       ));
     }
@@ -106,6 +129,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           BlocProvider(create: (context) => _folderSettingsBloc),
           BlocProvider(create: (context) => _sizesBloc),
           BlocProvider(create: (context) => _orderBloc),
+          BlocProvider(create: (context) => _watermarkBloc),
         ],
         child: Column(
           children: [
@@ -121,8 +145,8 @@ class FolderItemScreenState extends State<FolderItemScreen> {
               ),
             ),
             UploadFileButton(
-              pickImages: (context) async {
-                await _pickImages(context);
+              pickImages: (context, watermarkBytes) async {
+                await _pickImages(context, watermarkBytes);
               },
             ),
           ],

@@ -15,4 +15,6 @@ class ApiUrl {
   static const String orders = 'orders';
 
   static const String folderSettings = 'folder-settings';
+
+  static const String watermarks = 'watermarks';
 }

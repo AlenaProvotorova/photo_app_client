@@ -19,6 +19,8 @@ import 'package:photo_app/data/sizes/repositories/size.dart';
 import 'package:photo_app/data/sizes/sources/size_api_service.dart';
 import 'package:photo_app/data/user/repositories/user.dart';
 import 'package:photo_app/data/user/sources/user_api_service.dart';
+import 'package:photo_app/data/watermarks/repositories/watermark.dart';
+import 'package:photo_app/data/watermarks/sourses/watermark_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';
 import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
@@ -46,6 +48,10 @@ import 'package:photo_app/domain/sizes/repositories/sizes.dart';
 import 'package:photo_app/domain/sizes/usecases/get_sizes.dart';
 import 'package:photo_app/domain/user/repositories/user.dart';
 import 'package:photo_app/domain/user/usecases/get_user.dart';
+import 'package:photo_app/domain/watermarks/repositories/watermark.dart';
+import 'package:photo_app/domain/watermarks/usecases/get_watermark.dart';
+import 'package:photo_app/domain/watermarks/usecases/remove_watermark.dart';
+import 'package:photo_app/domain/watermarks/usecases/upload_watermark.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
 
 final sl = GetIt.instance;
@@ -63,6 +69,8 @@ void setupServiceLocator() {
   sl.registerSingleton<OrderApiService>(OrderApiServiceImplementation());
   sl.registerSingleton<FolderSettingsApiService>(
       FolderSettingsApiServiceImplementation());
+  sl.registerSingleton<WatermarkApiService>(
+      WatermarkApiServiceImplementation());
 
   //repositories
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
@@ -81,6 +89,9 @@ void setupServiceLocator() {
   sl.registerSingleton<OrderRepository>(OrderRepositoryImplementation());
   sl.registerSingleton<FolderSettingsRepository>(
       FolderSettingsRepositoryImplementation());
+  sl.registerSingleton<WatermarkRepository>(
+      WatermarkRepositoryImplementation());
+
   //usecases
   //auth
   sl.registerSingleton<SignUpUseCase>(SignUpUseCase());
@@ -111,6 +122,10 @@ void setupServiceLocator() {
   sl.registerSingleton<GetFolderSettingsUseCase>(GetFolderSettingsUseCase());
   sl.registerSingleton<UpdateFolderSettingsUseCase>(
       UpdateFolderSettingsUseCase());
+  //watermarks
+  sl.registerSingleton<UploadWatermarkUseCase>(UploadWatermarkUseCase());
+  sl.registerSingleton<GetWatermarkUseCase>(GetWatermarkUseCase());
+  sl.registerSingleton<RemoveWatermarkUseCase>(RemoveWatermarkUseCase());
 
   //bloc
   sl.registerFactory(() => FolderBloc());
