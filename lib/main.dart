@@ -7,6 +7,7 @@ import 'package:photo_app/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   setupServiceLocator();
   await Hive.initFlutter();
   await TokenStorage.init();

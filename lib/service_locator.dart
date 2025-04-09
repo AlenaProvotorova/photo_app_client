@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
 import 'package:photo_app/core/network/dio_client.dart';
 import 'package:photo_app/data/auth/repositories/auth.dart';
@@ -11,8 +12,8 @@ import 'package:photo_app/data/folder_settings/repositories/folder_settings.dart
 import 'package:photo_app/data/folder_settings/sourses/folder_settings_api_service.dart';
 import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
+import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
-import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/data/order/repositories/order.dart';
 import 'package:photo_app/data/order/sourses/clients_api_service.dart';
 import 'package:photo_app/data/sizes/repositories/size.dart';
@@ -76,12 +77,12 @@ void setupServiceLocator() {
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
   sl.registerSingleton<FoldersRepository>(FoldersRepositoryImplementation());
   sl.registerSingleton<FilesRepository>(FilesRepositoryImplementation());
-  if (kIsWeb) {
-    sl.registerSingleton<ImagePickerRepository>(
-        WebImagePickerRepositoryImplementation());
-  } else {
+  if (Platform.isAndroid || Platform.isIOS) {
     sl.registerSingleton<ImagePickerRepository>(
         MobileImagePickerRepositoryImplementation());
+  } else {
+    sl.registerSingleton<ImagePickerRepository>(
+        DesktopImagePickerRepositoryImplementation());
   }
   sl.registerSingleton<UserRepository>(UserRepositoryImplementation());
   sl.registerSingleton<ClientsRepository>(ClientsRepositoryImplementation());
