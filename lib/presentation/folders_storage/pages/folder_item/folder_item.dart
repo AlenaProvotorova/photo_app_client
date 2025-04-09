@@ -1,16 +1,19 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
-import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
+import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
@@ -23,6 +26,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
+import 'package:file_picker/file_picker.dart';
 
 class FolderItemScreen extends StatefulWidget {
   final String folderId;
@@ -46,13 +50,13 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final OrderBloc _orderBloc;
   late final FolderSettingsBloc _folderSettingsBloc;
   late final WatermarkBloc _watermarkBloc;
-
   @override
   void initState() {
     super.initState();
-    _imagePickerService = kIsWeb
-        ? WebImagePickerRepositoryImplementation()
-        : MobileImagePickerRepositoryImplementation();
+
+    _imagePickerService = Platform.isAndroid || Platform.isIOS
+        ? MobileImagePickerRepositoryImplementation()
+        : DesktopImagePickerRepositoryImplementation();
     _userBloc = UserBloc()..add(LoadUser());
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
@@ -65,13 +69,54 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
   Future<void> _pickImages(context) async {
     final selectedImages = await _imagePickerService.pickImages();
-
     if (selectedImages.isNotEmpty) {
       _filesBloc.add(UploadFiles(
         folderId: widget.folderId,
         images: selectedImages,
         context: context,
       ));
+    }
+  }
+
+  Future<void> _selectDirectory() async {
+    _orderBloc.add(LoadOrder(folderId: widget.folderId));
+
+    String? path = await FilePicker.platform.getDirectoryPath(
+      lockParentWindow: false,
+    );
+
+    if (path != null) {
+      final state = _orderBloc.state;
+      if (state is OrderLoaded) {
+        final order = state.fullOrderForSorting;
+        final orderClients = order.keys.toList();
+
+        for (final client in orderClients) {
+          final newClientDirectory = Directory('$path/$client');
+
+          if (!await newClientDirectory.exists()) {
+            await newClientDirectory.create();
+          }
+
+          final sizes = order[client]?.keys.toList() ?? [];
+          for (final size in sizes) {
+            final newSizeDirectory = Directory('$path/$client/$size');
+
+            if (!await newSizeDirectory.exists()) {
+              await newSizeDirectory.create();
+            }
+
+            final orderFiles = order[client]?[size] ?? [];
+            for (final fileName in orderFiles) {
+              final sourceFile = File('$path/$fileName');
+              if (await sourceFile.exists()) {
+                final destinationPath = '${newSizeDirectory.path}/$fileName';
+                await sourceFile.copy(destinationPath);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -86,7 +131,25 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         actions: [
           Container(
             margin: const EdgeInsets.all(8),
-            height: 36, // Fixed height for the button
+            height: 36,
+            child: BlocProvider(
+              create: (context) => _orderBloc,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  side: BorderSide(color: theme.colorScheme.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: _selectDirectory,
+                child: const Text('Отсортировать'),
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(8),
+            height: 36,
             child: TextButton(
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16),

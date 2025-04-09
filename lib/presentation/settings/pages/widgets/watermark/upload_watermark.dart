@@ -1,8 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
-import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
@@ -26,9 +27,9 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
   @override
   void initState() {
     super.initState();
-    _imagePickerService = kIsWeb
-        ? WebImagePickerRepositoryImplementation()
-        : MobileImagePickerRepositoryImplementation();
+    _imagePickerService = Platform.isAndroid || Platform.isIOS
+        ? MobileImagePickerRepositoryImplementation()
+        : DesktopImagePickerRepositoryImplementation();
   }
 
   void _removeWatermark() {
