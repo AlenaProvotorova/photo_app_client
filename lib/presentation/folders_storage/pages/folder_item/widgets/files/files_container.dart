@@ -34,8 +34,9 @@ class FilesContainer extends StatelessWidget {
         : Expanded(
             child: GridView.builder(
                 padding: const EdgeInsets.all(10),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      MediaQuery.of(context).size.width < 500 ? 2 : 3,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),

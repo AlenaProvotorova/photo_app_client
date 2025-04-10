@@ -14,32 +14,45 @@ class Profile extends StatelessWidget {
         if (state is UserLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is UserLoaded) {
-          return Column(
-            children: [
-              Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  color: theme.colorScheme.primaryContainer,
+          return ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 600),
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 16,
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    color: theme.colorScheme.primaryContainer,
+                  ),
+                  child: const Icon(
+                    Icons.person,
+                    size: 70,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  size: 70,
-                  color: Colors.white,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      state.user.name,
+                      style: theme.textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.user.email,
+                      style: theme.textTheme.titleSmall,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                state.user.name,
-                style: theme.textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                state.user.email,
-                style: theme.textTheme.titleSmall,
-              )
-            ],
+              ],
+            ),
           );
         } else if (state is UserError) {
           return Center(child: Text(state.message));

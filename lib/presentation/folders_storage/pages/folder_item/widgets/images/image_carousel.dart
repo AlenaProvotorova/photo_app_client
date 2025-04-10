@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/files/models/file.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
@@ -91,58 +92,66 @@ class _ImageCarouselState extends State<ImageCarousel> {
                           ),
                         ),
                       ),
-                      Positioned(
-                        left: 0,
-                        right: 8,
-                        bottom: 8,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.only(
-                                  left: 8,
-                                  right: 8,
-                                  top: 8,
-                                ),
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(16),
-                                    topRight: Radius.circular(16),
-                                  ),
-                                ),
-                                width: 400,
-                                child: ImageAdditionalPhotosContainer(
-                                  imageId: widget.images[index].id,
-                                  folderId: widget.folderId,
+                      BlocBuilder<ClientsBloc, ClientsState>(
+                        builder: (context, clientsState) {
+                          if (clientsState is ClientsLoaded &&
+                              clientsState.selectedClient != null) {
+                            return Positioned(
+                              left: 0,
+                              right: 8,
+                              bottom: 8,
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.only(
+                                        left: 8,
+                                        right: 8,
+                                        top: 8,
+                                      ),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(16),
+                                          topRight: Radius.circular(16),
+                                        ),
+                                      ),
+                                      width: 400,
+                                      child: ImageAdditionalPhotosContainer(
+                                        imageId: widget.images[index].id,
+                                        folderId: widget.folderId,
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.only(
+                                        left: 16,
+                                        right: 16,
+                                        top: 8,
+                                        bottom: 8,
+                                      ),
+                                      width: 400,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          bottomLeft: Radius.circular(16),
+                                          bottomRight: Radius.circular(16),
+                                        ),
+                                      ),
+                                      child: ImagePrintSelectorContainer(
+                                        imageId: widget.images[index].id,
+                                        folderId: widget.folderId,
+                                      ),
+                                    ),
+                                    // const SizedBox(height: 20),
+                                  ],
                                 ),
                               ),
-                              Container(
-                                padding: const EdgeInsets.only(
-                                  left: 16,
-                                  right: 16,
-                                  top: 8,
-                                  bottom: 8,
-                                ),
-                                width: 400,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(16),
-                                    bottomRight: Radius.circular(16),
-                                  ),
-                                ),
-                                child: ImagePrintSelectorContainer(
-                                  imageId: widget.images[index].id,
-                                  folderId: widget.folderId,
-                                ),
-                              ),
-                              // const SizedBox(height: 20),
-                            ],
-                          ),
-                        ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                     ],
                   );

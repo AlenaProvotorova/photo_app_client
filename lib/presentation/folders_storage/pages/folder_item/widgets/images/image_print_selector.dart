@@ -50,43 +50,60 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
           ),
-          child: DropdownButton<int>(
-            value: selectedQuantity,
-            dropdownColor: Colors.black87,
-            underline: const SizedBox(),
-            style: theme.textTheme.titleMedium,
-            items: List.generate(
-              10,
-              (index) => DropdownMenuItem(
-                value: index,
-                child: Text('$index'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: selectedQuantity > 0
+                    ? () {
+                        setState(() {
+                          selectedQuantity--;
+                        });
+                        _updateOrder();
+                      }
+                    : null,
+                icon: const Icon(Icons.remove),
               ),
-            ),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  selectedQuantity = value;
-                });
-                final clientState = context.read<ClientsBloc>().state;
-                if (clientState is ClientsLoaded &&
-                    clientState.selectedClient != null) {
-                  final orderBloc = context.read<OrderBloc>();
-
-                  final event = UpdateOrder(
-                    fileId: widget.imageId.toString(),
-                    clientId: clientState.selectedClient!.id.toString(),
-                    folderId: widget.folderId.toString(),
-                    sizeId: widget.size.id,
-                    count: selectedQuantity.toString(),
-                  );
-
-                  orderBloc.add(event);
-                }
-              }
-            },
+              SizedBox(
+                width: 40,
+                child: Text(
+                  selectedQuantity.toString(),
+                  style: theme.textTheme.titleMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              IconButton(
+                onPressed: selectedQuantity < 10
+                    ? () {
+                        setState(() {
+                          selectedQuantity++;
+                        });
+                        _updateOrder();
+                      }
+                    : null,
+                icon: const Icon(Icons.add),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  void _updateOrder() {
+    final clientState = context.read<ClientsBloc>().state;
+    if (clientState is ClientsLoaded && clientState.selectedClient != null) {
+      final orderBloc = context.read<OrderBloc>();
+
+      final event = UpdateOrder(
+        fileId: widget.imageId.toString(),
+        clientId: clientState.selectedClient!.id.toString(),
+        folderId: widget.folderId.toString(),
+        sizeId: widget.size.id,
+        count: selectedQuantity.toString(),
+      );
+
+      orderBloc.add(event);
+    }
   }
 }

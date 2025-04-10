@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
+import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
@@ -54,9 +56,11 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   void initState() {
     super.initState();
 
-    _imagePickerService = Platform.isAndroid || Platform.isIOS
-        ? MobileImagePickerRepositoryImplementation()
-        : DesktopImagePickerRepositoryImplementation();
+    _imagePickerService = kIsWeb
+        ? WebImagePickerRepositoryImplementation()
+        : Platform.isAndroid || Platform.isIOS
+            ? MobileImagePickerRepositoryImplementation()
+            : DesktopImagePickerRepositoryImplementation();
     _userBloc = UserBloc()..add(LoadUser());
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
@@ -181,7 +185,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
             ClientSelector(
               folderId: widget.folderId,
             ),
-            const SwitchAllDigital(),
+            SwitchAllDigital(
+              folderId: widget.folderId,
+            ),
             Expanded(
               child: FilesList(
                 folderId: widget.folderId,

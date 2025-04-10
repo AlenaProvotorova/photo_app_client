@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
+import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
@@ -27,9 +29,11 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
   @override
   void initState() {
     super.initState();
-    _imagePickerService = Platform.isAndroid || Platform.isIOS
-        ? MobileImagePickerRepositoryImplementation()
-        : DesktopImagePickerRepositoryImplementation();
+    _imagePickerService = kIsWeb
+        ? WebImagePickerRepositoryImplementation()
+        : Platform.isAndroid || Platform.isIOS
+            ? MobileImagePickerRepositoryImplementation()
+            : DesktopImagePickerRepositoryImplementation();
   }
 
   void _removeWatermark() {
@@ -56,6 +60,7 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return BlocListener<UserBloc, UserState>(listener: (context, userState) {
       if (userState is UserLoaded) {
         context
@@ -65,51 +70,90 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
     }, child:
         BlocBuilder<WatermarkBloc, WatermarkState>(builder: (context, state) {
       if (state is WatermarkLoaded) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (state.watermark?.filename == null)
-              UploadWatermarkButton(
-                pickImages: (parentContext) async {
-                  await _pickImages(parentContext);
-                },
-              )
-            else
-              Column(
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey, width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 500),
+              child: Column(
                 children: [
-                  Container(
-                    height: 200,
-                    width: 200,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: WatermarkCard(url: state.watermark!.url),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      Text(
+                        'Водяной знак',
+                        style: theme.textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Будет добавляться при загрузке фотографий',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () => _pickImages(context),
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        label: const Text('Изменить',
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                      const SizedBox(width: 16),
-                      ElevatedButton.icon(
-                        onPressed: _removeWatermark,
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Удалить'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
+                      if (state.watermark?.filename == null)
+                        UploadWatermarkButton(
+                          pickImages: (parentContext) async {
+                            await _pickImages(parentContext);
+                          },
+                        )
+                      else
+                        Column(
+                          children: [
+                            WatermarkCard(url: state.watermark!.url),
+                            const SizedBox(height: 16),
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () => _pickImages(context),
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.black),
+                                  label: const Text('Изменить',
+                                      style: TextStyle(color: Colors.black)),
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(
+                                      color: Colors.grey,
+                                    ),
+                                    shadowColor: Colors.transparent,
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black,
+                                  ),
+                                ),
+                                ElevatedButton.icon(
+                                  onPressed: _removeWatermark,
+                                  icon: const Icon(Icons.delete),
+                                  label: const Text('Удалить'),
+                                  style: ElevatedButton.styleFrom(
+                                    side: const BorderSide(
+                                      color: Colors.grey,
+                                    ),
+                                    shadowColor: Colors.transparent,
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ),
                     ],
                   ),
                 ],
               ),
-          ],
+            ),
+          ),
         );
       } else {
         return const SizedBox.shrink();

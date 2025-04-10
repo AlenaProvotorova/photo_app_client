@@ -18,8 +18,8 @@ class SettingsList extends StatelessWidget {
         child: Column(
           children: [
             UploadWatermarkWidget(userId: userId),
+            const SizedBox(height: 32),
             const Logout(),
-            const Divider(),
           ],
         ),
       ),

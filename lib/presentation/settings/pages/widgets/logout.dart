@@ -8,19 +8,23 @@ class Logout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
-        onTap: () {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: ElevatedButton(
+        onPressed: () {
           TokenStorage.deleteToken();
           context.go('/');
         },
-        title: Row(
-          children: [
-            const SizedBox(width: 8),
-            Text(
-              'Выйти из профиля',
-              style: theme.textTheme.titleMedium,
-            )
-          ],
-        ));
+        style: ElevatedButton.styleFrom(
+          backgroundColor: theme.colorScheme.error,
+          foregroundColor: Colors.white,
+          minimumSize: const Size.fromHeight(48),
+        ),
+        child: Text(
+          'Выйти из профиля',
+          style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
+        ),
+      ),
+    );
   }
 }

@@ -5,10 +5,14 @@ import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
+import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_event.dart';
 
 class SwitchAllDigital extends StatefulWidget {
+  final String folderId;
   const SwitchAllDigital({
     super.key,
+    required this.folderId,
   });
 
   @override
@@ -52,6 +56,13 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
                                 clientId: state.selectedClient!.id.toString(),
                                 orderDigital: value,
                               ));
+
+                          context.read<OrderBloc>().add(
+                                LoadOrder(
+                                  folderId: widget.folderId,
+                                  clientId: state.selectedClient!.id,
+                                ),
+                              );
                         },
                       ),
                       Text(
