@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:photo_app/core/network/dio_client.dart';
 import 'package:photo_app/data/auth/repositories/auth.dart';
@@ -14,6 +15,7 @@ import 'package:photo_app/data/folders/repositories/folders.dart';
 import 'package:photo_app/data/folders/sourses/folders_api_service.dart';
 import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
+import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/data/order/repositories/order.dart';
 import 'package:photo_app/data/order/sourses/clients_api_service.dart';
 import 'package:photo_app/data/sizes/repositories/size.dart';
@@ -27,6 +29,7 @@ import 'package:photo_app/domain/auth/usecases/signin.dart';
 import 'package:photo_app/domain/auth/usecases/signup.dart';
 import 'package:photo_app/domain/clients/repositories/clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
+import 'package:photo_app/domain/clients/usecases/get_client_by_id.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
 import 'package:photo_app/domain/clients/usecases/update_selected_client.dart';
 import 'package:photo_app/domain/files/repositories/files.dart';
@@ -77,7 +80,10 @@ void setupServiceLocator() {
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
   sl.registerSingleton<FoldersRepository>(FoldersRepositoryImplementation());
   sl.registerSingleton<FilesRepository>(FilesRepositoryImplementation());
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (kIsWeb) {
+    sl.registerSingleton<ImagePickerRepository>(
+        WebImagePickerRepositoryImplementation());
+  } else if (Platform.isAndroid || Platform.isIOS) {
     sl.registerSingleton<ImagePickerRepository>(
         MobileImagePickerRepositoryImplementation());
   } else {
@@ -113,6 +119,7 @@ void setupServiceLocator() {
   sl.registerSingleton<UpdateClientsUseCase>(UpdateClientsUseCase());
   sl.registerSingleton<UpdateSelectedClientUseCase>(
       UpdateSelectedClientUseCase());
+  sl.registerSingleton<GetClientByIdUseCase>(GetClientByIdUseCase());
   //sizes
   sl.registerSingleton<GetSizesUseCase>(GetSizesUseCase());
   //orders

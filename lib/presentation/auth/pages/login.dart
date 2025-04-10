@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         : null;
     return Expanded(
-      flex: 1,
+      flex: 2,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),

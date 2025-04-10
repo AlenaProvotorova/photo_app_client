@@ -7,12 +7,25 @@ import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 
-class ClientSelector extends StatelessWidget {
+class ClientSelector extends StatefulWidget {
   final String folderId;
   const ClientSelector({
     super.key,
     required this.folderId,
   });
+
+  @override
+  State<ClientSelector> createState() => _ClientSelectorState();
+}
+
+class _ClientSelectorState extends State<ClientSelector> {
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,17 +41,20 @@ class ClientSelector extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: DropdownButtonFormField<String>(
+                  focusNode: _focusNode,
                   decoration: InputDecoration(
                     labelText: 'Выберите фамилию',
+                    labelStyle: theme.textTheme.titleSmall,
                     border: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                      borderSide:
+                          BorderSide(width: 1, color: Color(0xFFE4E4E4)),
                     ),
                     enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFE4E4E4)),
+                      borderSide:
+                          BorderSide(width: 1, color: Color(0xFFE4E4E4)),
                     ),
                     filled: true,
                     fillColor: Colors.white,
-                    labelStyle: theme.textTheme.titleSmall,
                   ),
                   dropdownColor: Colors.white,
                   menuMaxHeight: 300,
@@ -58,18 +74,23 @@ class ClientSelector extends StatelessWidget {
                       ),
                     );
                   }).toList(),
+                  onTap: () {
+                    if (state.selectedClient == null) {
+                      context.read<ClientsBloc>().add(ResetSelectedClient());
+                      _focusNode.unfocus();
+                    }
+                  },
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       final selectedClient = state.namesList.firstWhere(
                         (client) => client.name == newValue,
                       );
-                      context
-                          .read<ClientsBloc>()
-                          .add(SelectClient(client: selectedClient));
+                      context.read<ClientsBloc>().add(LoadClientById(
+                          clientId: selectedClient.id.toString()));
 
                       context.read<OrderBloc>().add(
                             LoadOrder(
-                              folderId: folderId,
+                              folderId: widget.folderId,
                               clientId: selectedClient.id,
                             ),
                           );

@@ -8,9 +8,7 @@ class MobileImagePickerRepositoryImplementation
   @override
   Future<List<ImageData>> pickImages() async {
     final picker = ImagePicker();
-    print('===picker> $picker');
     final selectedFiles = await picker.pickMultiImage();
-    print('===selectedFiles> $selectedFiles');
 
     if (selectedFiles.isNotEmpty) {
       return selectedFiles

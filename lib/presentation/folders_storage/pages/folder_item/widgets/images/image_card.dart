@@ -12,7 +12,9 @@ class ImageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageSize = MediaQuery.of(context).size.width * 0.28;
+    final imageSize = MediaQuery.of(context).size.width < 500
+        ? MediaQuery.of(context).size.width * 0.4
+        : MediaQuery.of(context).size.width * 0.265;
     return Container(
       width: imageSize,
       height: imageSize,

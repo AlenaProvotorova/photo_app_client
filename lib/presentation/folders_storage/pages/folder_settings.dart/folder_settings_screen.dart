@@ -58,7 +58,6 @@ class FolderSettingsScreen extends StatelessWidget {
   }
 
   @override
-  // ignore: avoid_renaming_method_parameters
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return BlocProvider(
@@ -87,7 +86,7 @@ class FolderSettingsScreen extends StatelessWidget {
                   children: [
                     Text(
                       'Выберите необходимый функционал для клиента',
-                      style: theme.textTheme.headlineSmall,
+                      style: theme.textTheme.titleSmall,
                     ),
                     const SizedBox(height: 20),
                     ...defaultSettingsList.map((setting) => CheckboxListTile(

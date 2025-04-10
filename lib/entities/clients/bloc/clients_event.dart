@@ -8,6 +8,12 @@ class LoadClients extends ClientsEvent {
   LoadClients({required this.folderId});
 }
 
+class LoadClientById extends ClientsEvent {
+  final String clientId;
+
+  LoadClientById({required this.clientId});
+}
+
 class UpdateClients extends ClientsEvent {
   final String folderId;
   final List<String> clients;
@@ -30,3 +36,5 @@ class UpdateSelectedClient extends ClientsEvent {
     required this.orderDigital,
   });
 }
+
+class ResetSelectedClient extends ClientsEvent {}

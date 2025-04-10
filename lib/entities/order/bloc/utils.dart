@@ -43,16 +43,12 @@ class OrderUtils {
 
   static Map<String, Map<String, dynamic>> getFullOrderForSorting(data) {
     final fullOrderForSorting = <String, Map<String, dynamic>>{};
-    print('1===data> $data');
-    print('1===data type> ${data.runtimeType}');
     for (final item in data) {
-      print('1===item> $item');
       try {
         final order = Order.fromJson(item);
         final clientName = order.client.name;
         final sizeName = order.size.name;
         final fileName = order.file.originalName;
-        print('1===clientName> $clientName');
         if (!fullOrderForSorting.containsKey(clientName)) {
           fullOrderForSorting[clientName] = {};
         }
@@ -62,7 +58,6 @@ class OrderUtils {
         fullOrderForSorting[clientName]![sizeName]!.add(fileName);
       } catch (e) {}
     }
-    print('1===fullOrderForSorting> $fullOrderForSorting');
     return fullOrderForSorting;
   }
 }

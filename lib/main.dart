@@ -11,6 +11,7 @@ void main() async {
   setupServiceLocator();
   await Hive.initFlutter();
   await TokenStorage.init();
+
   runApp(const MyApp());
 }
 

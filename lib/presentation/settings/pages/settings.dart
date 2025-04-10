@@ -22,25 +22,30 @@ class SettingsScreen extends StatelessWidget {
         appBar: const AppBarCustom(
           title: 'Настройки',
         ),
-        body: BlocBuilder<UserBloc, UserState>(
-          builder: (context, userState) {
-            if (userState is UserLoaded) {
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Profile(),
-                    SettingsList(userId: userState.user.id.toString()),
-                  ],
-                ),
+        body: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 600),
+          child: BlocBuilder<UserBloc, UserState>(
+            builder: (context, userState) {
+              if (userState is UserLoaded) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const Profile(),
+                        SettingsList(userId: userState.user.id.toString()),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const Center(
+                child: CircularProgressIndicator(),
               );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
+            },
+          ),
         ),
       ),
     );
