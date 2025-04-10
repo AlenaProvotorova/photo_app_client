@@ -73,7 +73,8 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey, width: 1),
+            border: Border.all(
+                color: const Color.fromARGB(95, 158, 158, 158), width: 1),
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),

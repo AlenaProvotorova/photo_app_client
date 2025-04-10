@@ -9,7 +9,7 @@ class WatermarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageSize = MediaQuery.of(context).size.width * 0.28;
+    const imageSize = 150.0;
     return Container(
       width: imageSize,
       height: imageSize,

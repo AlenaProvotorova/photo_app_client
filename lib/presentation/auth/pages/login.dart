@@ -99,69 +99,75 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      'Добро пожаловать!',
-                      style: theme.textTheme.headlineLarge,
+              child: Form(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        'Добро пожаловать!',
+                        style: theme.textTheme.headlineLarge,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Column(
-                    children: [
-                      InputField(
-                          child: TextFormField(
-                        controller: _userEmailController,
-                        decoration: InputDecoration(
-                          hintText: 'Email',
-                          border: InputBorder.none,
-                          hintStyle: theme.textTheme.titleSmall,
-                        ),
-                      )),
-                      const SizedBox(height: 20),
-                      InputField(
-                          child: TextFormField(
-                        obscureText: true,
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          hintText: 'Пароль',
-                          border: InputBorder.none,
-                          hintStyle: theme.textTheme.titleSmall,
-                        ),
-                      )),
-                      const SizedBox(height: 20),
-                      PrimaryButton(
-                        title: 'Войти',
-                        onPress: onPressed,
-                        disabled: !isLoginButtonEnabled,
-                      ),
-                      const SizedBox(height: 20),
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            'Еще не зарегистрированы? ',
-                            style: theme.textTheme.titleSmall,
+                    const SizedBox(height: 24),
+                    Column(
+                      children: [
+                        InputField(
+                            child: TextFormField(
+                          controller: _userEmailController,
+                          decoration: InputDecoration(
+                            hintText: 'Email',
+                            border: InputBorder.none,
+                            hintStyle: theme.textTheme.titleSmall,
                           ),
-                          TextButton(
-                            child: Text('Зарегистрироваться',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                  color: theme.colorScheme.primary,
-                                )),
-                            onPressed: () {
-                              context.go('/sign-up');
-                            },
+                          onFieldSubmitted:
+                              isLoginButtonEnabled ? (_) => _login() : null,
+                        )),
+                        const SizedBox(height: 20),
+                        InputField(
+                            child: TextFormField(
+                          obscureText: true,
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            hintText: 'Пароль',
+                            border: InputBorder.none,
+                            hintStyle: theme.textTheme.titleSmall,
                           ),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
+                          onFieldSubmitted:
+                              isLoginButtonEnabled ? (_) => _login() : null,
+                        )),
+                        const SizedBox(height: 20),
+                        PrimaryButton(
+                          title: 'Войти',
+                          onPress: onPressed,
+                          disabled: !isLoginButtonEnabled,
+                        ),
+                        const SizedBox(height: 20),
+                        Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              'Еще не зарегистрированы? ',
+                              style: theme.textTheme.titleSmall,
+                            ),
+                            TextButton(
+                              child: Text('Зарегистрироваться',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: theme.colorScheme.primary,
+                                  )),
+                              onPressed: () {
+                                context.go('/sign-up');
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
           ),
