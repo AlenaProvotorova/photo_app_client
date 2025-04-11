@@ -41,9 +41,11 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
         widget.description?.isNotEmpty == true ? '(${widget.description})' : '';
     return Row(
       children: [
-        Text(
-          'Заказать фото ${widget.size.name} $description',
-          style: theme.textTheme.titleMedium,
+        Expanded(
+          child: Text(
+            'Заказать фото ${widget.size.name} $description',
+            style: theme.textTheme.titleMedium,
+          ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),

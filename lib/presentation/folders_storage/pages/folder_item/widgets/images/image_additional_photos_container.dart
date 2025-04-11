@@ -37,16 +37,14 @@ class _ImageAdditionalPhotosContainerState
             } else if (state is FolderSettingsLoaded) {
               return ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height *
-                      0.8, // 80% от высоты экрана
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
                 ),
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(1),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment
-                          .stretch, // Растягиваем кнопки по ширине
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (state.folderSettings.showPhotoOne)
                           Row(
