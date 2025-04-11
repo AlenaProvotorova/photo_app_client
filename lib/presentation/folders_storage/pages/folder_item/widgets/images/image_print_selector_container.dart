@@ -17,6 +17,12 @@ class ImagePrintSelectorContainer extends StatelessWidget {
     required this.folderId,
   });
 
+  final Map<dynamic, dynamic> sizesNames = {
+    0: 'showSize1',
+    1: 'showSize2',
+    2: 'showSize3',
+  };
+
   final Map<dynamic, dynamic> sizesDescriptionNames = {
     0: 'sizeDescription1',
     1: 'sizeDescription2',
@@ -57,15 +63,26 @@ class ImagePrintSelectorContainer extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: state.sizes.map((size) {
-                      return ImagePrintSelector(
-                        size: size,
-                        imageId: imageId,
-                        folderId: folderId,
-                        description: folderSettingsState.folderSettings
-                            .getProperty(sizesDescriptionNames[
-                                    state.sizes.indexOf(size)] ??
-                                ''),
-                        defaultQuantity: getDefaultQuantity(size.name),
+                      return BlocBuilder<FolderSettingsBloc,
+                          FolderSettingsState>(
+                        builder: (context, settingsState) {
+                          if (settingsState is FolderSettingsLoaded &&
+                              !settingsState.folderSettings.getProperty(
+                                  sizesNames[state.sizes.indexOf(size)] ??
+                                      '')) {
+                            return const SizedBox.shrink();
+                          }
+                          return ImagePrintSelector(
+                            size: size,
+                            imageId: imageId,
+                            folderId: folderId,
+                            description: folderSettingsState.folderSettings
+                                .getProperty(sizesDescriptionNames[
+                                        state.sizes.indexOf(size)] ??
+                                    ''),
+                            defaultQuantity: getDefaultQuantity(size.name),
+                          );
+                        },
                       );
                     }).toList(),
                   ),

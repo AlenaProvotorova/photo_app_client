@@ -49,7 +49,6 @@ class FolderSettingsBloc
     UpdateFolderSettings event,
     Emitter<FolderSettingsState> emit,
   ) async {
-    emit(FolderSettingsLoading());
     try {
       final response = await sl<UpdateFolderSettingsUseCase>().call(
         params: UpdateFolderSettingsReqParams(

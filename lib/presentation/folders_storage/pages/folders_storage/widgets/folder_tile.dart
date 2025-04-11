@@ -59,7 +59,7 @@ class FolderTile extends StatelessWidget {
             title: 'Скопировать ссылку',
             onTap: () {
               final baseUrl = Uri.base.toString().split('#')[0];
-              final fullUrl = '${baseUrl}folder/${folder.url}';
+              final fullUrl = '${baseUrl}#/folder/${folder.url}';
 
               Clipboard.setData(ClipboardData(text: fullUrl));
               DisplayMessage.showMessage(context, 'Ссылка скопирована в буфер');

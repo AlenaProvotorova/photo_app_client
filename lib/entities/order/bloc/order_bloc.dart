@@ -75,6 +75,10 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           if (data == null) {
             throw Exception('Неверный формат данных от сервера');
           }
+          add(LoadOrder(
+            folderId: event.folderId,
+            clientId: int.parse(event.clientId),
+          ));
         },
       );
     } catch (e) {

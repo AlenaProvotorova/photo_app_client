@@ -20,8 +20,7 @@ import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_event.dart';
-import 'package:photo_app/entities/watermark/watermark_bloc.dart';
-import 'package:photo_app/entities/watermark/watermark_event.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
@@ -51,7 +50,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
   late final FolderSettingsBloc _folderSettingsBloc;
-  late final WatermarkBloc _watermarkBloc;
   @override
   void initState() {
     super.initState();
@@ -61,14 +59,13 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         : Platform.isAndroid || Platform.isIOS
             ? MobileImagePickerRepositoryImplementation()
             : DesktopImagePickerRepositoryImplementation();
-    _userBloc = UserBloc()..add(LoadUser());
     _filesBloc = FilesBloc()..add(LoadFiles(folderId: widget.folderId));
     _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
     _folderSettingsBloc = FolderSettingsBloc()
       ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
     _orderBloc = OrderBloc();
-    _watermarkBloc = WatermarkBloc()..add(LoadWatermark(userId: '1'));
+    _userBloc = UserBloc()..add(LoadUser());
   }
 
   Future<void> _pickImages(context) async {
@@ -136,18 +133,28 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           Container(
             margin: const EdgeInsets.all(8),
             height: 36,
-            child: BlocProvider(
-              create: (context) => _orderBloc,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  side: BorderSide(color: theme.colorScheme.primary),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: _selectDirectory,
-                child: const Text('Отсортировать'),
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => _userBloc),
+                BlocProvider(create: (context) => _orderBloc),
+              ],
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  if (state is UserLoaded && state.user.isAdmin) {
+                    return TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        side: BorderSide(color: theme.colorScheme.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: _selectDirectory,
+                      child: const Text('Отсортировать'),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ),
@@ -178,7 +185,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           BlocProvider(create: (context) => _folderSettingsBloc),
           BlocProvider(create: (context) => _sizesBloc),
           BlocProvider(create: (context) => _orderBloc),
-          BlocProvider(create: (context) => _watermarkBloc),
         ],
         child: Column(
           children: [
