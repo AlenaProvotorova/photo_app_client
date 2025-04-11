@@ -32,25 +32,6 @@ class _ImageCardContainerState extends State<ImageCardContainer> {
   bool isHovered = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final clientsBloc = context.read<ClientsBloc>();
-    final userBloc = context.read<UserBloc>();
-    final isAdmin = userBloc.state is UserLoaded
-        ? (userBloc.state as UserLoaded).user.isAdmin
-        : false;
-    final shouldBeDisabled = !isAdmin &&
-        clientsBloc.state is ClientsLoaded &&
-        (clientsBloc.state as ClientsLoaded).selectedClient == null;
-
-    if (disabled != shouldBeDisabled) {
-      setState(() {
-        disabled = shouldBeDisabled;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final imageSize = MediaQuery.of(context).size.width * 0.28;
     final containerSize = imageSize * 1.15;
@@ -111,7 +92,6 @@ class _ImageCardContainerState extends State<ImageCardContainer> {
     final shouldBeDisabled = !isAdmin &&
         clientsBloc.state is ClientsLoaded &&
         (clientsBloc.state as ClientsLoaded).selectedClient == null;
-
     if (disabled != shouldBeDisabled) {
       setState(() {
         disabled = shouldBeDisabled;

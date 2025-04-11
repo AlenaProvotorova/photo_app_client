@@ -49,13 +49,17 @@ class OrderUtils {
         final clientName = order.client.name;
         final sizeName = order.size.name;
         final fileName = order.file.originalName;
+        final count = order.count;
         if (!fullOrderForSorting.containsKey(clientName)) {
           fullOrderForSorting[clientName] = {};
         }
         if (!fullOrderForSorting[clientName]!.containsKey(sizeName)) {
           fullOrderForSorting[clientName]![sizeName] = [];
         }
-        fullOrderForSorting[clientName]![sizeName]!.add(fileName);
+        fullOrderForSorting[clientName]![sizeName]!.add({
+          'fileName': fileName,
+          'count': count,
+        });
       } catch (e) {}
     }
     return fullOrderForSorting;
