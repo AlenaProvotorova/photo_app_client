@@ -144,7 +144,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                         folderId: widget.folderId,
                                       ),
                                     ),
-                                    // const SizedBox(height: 20),
                                   ],
                                 ),
                               ),

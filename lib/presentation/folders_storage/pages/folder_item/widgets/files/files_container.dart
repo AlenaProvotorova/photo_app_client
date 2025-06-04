@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/empty_container.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
+import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
@@ -16,12 +18,14 @@ class FilesContainer extends StatelessWidget {
   final String folderId;
   final OrderBloc orderBloc;
   final ClientsBloc clientsBloc;
+  final bool showSelected;
   const FilesContainer(
       {super.key,
       required this.files,
       required this.folderId,
       required this.orderBloc,
-      required this.clientsBloc});
+      required this.clientsBloc,
+      required this.showSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,19 @@ class FilesContainer extends StatelessWidget {
     final isAdmin = userBloc.state is UserLoaded
         ? (userBloc.state as UserLoaded).user.isAdmin
         : false;
-    return files.isEmpty
+    final orderBloc = context.read<OrderBloc>();
+    final filteredFiles = showSelected
+        ? files
+            .where((file) =>
+                orderBloc.state is OrderLoaded &&
+                (orderBloc.state as OrderLoaded)
+                    .orderForCarusel
+                    .containsKey(file.id.toString()))
+            .toList()
+        : files;
+
+    final filesToRender = filteredFiles;
+    return filesToRender.isEmpty
         ? const Expanded(child: EmptyContainer(text: 'Папка пуста'))
         : Expanded(
             child: GridView.builder(
@@ -40,12 +56,13 @@ class FilesContainer extends StatelessWidget {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: files.length,
+                itemCount: filesToRender.length,
                 itemBuilder: (context, index) {
-                  final imageData = files[index];
+                  final imageData = filesToRender[index];
                   final sizesBloc = context.read<SizesBloc>();
                   final clientsBloc = context.read<ClientsBloc>();
                   final orderBloc = context.read<OrderBloc>();
+                  final settingsBloc = context.read<FolderSettingsBloc>();
                   return GestureDetector(
                     onTap: () {
                       if (!isAdmin &&
@@ -62,9 +79,10 @@ class FilesContainer extends StatelessWidget {
                                 BlocProvider.value(value: sizesBloc),
                                 BlocProvider.value(value: clientsBloc),
                                 BlocProvider.value(value: orderBloc),
+                                BlocProvider.value(value: settingsBloc),
                               ],
                               child: ImageCarousel(
-                                images: files,
+                                images: filesToRender,
                                 initialIndex: index,
                                 folderId: int.parse(folderId),
                                 clientId: clientsBloc.state is ClientsLoaded &&

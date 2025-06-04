@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_app/core/router/router.dart';
+import 'package:photo_app/core/utils/client_storage.dart';
 import 'package:photo_app/core/utils/token_storage.dart';
 import 'package:photo_app/core/theme/theme.dart';
 import 'package:photo_app/service_locator.dart';
@@ -11,6 +12,7 @@ void main() async {
   setupServiceLocator();
   await Hive.initFlutter();
   await TokenStorage.init();
+  await ClientStorage.init();
 
   runApp(const MyApp());
 }

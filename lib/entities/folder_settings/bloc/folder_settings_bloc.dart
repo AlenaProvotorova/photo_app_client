@@ -39,6 +39,7 @@ class FolderSettingsBloc
         },
       );
     } catch (e) {
+      print('==e: $e');
       emit(
         const FolderSettingsError(message: 'Ошибка загрузки настроек папки'),
       );

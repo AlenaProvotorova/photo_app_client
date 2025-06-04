@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class AddDescription extends StatelessWidget {
-  final String descriptionName;
+class RenameSetting extends StatelessWidget {
+  final String? settingName;
   final Function(String, String) onSave;
-  const AddDescription({
+  const RenameSetting({
     super.key,
-    required this.descriptionName,
+    required this.settingName,
     required this.onSave,
   });
 
@@ -13,7 +13,7 @@ class AddDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       child: const Text(
-        'Добавить описание',
+        'Изменить',
         style: TextStyle(
           fontSize: 14,
           color: Colors.black,
@@ -23,15 +23,12 @@ class AddDescription extends StatelessWidget {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            String description = '';
+            String newName = '';
             return AlertDialog(
-              title: const Text('Добавить описание'),
+              title: const Text('Изменить'),
               content: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Введите описание...',
-                ),
                 onChanged: (value) {
-                  description = value;
+                  newName = value;
                 },
               ),
               actions: [
@@ -43,7 +40,7 @@ class AddDescription extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    onSave(descriptionName, description);
+                    onSave(settingName ?? '', newName);
                     Navigator.pop(context);
                   },
                   child: const Text('Сохранить'),

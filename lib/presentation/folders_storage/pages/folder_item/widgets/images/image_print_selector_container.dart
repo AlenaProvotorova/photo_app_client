@@ -5,7 +5,6 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.da
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
-import 'package:photo_app/entities/sizes/bloc/sizes_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector.dart';
 
 class ImagePrintSelectorContainer extends StatelessWidget {
@@ -17,17 +16,11 @@ class ImagePrintSelectorContainer extends StatelessWidget {
     required this.folderId,
   });
 
-  final Map<dynamic, dynamic> sizesNames = {
-    0: 'showSize1',
-    1: 'showSize2',
-    2: 'showSize3',
-  };
-
-  final Map<dynamic, dynamic> sizesDescriptionNames = {
-    0: 'sizeDescription1',
-    1: 'sizeDescription2',
-    2: 'sizeDescription3',
-  };
+  final List<String> sizesNames = [
+    'sizeOne',
+    'sizeTwo',
+    'sizeThree',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -52,44 +45,28 @@ class ImagePrintSelectorContainer extends StatelessWidget {
         BlocProvider.value(value: orderBloc),
       ],
       child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
-        builder: (context, folderSettingsState) {
-          return BlocBuilder<SizesBloc, SizesState>(
-            builder: (context, state) {
-              if (state is SizesLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is SizesLoaded &&
-                  folderSettingsState is FolderSettingsLoaded) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: state.sizes.map((size) {
-                      return BlocBuilder<FolderSettingsBloc,
-                          FolderSettingsState>(
-                        builder: (context, settingsState) {
-                          if (settingsState is FolderSettingsLoaded &&
-                              !settingsState.folderSettings.getProperty(
-                                  sizesNames[state.sizes.indexOf(size)] ??
-                                      '')) {
-                            return const SizedBox.shrink();
-                          }
-                          return ImagePrintSelector(
-                            size: size,
-                            imageId: imageId,
-                            folderId: folderId,
-                            description: folderSettingsState.folderSettings
-                                .getProperty(sizesDescriptionNames[
-                                        state.sizes.indexOf(size)] ??
-                                    ''),
-                            defaultQuantity: getDefaultQuantity(size.name),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
-                );
-              }
-              return const Center(child: Text('Error'));
-            },
+        builder: (context, settingsState) {
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: sizesNames.map((sizeName) {
+                final sizeId = sizesNames.indexOf(sizeName) + 1;
+                if (settingsState is FolderSettingsLoaded) {
+                  if (!settingsState.folderSettings.getShowProperty(sizeName)) {
+                    return const SizedBox.shrink();
+                  }
+                  return ImagePrintSelector(
+                    size: settingsState.folderSettings
+                        .getRuNameProperty(sizeName),
+                    sizeId: sizeId,
+                    imageId: imageId,
+                    folderId: folderId,
+                    defaultQuantity: getDefaultQuantity(sizeName),
+                  );
+                }
+                return const SizedBox.shrink();
+              }).toList(),
+            ),
           );
         },
       ),
