@@ -30,7 +30,7 @@ class ImageCard extends StatelessWidget {
             url,
             width: imageSize,
             height: imageSize,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return Center(

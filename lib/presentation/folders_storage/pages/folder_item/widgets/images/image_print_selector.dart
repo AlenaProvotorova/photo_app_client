@@ -4,21 +4,20 @@ import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
-import 'package:photo_app/data/sizes/models/size.dart';
 
 class ImagePrintSelector extends StatefulWidget {
-  final Size size;
+  final String size;
+  final int sizeId;
   final int imageId;
   final int folderId;
   final int defaultQuantity;
-  final String? description;
   const ImagePrintSelector({
     super.key,
     required this.size,
+    required this.sizeId,
     required this.imageId,
     required this.folderId,
     this.defaultQuantity = 0,
-    this.description = '',
   });
 
   @override
@@ -37,13 +36,12 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final description =
-        widget.description?.isNotEmpty == true ? '(${widget.description})' : '';
+
     return Row(
       children: [
         Expanded(
           child: Text(
-            'Заказать фото ${widget.size.name} $description',
+            'Заказать фото ${widget.size}',
             style: theme.textTheme.titleMedium,
           ),
         ),
@@ -52,6 +50,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
           ),
+          height: 40,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -101,7 +100,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
         fileId: widget.imageId.toString(),
         clientId: clientState.selectedClient!.id.toString(),
         folderId: widget.folderId.toString(),
-        sizeId: widget.size.id,
+        sizeId: widget.sizeId,
         count: selectedQuantity.toString(),
       );
 

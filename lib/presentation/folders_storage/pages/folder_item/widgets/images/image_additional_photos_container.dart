@@ -21,6 +21,7 @@ class _ImageAdditionalPhotosContainerState
     extends State<ImageAdditionalPhotosContainer> {
   bool _photoOne = false;
   bool _photoTwo = false;
+  bool _photoThree = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,7 @@ class _ImageAdditionalPhotosContainerState
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (state.folderSettings.showPhotoOne)
+                        if (state.folderSettings.photoOne.show)
                           Row(
                             children: [
                               Switch(
@@ -65,12 +66,12 @@ class _ImageAdditionalPhotosContainerState
                                 },
                               ),
                               Text(
-                                'Фото 1',
+                                state.folderSettings.photoOne.ruName,
                                 style: theme.textTheme.titleMedium,
                               ),
                             ],
                           ),
-                        if (state.folderSettings.showPhotoTwo)
+                        if (state.folderSettings.photoTwo.show)
                           Row(
                             children: [
                               Switch(
@@ -89,7 +90,31 @@ class _ImageAdditionalPhotosContainerState
                                 },
                               ),
                               Text(
-                                'Фото 2',
+                                state.folderSettings.photoTwo.ruName,
+                                style: theme.textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
+                        if (state.folderSettings.photoThree.show)
+                          Row(
+                            children: [
+                              Switch(
+                                value: _photoThree,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _photoThree = value;
+                                  });
+                                  // context
+                                  //     .read<ClientsBloc>()
+                                  //     .add(UpdateSelectedClient(
+                                  //       clientId:
+                                  //           state.selectedClient!.id.toString(),
+                                  //       orderDigital: value,
+                                  //     ));
+                                },
+                              ),
+                              Text(
+                                state.folderSettings.photoThree.ruName,
                                 style: theme.textTheme.titleMedium,
                               ),
                             ],

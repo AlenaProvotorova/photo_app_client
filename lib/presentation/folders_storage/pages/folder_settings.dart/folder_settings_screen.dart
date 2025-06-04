@@ -6,7 +6,7 @@ import 'package:photo_app/data/folder_settings/models/folder_settings.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/add_description.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/rename_setting.dart';
 
 class FolderSettingsScreen extends StatelessWidget {
   final String folderId;
@@ -19,42 +19,52 @@ class FolderSettingsScreen extends StatelessWidget {
 
   final defaultSettingsList = [
     {
-      'nameRu': "Переключатель 'ВЫБРАТЬ ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ'",
+      'tileText': "Переключатель",
       'name': 'showSelectAllDigital',
+      'showRenameButton': false,
     },
     {
-      'nameRu': "Переключатель 'ФОТО 1'",
-      'name': 'showPhotoOne',
+      'tileText': 'Переключатель',
+      'name': 'photoOne',
+      'showRenameButton': true,
     },
     {
-      'nameRu': "Переключатель 'ФОТО 2'",
-      'name': 'showPhotoTwo',
+      'tileText': 'Переключатель',
+      'name': 'photoTwo',
+      'showRenameButton': true,
     },
     {
-      'nameRu': "Счетчик 'Заказать фото 10Х15'",
-      'name': 'showSize1',
-      'descriptionName': 'sizeDescription1',
+      'tileText': 'Переключатель',
+      'name': 'photoThree',
+      'showRenameButton': true,
     },
     {
-      'nameRu': "Счетчик 'Заказать фото 15Х21'",
-      'name': 'showSize2',
-      'descriptionName': 'sizeDescription2',
+      'tileText': 'Счетчик',
+      'name': 'sizeOne',
+      'showRenameButton': true,
     },
     {
-      'nameRu': "Счетчик 'Заказать фото 20Х30'",
-      'name': 'showSize3',
-      'descriptionName': 'sizeDescription3',
+      'tileText': 'Счетчик',
+      'name': 'sizeTwo',
+      'showRenameButton': true,
+    },
+    {
+      'tileText': 'Счетчик',
+      'name': 'sizeThree',
+      'showRenameButton': true,
     },
   ];
 
   String getCheckboxTileName(setting, FolderSettings state) {
-    final baseName = setting['nameRu'];
-    final descName = setting['descriptionName']?.trim();
+    final baseName = setting['tileText'];
+    final tileName = setting['name'];
+    final ruName = state.getRuNameProperty(tileName);
 
-    if (descName == null) return baseName;
-
-    final desc = state.getProperty(descName);
-    return desc?.isNotEmpty == true ? '$baseName ($desc)' : baseName;
+    if (ruName != null) {
+      return '$baseName "$ruName"';
+    } else {
+      return '$baseName';
+    }
   }
 
   @override
@@ -94,32 +104,34 @@ class FolderSettingsScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           title: Text(
-                            getCheckboxTileName(setting, state.folderSettings),
+                            'Заказать фото ${getCheckboxTileName(setting, state.folderSettings)}',
                             style: theme.textTheme.titleMedium,
                           ),
                           value: state.folderSettings
-                              .getProperty(setting['name'] ?? ''),
+                              .getShowProperty(setting['name'] as String),
                           onChanged: (bool? value) {
                             context
                                 .read<FolderSettingsBloc>()
                                 .add(UpdateFolderSettings(
                                   folderId: folderId,
                                   settings: {
-                                    setting['name']!: value ?? false,
+                                    'settingName': setting['name'],
+                                    'show': value,
                                   },
                                 ));
                           },
                           controlAffinity: ListTileControlAffinity.leading,
-                          secondary: setting['descriptionName'] != null
-                              ? AddDescription(
-                                  descriptionName: setting['descriptionName']!,
-                                  onSave: (descriptionName, description) {
+                          secondary: setting['showRenameButton'] == true
+                              ? RenameSetting(
+                                  settingName: setting['name'] as String,
+                                  onSave: (settingName, newName) {
                                     context
                                         .read<FolderSettingsBloc>()
                                         .add(UpdateFolderSettings(
                                           folderId: folderId,
                                           settings: {
-                                            descriptionName: description,
+                                            'settingName': setting['name'],
+                                            'newName': newName,
                                           },
                                         ));
                                   },

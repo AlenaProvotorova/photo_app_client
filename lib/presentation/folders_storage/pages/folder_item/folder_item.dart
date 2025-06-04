@@ -25,6 +25,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/fi
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/show_selected_button.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 import 'package:file_picker/file_picker.dart';
@@ -50,6 +51,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
   late final FolderSettingsBloc _folderSettingsBloc;
+  bool _showSelected = false;
   @override
   void initState() {
     super.initState();
@@ -64,7 +66,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     _folderSettingsBloc = FolderSettingsBloc()
       ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
-    _orderBloc = OrderBloc();
+    _orderBloc = OrderBloc()..add(LoadOrder(folderId: widget.folderId));
   }
 
   Future<void> _pickImages(context) async {
@@ -99,7 +101,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           }
 
           final sizes = order[client]?.keys.toList() ?? [];
-          print('order[client] ${order[client]}');
           for (final size in sizes) {
             final newSizeDirectory = Directory('$path/$client/$size');
 
@@ -197,8 +198,17 @@ class FolderItemScreenState extends State<FolderItemScreen> {
             SwitchAllDigital(
               folderId: widget.folderId,
             ),
+            ShowSelectedButton(
+              showSelected: _showSelected,
+              onPressed: () {
+                setState(() {
+                  _showSelected = !_showSelected;
+                });
+              },
+            ),
             Expanded(
               child: FilesList(
+                showSelected: _showSelected,
                 folderId: widget.folderId,
                 orderBloc: _orderBloc,
                 clientsBloc: _clientsBloc,

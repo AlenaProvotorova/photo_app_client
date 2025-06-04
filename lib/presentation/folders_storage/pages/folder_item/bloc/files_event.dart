@@ -23,8 +23,8 @@ class UploadFiles extends FilesEvent {
 
 class UpdateFilePrintedFormats extends FilesEvent {
   final int fileId;
-  final String sizeType; // '1', '2', или '3'
-  final String printFormat; // 1-10
+  final String sizeType;
+  final String printFormat;
 
   UpdateFilePrintedFormats({
     required this.fileId,

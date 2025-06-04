@@ -36,7 +36,7 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
       child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
         builder: (context, settingsState) {
           if (settingsState is FolderSettingsLoaded &&
-              !settingsState.folderSettings.showSelectAllDigital) {
+              !settingsState.folderSettings.showSelectAllDigital.show) {
             return const SizedBox.shrink();
           }
           return BlocBuilder<ClientsBloc, ClientsState>(

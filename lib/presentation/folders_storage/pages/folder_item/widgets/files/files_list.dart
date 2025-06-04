@@ -10,11 +10,13 @@ class FilesList extends StatelessWidget {
   final String folderId;
   final OrderBloc orderBloc;
   final ClientsBloc clientsBloc;
+  final bool showSelected;
   const FilesList({
     super.key,
     required this.folderId,
     required this.orderBloc,
     required this.clientsBloc,
+    required this.showSelected,
   });
 
   @override
@@ -31,6 +33,7 @@ class FilesList extends StatelessWidget {
                 folderId: folderId,
                 orderBloc: orderBloc,
                 clientsBloc: clientsBloc,
+                showSelected: showSelected,
               ),
             ],
           );
