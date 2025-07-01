@@ -24,8 +24,13 @@ class ClientsRepositoryImplementation extends ClientsRepository {
   }
 
   @override
-  Future<Either> updateSelectedClient(
+  Future<Either> updateOrderDigital(
       UpdateSelectedClientReqParams params) async {
-    return await sl<ClientsApiService>().updateSelectedClient(params);
+    return await sl<ClientsApiService>().updateOrderDigital(params);
+  }
+
+  @override
+  Future<Either> updateOrderAlbum(UpdateSelectedClientReqParams params) async {
+    return await sl<ClientsApiService>().updateOrderAlbum(params);
   }
 }

@@ -8,5 +8,6 @@ abstract class ClientsRepository {
   Future<Either> getAllClients(GetAllClientsReqParams params);
   Future<Either> getClientById(GetClientByIdReqParams params);
   Future<Either> updateClients(UpdateClientsReqParams params);
-  Future<Either> updateSelectedClient(UpdateSelectedClientReqParams params);
+  Future<Either> updateOrderDigital(UpdateSelectedClientReqParams params);
+  Future<Either> updateOrderAlbum(UpdateSelectedClientReqParams params);
 }

@@ -42,35 +42,32 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
           return BlocBuilder<ClientsBloc, ClientsState>(
             builder: (context, state) {
               if (state is ClientsLoaded && state.selectedClient != null) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Switch(
-                        value: _printAll,
-                        onChanged: (value) {
-                          setState(() {
-                            _printAll = value;
-                          });
-                          context.read<ClientsBloc>().add(UpdateSelectedClient(
-                                clientId: state.selectedClient!.id.toString(),
-                                orderDigital: value,
-                              ));
+                return Row(
+                  children: [
+                    Switch(
+                      value: _printAll,
+                      onChanged: (value) {
+                        setState(() {
+                          _printAll = value;
+                        });
+                        context.read<ClientsBloc>().add(UpdateOrderDigital(
+                              clientId: state.selectedClient!.id.toString(),
+                              orderDigital: value,
+                            ));
 
-                          context.read<OrderBloc>().add(
-                                LoadOrder(
-                                  folderId: widget.folderId,
-                                  clientId: state.selectedClient!.id,
-                                ),
-                              );
-                        },
-                      ),
-                      Text(
-                        'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ',
-                        style: theme.textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
+                        context.read<OrderBloc>().add(
+                              LoadOrder(
+                                folderId: widget.folderId,
+                                clientId: state.selectedClient!.id,
+                              ),
+                            );
+                      },
+                    ),
+                    Text(
+                      'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ],
                 );
               }
               return const SizedBox.shrink();
