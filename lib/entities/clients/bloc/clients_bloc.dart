@@ -7,7 +7,8 @@ import 'package:photo_app/data/clients/models/update_selected_client_req_params.
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_client_by_id.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
-import 'package:photo_app/domain/clients/usecases/update_selected_client.dart';
+import 'package:photo_app/domain/clients/usecases/update_order_album.dart';
+import 'package:photo_app/domain/clients/usecases/update_order_digital.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/service_locator.dart';
@@ -21,7 +22,8 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     on<LoadClientById>(_onLoadClientById);
     on<UpdateClients>(_onUpdateClients);
     on<SelectClient>(_onSelectClient);
-    on<UpdateSelectedClient>(_onUpdateSelectedClient);
+    on<UpdateOrderDigital>(_onUpdateOrderDigital);
+    on<UpdateOrderAlbum>(_onUpdateOrderAlbum);
     on<ResetSelectedClient>(_onResetSelectedClient);
   }
 
@@ -112,12 +114,12 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     }
   }
 
-  Future<void> _onUpdateSelectedClient(
-    UpdateSelectedClient event,
+  Future<void> _onUpdateOrderDigital(
+    UpdateOrderDigital event,
     Emitter<ClientsState> emit,
   ) async {
     try {
-      final response = await sl<UpdateSelectedClientUseCase>().call(
+      final response = await sl<UpdateOrderDigitalUseCase>().call(
         params: UpdateSelectedClientReqParams(
           clientId: int.parse(event.clientId),
           orderDigital: event.orderDigital,
@@ -129,7 +131,31 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
         (data) {},
       );
     } catch (e) {
-      emit(const ClientsError(message: 'Ошибка изменения клиента'));
+      emit(const ClientsError(message: 'Ошибка выбора цифрового заказа'));
+    }
+  }
+
+  Future<void> _onUpdateOrderAlbum(
+    UpdateOrderAlbum event,
+    Emitter<ClientsState> emit,
+  ) async {
+    print('==22event: ${event}');
+    try {
+      print('==event: ${event}');
+      final response = await sl<UpdateOrderAlbumUseCase>().call(
+        params: UpdateSelectedClientReqParams(
+          clientId: int.parse(event.clientId),
+          orderAlbum: event.orderAlbum,
+        ),
+      );
+
+      response.fold(
+        (error) => emit(ClientsError(message: error.toString())),
+        (data) {},
+      );
+    } catch (e) {
+      print('==error: $e');
+      emit(const ClientsError(message: 'Ошибка выбора альбомного заказа'));
     }
   }
 

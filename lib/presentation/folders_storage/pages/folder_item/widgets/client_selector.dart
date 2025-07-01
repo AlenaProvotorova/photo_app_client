@@ -94,6 +94,10 @@ class _ClientSelectorState extends State<ClientSelector> {
                               clientId: selectedClient.id,
                             ),
                           );
+                      if (selectedClient.orderAlbum == null) {
+                        _showAlbumQuestionDialog(
+                            context, state, widget.folderId);
+                      }
                     }
                   },
                 ),
@@ -107,4 +111,43 @@ class _ClientSelectorState extends State<ClientSelector> {
       },
     );
   }
+}
+
+void _showAlbumQuestionDialog(
+    BuildContext context, ClientsLoaded state, String folderId) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Вы планируете заказывать альбом?'),
+      actions: [
+        TextButton(
+          onPressed: () {
+            // context.read<ClientsBloc>().add(UpdateOrderAlbum(
+            //       clientId: state.selectedClient!.id.toString(),
+            //       orderAlbum: true,
+            //     ));
+            // context.read<ClientsBloc>().add(LoadClients(
+            //       folderId: folderId,
+            //     ));
+            Navigator.pop(context);
+          },
+          child: const Text('Да'),
+        ),
+        TextButton(
+          onPressed: () {
+            print('==1 ${state.selectedClient!.id.toString()}');
+            context.read<ClientsBloc>().add(UpdateOrderAlbum(
+                  clientId: state.selectedClient!.id.toString(),
+                  orderAlbum: false,
+                ));
+            // context.read<ClientsBloc>().add(LoadClients(
+            //       folderId: folderId,
+            //     ));
+            Navigator.pop(context);
+          },
+          child: const Text('Нет'),
+        ),
+      ],
+    ),
+  );
 }

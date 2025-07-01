@@ -25,6 +25,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/fi
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/order_album.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/show_selected_button.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
@@ -195,8 +196,18 @@ class FolderItemScreenState extends State<FolderItemScreen> {
             ClientSelector(
               folderId: widget.folderId,
             ),
-            SwitchAllDigital(
-              folderId: widget.folderId,
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.colorScheme.primary),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(children: [
+                SwitchAllDigital(
+                  folderId: widget.folderId,
+                ),
+                const OrderAlbum()
+              ]),
             ),
             ShowSelectedButton(
               showSelected: _showSelected,

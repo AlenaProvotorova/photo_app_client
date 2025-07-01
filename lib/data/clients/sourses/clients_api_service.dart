@@ -12,7 +12,8 @@ abstract class ClientsApiService {
   Future<Either> getAllClients(GetAllClientsReqParams params);
   Future<Either> getClientById(GetClientByIdReqParams params);
   Future<Either> updateClients(UpdateClientsReqParams params);
-  Future<Either> updateSelectedClient(UpdateSelectedClientReqParams params);
+  Future<Either> updateOrderDigital(UpdateSelectedClientReqParams params);
+  Future<Either> updateOrderAlbum(UpdateSelectedClientReqParams params);
 }
 
 class ClientsApiServiceImplementation extends ClientsApiService {
@@ -54,13 +55,28 @@ class ClientsApiServiceImplementation extends ClientsApiService {
   }
 
   @override
-  Future<Either> updateSelectedClient(
+  Future<Either> updateOrderDigital(
       UpdateSelectedClientReqParams params) async {
     try {
       var response = await sl<DioClient>().put(
         '${ApiUrl.clients}/${params.clientId}/order-digital',
         data: {
           'orderDigital': params.orderDigital,
+        },
+      );
+      return Right(response.data);
+    } on DioException catch (e) {
+      return Left(e.response!.data['message']);
+    }
+  }
+
+  @override
+  Future<Either> updateOrderAlbum(UpdateSelectedClientReqParams params) async {
+    try {
+      var response = await sl<DioClient>().put(
+        '${ApiUrl.clients}/${params.clientId}/order-album',
+        data: {
+          'orderAlbum': params.orderAlbum,
         },
       );
       return Right(response.data);

@@ -1,5 +1,8 @@
 class ApiUrl {
-  static String baseURL = 'http://127.0.0.1:3000/api/';
+  static String baseURL = const String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://127.0.0.1:3000/api/',
+  );
 
   static const String signUp = 'user';
   static const String signIn = 'auth/login';
