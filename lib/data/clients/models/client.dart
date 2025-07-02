@@ -3,11 +3,14 @@ class Client {
   final String name;
   final int folderId;
   final bool orderDigital;
+  final bool? orderAlbum;
+
   Client({
     required this.id,
     required this.name,
     required this.folderId,
     required this.orderDigital,
+    required this.orderAlbum,
   });
 
   factory Client.fromJson(Map<String, dynamic> json) {
@@ -16,6 +19,7 @@ class Client {
       name: json['name'],
       folderId: json['folderId'],
       orderDigital: json['orderDigital'],
+      orderAlbum: json['orderAlbum'],
     );
   }
 }

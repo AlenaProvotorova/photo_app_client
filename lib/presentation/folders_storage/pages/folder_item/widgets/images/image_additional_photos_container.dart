@@ -58,7 +58,7 @@ class _ImageAdditionalPhotosContainerState
                                   });
                                   // context
                                   //     .read<ClientsBloc>()
-                                  //     .add(UpdateSelectedClient(
+                                  //     .add(UpdateOrderDigital(
                                   //       clientId:
                                   //           state.selectedClient!.id.toString(),
                                   //       orderDigital: value,
@@ -82,7 +82,7 @@ class _ImageAdditionalPhotosContainerState
                                   });
                                   // context
                                   //     .read<ClientsBloc>()
-                                  //     .add(UpdateSelectedClient(
+                                  //     .add(UpdateOrderDigital(
                                   //       clientId:
                                   //           state.selectedClient!.id.toString(),
                                   //       orderDigital: value,
@@ -106,7 +106,7 @@ class _ImageAdditionalPhotosContainerState
                                   });
                                   // context
                                   //     .read<ClientsBloc>()
-                                  //     .add(UpdateSelectedClient(
+                                  //     .add(UpdateOrderDigital(
                                   //       clientId:
                                   //           state.selectedClient!.id.toString(),
                                   //       orderDigital: value,

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:photo_app/core/constants/api_url.dart';
+import 'package:photo_app/core/config/app_config.dart';
 
 import 'interceptors.dart';
 
@@ -9,13 +9,15 @@ class DioClient {
   DioClient()
       : _dio = Dio(
           BaseOptions(
-              baseUrl: ApiUrl.baseURL,
+              baseUrl: AppConfig.apiBaseUrl,
               headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
               },
               responseType: ResponseType.json,
               receiveTimeout: const Duration(seconds: 10)),
-        )..interceptors.addAll([LoggerInterceptor()]);
+        )..interceptors.addAll([
+            if (AppConfig.enableLogging) LoggerInterceptor(),
+          ]);
 
   Options get _sendTimeoutOption => Options(
         sendTimeout: const Duration(seconds: 10),

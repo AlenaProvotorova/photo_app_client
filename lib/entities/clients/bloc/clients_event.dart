@@ -27,13 +27,23 @@ class SelectClient extends ClientsEvent {
   SelectClient({required this.client});
 }
 
-class UpdateSelectedClient extends ClientsEvent {
+class UpdateOrderDigital extends ClientsEvent {
   final String clientId;
   final bool orderDigital;
 
-  UpdateSelectedClient({
+  UpdateOrderDigital({
     required this.clientId,
     required this.orderDigital,
+  });
+}
+
+class UpdateOrderAlbum extends ClientsEvent {
+  final String clientId;
+  final bool orderAlbum;
+
+  UpdateOrderAlbum({
+    required this.clientId,
+    required this.orderAlbum,
   });
 }
 
