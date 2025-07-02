@@ -41,7 +41,6 @@ void main() async {
   Config.initialize(env);
 
   runApp(const MyApp());
-  //test
 }
 
 class MyApp extends StatefulWidget {
