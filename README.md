@@ -1,3 +1,5 @@
+flutter run -d chrome --web-port=3001
+
 Запуск flutter приложения через симулятор
 
 запуск сервера
@@ -63,20 +65,12 @@ flutter packages pub run build_runner build --delete-conflicting-outputs
 
 ====singin
 
- 13. В папке domain/auth/repositories домавляем в репозиторий метод signIn(SignInReqParams params)
- 14. В папке domain/auth/usecases создаем файл signin.dart. Там создаем класс SignInUsecase, который реализует абстрактный класс Usecase<Type, Params> и реализует метод call(SignInReqParams? params)
- 15. В папке data/auth/repositories создаем файл auth.dart. Там создаем метод signIn(SignInReqParams params)
- 16. В папке data/auth/sources в файле auth_api_service.dart добавляем метод signIn(SignInReqParams params)
- 17. В папке data/auth/models создаем файл signin_req_params.dart. Там создаем класс SignInReqParams, в котором создаем поля email и password.
- 18. В ui добавляем контроллеры для ввода email и password. и обработчик нажатия(отправка запроса с параметрами на сервер)
+13. В папке domain/auth/repositories домавляем в репозиторий метод signIn(SignInReqParams params)
+14. В папке domain/auth/usecases создаем файл signin.dart. Там создаем класс SignInUsecase, который реализует абстрактный класс Usecase<Type, Params> и реализует метод call(SignInReqParams? params)
+15. В папке data/auth/repositories создаем файл auth.dart. Там создаем метод signIn(SignInReqParams params)
+16. В папке data/auth/sources в файле auth_api_service.dart добавляем метод signIn(SignInReqParams params)
+17. В папке data/auth/models создаем файл signin_req_params.dart. Там создаем класс SignInReqParams, в котором создаем поля email и password.
+18. В ui добавляем контроллеры для ввода email и password. и обработчик нажатия(отправка запроса с параметрами на сервер)
 
-
- текстовая ТЕМА
+текстовая ТЕМА
 APPBAR - headlineMedium
-
-
-
-
-
-
-
