@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Products/Debug/desktop_window/desktop_window.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/desktop_window.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Products/Debug/desktop_window/desktop_window.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "desktop_window-Swift.h",
+      'external-contents': "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/desktop_window.build/unextended-interface-header.h",
+    }]
+    }]
+}
