@@ -6,9 +6,9 @@ class WatermarkCard extends StatelessWidget {
     super.key,
     required this.url,
   });
-
   @override
   Widget build(BuildContext context) {
+    print('url $url');
     const imageSize = 150.0;
     return Container(
       width: imageSize,

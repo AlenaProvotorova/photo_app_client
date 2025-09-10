@@ -19,13 +19,15 @@ class FilesContainer extends StatelessWidget {
   final OrderBloc orderBloc;
   final ClientsBloc clientsBloc;
   final bool showSelected;
+  final bool singleItem;
   const FilesContainer(
       {super.key,
       required this.files,
       required this.folderId,
       required this.orderBloc,
       required this.clientsBloc,
-      required this.showSelected});
+      required this.showSelected,
+      this.singleItem = false});
 
   @override
   Widget build(BuildContext context) {
@@ -45,68 +47,122 @@ class FilesContainer extends StatelessWidget {
         : files;
 
     final filesToRender = filteredFiles;
-    return filesToRender.isEmpty
-        ? const Expanded(child: EmptyContainer(text: 'Папка пуста'))
-        : Expanded(
-            child: GridView.builder(
-                padding: const EdgeInsets.all(10),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      MediaQuery.of(context).size.width < 500 ? 2 : 3,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: filesToRender.length,
-                itemBuilder: (context, index) {
-                  final imageData = filesToRender[index];
-                  final sizesBloc = context.read<SizesBloc>();
-                  final clientsBloc = context.read<ClientsBloc>();
-                  final orderBloc = context.read<OrderBloc>();
-                  final settingsBloc = context.read<FolderSettingsBloc>();
-                  return GestureDetector(
-                    onTap: () {
-                      if (!isAdmin &&
-                          clientsBloc.state is ClientsLoaded &&
-                          (clientsBloc.state as ClientsLoaded).selectedClient ==
-                              null) {
-                        return;
-                      }
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return MultiBlocProvider(
-                              providers: [
-                                BlocProvider.value(value: sizesBloc),
-                                BlocProvider.value(value: clientsBloc),
-                                BlocProvider.value(value: orderBloc),
-                                BlocProvider.value(value: settingsBloc),
-                              ],
-                              child: ImageCarousel(
-                                images: filesToRender,
-                                initialIndex: index,
-                                folderId: int.parse(folderId),
-                                clientId: clientsBloc.state is ClientsLoaded &&
-                                        (clientsBloc.state as ClientsLoaded)
-                                                .selectedClient !=
-                                            null
-                                    ? (clientsBloc.state as ClientsLoaded)
-                                        .selectedClient!
-                                        .id
-                                    : null,
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                    child: ImageCardContainer(
-                      url: imageData.url,
-                      id: imageData.id,
-                      folderId: int.parse(folderId),
-                      originalName: imageData.originalName,
-                    ),
-                  );
-                }),
+
+    if (filesToRender.isEmpty) {
+      return const Expanded(child: EmptyContainer(text: 'Папка пуста'));
+    }
+
+    // Если это одиночный элемент (для состояния загрузки)
+    if (singleItem) {
+      final imageData = filesToRender.first;
+      final sizesBloc = context.read<SizesBloc>();
+      final clientsBloc = context.read<ClientsBloc>();
+      final orderBloc = context.read<OrderBloc>();
+      final settingsBloc = context.read<FolderSettingsBloc>();
+
+      return GestureDetector(
+        onTap: () {
+          if (!isAdmin &&
+              clientsBloc.state is ClientsLoaded &&
+              (clientsBloc.state as ClientsLoaded).selectedClient == null) {
+            return;
+          }
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: sizesBloc),
+                    BlocProvider.value(value: clientsBloc),
+                    BlocProvider.value(value: orderBloc),
+                    BlocProvider.value(value: settingsBloc),
+                  ],
+                  child: ImageCarousel(
+                    images: filesToRender,
+                    initialIndex: 0,
+                    folderId: int.parse(folderId),
+                    clientId: clientsBloc.state is ClientsLoaded &&
+                            (clientsBloc.state as ClientsLoaded)
+                                    .selectedClient !=
+                                null
+                        ? (clientsBloc.state as ClientsLoaded)
+                            .selectedClient!
+                            .id
+                        : null,
+                  ),
+                );
+              },
+            ),
           );
+        },
+        child: ImageCardContainer(
+          url: imageData.url,
+          id: imageData.id,
+          folderId: int.parse(folderId),
+          originalName: imageData.originalName,
+        ),
+      );
+    }
+
+    return Expanded(
+      child: GridView.builder(
+        padding: const EdgeInsets.all(10),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).size.width < 500 ? 2 : 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: filesToRender.length,
+        itemBuilder: (context, index) {
+          final imageData = filesToRender[index];
+          final sizesBloc = context.read<SizesBloc>();
+          final clientsBloc = context.read<ClientsBloc>();
+          final orderBloc = context.read<OrderBloc>();
+          final settingsBloc = context.read<FolderSettingsBloc>();
+          return GestureDetector(
+            onTap: () {
+              if (!isAdmin &&
+                  clientsBloc.state is ClientsLoaded &&
+                  (clientsBloc.state as ClientsLoaded).selectedClient == null) {
+                return;
+              }
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: sizesBloc),
+                        BlocProvider.value(value: clientsBloc),
+                        BlocProvider.value(value: orderBloc),
+                        BlocProvider.value(value: settingsBloc),
+                      ],
+                      child: ImageCarousel(
+                        images: filesToRender,
+                        initialIndex: index,
+                        folderId: int.parse(folderId),
+                        clientId: clientsBloc.state is ClientsLoaded &&
+                                (clientsBloc.state as ClientsLoaded)
+                                        .selectedClient !=
+                                    null
+                            ? (clientsBloc.state as ClientsLoaded)
+                                .selectedClient!
+                                .id
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            child: ImageCardContainer(
+              url: imageData.url,
+              id: imageData.id,
+              folderId: int.parse(folderId),
+              originalName: imageData.originalName,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
