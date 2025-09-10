@@ -47,6 +47,24 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
     UploadFiles event,
     Emitter<FilesState> emit,
   ) async {
+    // Получаем текущие файлы для отображения
+    final currentState = state;
+    List<File> existingFiles = [];
+    if (currentState is FilesLoaded) {
+      existingFiles = currentState.files;
+    }
+
+    // Эмитим начальное состояние загрузки
+    emit(FilesUploading(
+      existingFiles: existingFiles,
+      totalFiles: event.images.length,
+      uploadedFiles: 0,
+      failedFiles: 0,
+    ));
+
+    int uploadedCount = 0;
+    int failedCount = 0;
+
     for (var image in event.images) {
       final result = await sl<UploadFileUseCase>().call(
         params: UploadFileReqParams(
@@ -63,11 +81,31 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
       );
 
       result.fold(
-        (error) => DisplayMessage.showMessage(event.context, error),
+        (error) {
+          failedCount++;
+          DisplayMessage.showMessage(event.context, error);
+          // Обновляем состояние с прогрессом
+          emit(FilesUploading(
+            existingFiles: existingFiles,
+            totalFiles: event.images.length,
+            uploadedFiles: uploadedCount,
+            failedFiles: failedCount,
+          ));
+        },
         (success) {
-          add(LoadFiles(folderId: event.folderId));
+          uploadedCount++;
+          // Обновляем состояние с прогрессом
+          emit(FilesUploading(
+            existingFiles: existingFiles,
+            totalFiles: event.images.length,
+            uploadedFiles: uploadedCount,
+            failedFiles: failedCount,
+          ));
         },
       );
     }
+
+    // После загрузки всех файлов перезагружаем список
+    add(LoadFiles(folderId: event.folderId));
   }
 }
