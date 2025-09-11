@@ -1,0 +1,6 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "67cd7729223036e02cecc5016412ca29a67f6b925706c213d8763079cdc7b029"
+build_start_time: [1757587850, 394474000]
+build_end_time: [1757587858, 166979000]
+inputs:
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/desktop_drop-0.4.4/macos/Classes/DesktopDropPlugin.swift": [1757587777, 490906558]

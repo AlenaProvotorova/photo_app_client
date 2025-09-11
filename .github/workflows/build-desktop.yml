@@ -1,0 +1,117 @@
+name: Build Desktop Applications
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        channel: 'stable'
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Run tests
+      run: flutter test
+      
+    - name: Build macOS app
+      run: flutter build macos --release
+      
+    - name: Install create-dmg
+      run: brew install create-dmg
+      
+    - name: Create DMG
+      run: |
+        create-dmg \
+          --volname "Photo App" \
+          --window-pos 200 120 \
+          --window-size 600 300 \
+          --icon-size 100 \
+          --icon "photo_app.app" 175 120 \
+          --hide-extension "photo_app.app" \
+          --app-drop-link 425 120 \
+          "PhotoApp-${{ github.ref_name }}.dmg" \
+          "build/macos/Build/Products/Release/"
+          
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-app
+        path: PhotoApp-${{ github.ref_name }}.dmg
+        retention-days: 30
+
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        channel: 'stable'
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Run tests
+      run: flutter test
+      
+    - name: Build Windows app
+      run: flutter build windows --release
+      
+    - name: Create ZIP archive
+      run: |
+        Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath "PhotoApp-Windows-${{ github.ref_name }}.zip" -Force
+          
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-app
+        path: PhotoApp-Windows-${{ github.ref_name }}.zip
+        retention-days: 30
+
+  create-release:
+    if: github.event_name == 'release'
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download macOS artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: macos-app
+        path: ./releases
+        
+    - name: Download Windows artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-app
+        path: ./releases
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./releases/*.dmg
+          ./releases/*.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

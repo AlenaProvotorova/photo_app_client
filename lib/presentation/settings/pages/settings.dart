@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
-import 'package:photo_app/entities/user/bloc/user_event.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/entities/watermark/watermark_bloc.dart';
+import 'package:photo_app/entities/watermark/watermark_event.dart';
 import 'package:photo_app/presentation/settings/pages/widgets/profile.dart';
 import 'package:photo_app/presentation/settings/pages/widgets/settings_list.dart';
 
@@ -13,20 +13,26 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => UserBloc()..add(LoadUser())),
-        BlocProvider(create: (context) => WatermarkBloc()),
-      ],
-      child: Scaffold(
-        appBar: const AppBarCustom(
-          title: 'Настройки',
-        ),
-        body: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 600),
+    print('SettingsScreen building'); // Отладочная информация
+    return Scaffold(
+      appBar: const AppBarCustom(
+        title: 'Настройки',
+      ),
+      body: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 600),
+        child: BlocListener<UserBloc, UserState>(
+          listener: (context, userState) {
+            if (userState is UserLoaded) {
+              context.read<WatermarkBloc>().add(
+                    LoadWatermark(userId: userState.user.id.toString()),
+                  );
+            }
+          },
           child: BlocBuilder<UserBloc, UserState>(
             builder: (context, userState) {
               if (userState is UserLoaded) {
+                print(
+                    'User loaded with ID: ${userState.user.id}'); // Отладочная информация
                 return Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 30),

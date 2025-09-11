@@ -1,0 +1,6 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "beb0b9c83bf00c67f72bc47c06b068e419fdda0061c7096ce0a49f45f06f5ce9"
+build_start_time: [1757587850, 393872000]
+build_end_time: [1757587858, 134580000]
+inputs:
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/desktop_window-0.4.2/macos/Classes/DesktopWindowPlugin.swift": [1744032871, 886802374]

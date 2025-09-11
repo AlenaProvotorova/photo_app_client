@@ -1,0 +1,55 @@
+{
+  "main_library": {
+    "exported_symbols": [
+      {
+        "data": {
+          "global": [
+            "_$s11file_picker16FilePickerPluginCMn",
+            "_$s11file_picker16FilePickerPluginCACycfC",
+            "_$s11file_picker16FilePickerPluginCMa",
+            "_$s11file_picker16FilePickerPluginCfD",
+            "_$s11file_picker16FilePickerPluginC8register4withySo07FlutterE9Registrar_p_tFZ",
+            "_$s11file_picker16FilePickerPluginC6handle_6resultySo17FlutterMethodCallC_yypSgctF",
+            "_file_pickerVersionNumber",
+            "_$s11file_picker16FilePickerPluginC6handle_6resultySo17FlutterMethodCallC_yypSgctFTq",
+            "_$s11file_picker16FilePickerPluginCN",
+            "_$s11file_picker16FilePickerPluginCACycfc",
+            "_file_pickerVersionString"
+          ],
+          "objc_class": [
+            "_TtC11file_picker16FilePickerPlugin",
+            "PodsDummy_file_picker"
+          ]
+        }
+      }
+    ],
+    "flags": [
+      {
+        "attributes": [
+          "not_app_extension_safe"
+        ]
+      }
+    ],
+    "install_names": [
+      {
+        "name": "@rpath/file_picker.framework/Versions/A/file_picker"
+      }
+    ],
+    "swift_abi": [
+      {
+        "abi": 7
+      }
+    ],
+    "target_info": [
+      {
+        "min_deployment": "10.14",
+        "target": "x86_64-macos"
+      },
+      {
+        "min_deployment": "11",
+        "target": "arm64-macos"
+      }
+    ]
+  },
+  "tapi_tbd_version": 5
+}

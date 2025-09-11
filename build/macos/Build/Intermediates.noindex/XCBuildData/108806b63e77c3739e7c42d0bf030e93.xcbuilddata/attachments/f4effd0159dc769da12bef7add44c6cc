@@ -1,0 +1,20 @@
+{
+  "" : {
+    "const-values" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master.swiftconstvalues",
+    "dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master.d",
+    "diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master.dia",
+    "emit-module-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master-emit-module.dia",
+    "swift-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/window_manager-master.swiftdeps"
+  },
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/window_manager-0.4.3/macos/Classes/WindowManager.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManager.o",
+    "llvm-bc" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManager.bc",
+    "object" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManager.o"
+  },
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/window_manager-0.4.3/macos/Classes/WindowManagerPlugin.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManagerPlugin.o",
+    "llvm-bc" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManagerPlugin.bc",
+    "object" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/window_manager.build/Objects-normal/x86_64/WindowManagerPlugin.o"
+  }
+}

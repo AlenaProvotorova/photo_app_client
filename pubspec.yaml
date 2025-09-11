@@ -25,11 +25,15 @@ dependencies:
   flutter_bloc: ^9.0.0
   # Upload images for mobile:
   image_picker: ^1.0.7
-  # Upload images for web:
-  file_picker: ^6.1.1
+  # Upload images for web and desktop:
+  file_picker: ^8.0.0+1
   # Window manager for desktop:
   window_manager: ^0.4.3
   desktop_window: ^0.4.2
+  # Desktop-specific packages:
+  desktop_drop: ^0.4.4
+  path_provider: ^2.1.4
+  url_launcher: ^6.3.1
   
   equatable: ^2.0.5
 

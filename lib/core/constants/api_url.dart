@@ -1,9 +1,7 @@
+import 'environment.dart';
+
 class ApiUrl {
-  static String baseURL = const String.fromEnvironment(
-    'API_BASE_URL',
-    // defaultValue: 'https://photoappserver-production.up.railway.app/api/',
-    defaultValue: 'http://127.0.0.1:3000/api/',
-  );
+  static String get baseURL => EnvironmentConfig.apiBaseURL;
 
   static const String signUp = 'user';
   static const String signIn = 'auth/login';

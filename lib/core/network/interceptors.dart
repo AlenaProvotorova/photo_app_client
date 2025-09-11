@@ -37,3 +37,79 @@ class LoggerInterceptor extends Interceptor {
     handler.next(response); // continue with the Response
   }
 }
+
+/// CORS interceptor to handle cross-origin requests
+class CorsInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers['Content-Type'] = 'application/json';
+    options.headers['Accept'] = 'application/json';
+
+    // Add Origin header to help server identify the request source
+    if (options.headers['Origin'] == null) {
+      options.headers['Origin'] =
+          'http://localhost:8080'; // Default Flutter web origin
+    }
+
+    handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    // Handle CORS preflight errors
+    if (err.response?.statusCode == 405 &&
+        err.requestOptions.method == 'OPTIONS') {
+      // This is a CORS preflight request, return success
+      final response = Response(
+        requestOptions: err.requestOptions,
+        statusCode: 200,
+        statusMessage: 'OK',
+        headers: Headers.fromMap({
+          'Access-Control-Allow-Origin': ['*'],
+          'Access-Control-Allow-Methods': ['GET, POST, PUT, DELETE, OPTIONS'],
+          'Access-Control-Allow-Headers': [
+            'Origin, Content-Type, Accept, Authorization, X-Request-With'
+          ],
+          'Access-Control-Allow-Credentials': ['true'],
+        }),
+      );
+      handler.resolve(response);
+      return;
+    }
+
+    handler.next(err);
+  }
+}
+
+/// Error handling interceptor for better CORS error management
+class ErrorHandlingInterceptor extends Interceptor {
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    // Handle CORS errors specifically
+    if (err.type == DioExceptionType.connectionError) {
+      // Network error - could be CORS related
+      final newError = DioException(
+        requestOptions: err.requestOptions,
+        error:
+            'Network connection failed. Please check your internet connection and try again.',
+        type: DioExceptionType.connectionError,
+      );
+      handler.next(newError);
+      return;
+    }
+
+    if (err.response?.statusCode == 0) {
+      // CORS error typically returns status code 0
+      final newError = DioException(
+        requestOptions: err.requestOptions,
+        error:
+            'CORS error: Unable to connect to the server. Please check if the server is running and CORS is properly configured.',
+        type: DioExceptionType.connectionError,
+      );
+      handler.next(newError);
+      return;
+    }
+
+    handler.next(err);
+  }
+}

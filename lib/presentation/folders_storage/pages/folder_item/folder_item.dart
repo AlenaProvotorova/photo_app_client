@@ -19,7 +19,6 @@ import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_event.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
-import 'package:photo_app/entities/user/bloc/user_event.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
@@ -47,7 +46,6 @@ class FolderItemScreen extends StatefulWidget {
 class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
-  late final UserBloc _userBloc;
   late final ClientsBloc _clientsBloc;
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
@@ -56,7 +54,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   @override
   void initState() {
     super.initState();
-    _userBloc = UserBloc()..add(LoadUser());
     _imagePickerService = kIsWeb
         ? WebImagePickerRepositoryImplementation()
         : Platform.isAndroid || Platform.isIOS
@@ -138,11 +135,8 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           Container(
             margin: const EdgeInsets.all(8),
             height: 36,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (context) => _userBloc),
-                BlocProvider(create: (context) => _orderBloc),
-              ],
+            child: BlocProvider(
+              create: (context) => _orderBloc,
               child: BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   if (state is UserLoaded && state.user.isAdmin) {
@@ -184,7 +178,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       ),
       body: MultiBlocProvider(
         providers: [
-          BlocProvider(create: (context) => _userBloc),
           BlocProvider(create: (context) => _filesBloc),
           BlocProvider(create: (context) => _clientsBloc),
           BlocProvider(create: (context) => _folderSettingsBloc),

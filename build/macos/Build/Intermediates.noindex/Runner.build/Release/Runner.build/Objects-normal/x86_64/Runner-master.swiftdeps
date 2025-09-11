@@ -1,0 +1,10 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "e373ccba7401d42f78d3e3d8a7db8a1766647f902a2c442956e74d07b821a34f"
+build_start_time: [1757587879, 844051000]
+build_end_time: [1757587885, 4962000]
+inputs:
+  ? "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Runner.build/Release/Runner.build/DerivedSources/GeneratedAssetSymbols.swift"
+  : [1757587879, 837658468]
+  "/Users/alenaprovotorova/flutter_projects/photo_app_client/macos/Flutter/GeneratedPluginRegistrant.swift": [1757587847, 315765264]
+  "/Users/alenaprovotorova/flutter_projects/photo_app_client/macos/Runner/AppDelegate.swift": [1737457417, 249001854]
+  "/Users/alenaprovotorova/flutter_projects/photo_app_client/macos/Runner/MainFlutterWindow.swift": [1757587797, 22955824]

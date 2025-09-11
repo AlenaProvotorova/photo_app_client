@@ -9,5 +9,6 @@
     "Schyler",
     "signup",
     "usecases"
-  ]
+  ],
+  "git.ignoreLimitWarning": true
 }

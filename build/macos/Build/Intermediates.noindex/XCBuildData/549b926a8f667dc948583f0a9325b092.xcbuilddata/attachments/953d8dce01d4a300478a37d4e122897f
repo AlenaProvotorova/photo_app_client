@@ -1,0 +1,18 @@
+{
+  "" : {
+    "diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/file_picker-master.dia",
+    "emit-module-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/file_picker-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/file_picker-master-emit-module.dia",
+    "swift-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/file_picker-master.swiftdeps"
+  },
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/file_picker-8.3.7/macos/file_picker/Sources/file_picker/FilePickerPlugin.swift" : {
+    "const-values" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.swiftconstvalues",
+    "dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.d",
+    "diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.dia",
+    "index-unit-output-path" : "/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.o",
+    "llvm-bc" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.bc",
+    "object" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.o",
+    "swift-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin.swiftdeps",
+    "swiftmodule" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Debug/file_picker.build/Objects-normal/arm64/FilePickerPlugin~partial.swiftmodule"
+  }
+}

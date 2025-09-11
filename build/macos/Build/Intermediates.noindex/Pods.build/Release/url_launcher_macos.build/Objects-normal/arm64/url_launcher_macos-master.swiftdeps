@@ -1,0 +1,9 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "2b3f123c58f71010b6fb3940e057bb627ffcf278ebc7c805fc015e189ba7376f"
+build_start_time: [1757587850, 384146000]
+build_end_time: [1757587858, 121007000]
+inputs:
+  ? "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.2/macos/url_launcher_macos/Sources/url_launcher_macos/UrlLauncherPlugin.swift"
+  : [1757587777, 483440423]
+  ? "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/url_launcher_macos-3.2.2/macos/url_launcher_macos/Sources/url_launcher_macos/messages.g.swift"
+  : [1757587777, 484230696]

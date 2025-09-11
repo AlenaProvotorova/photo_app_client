@@ -1,0 +1,7 @@
+version: "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)"
+options: "39a8590107812df05d8d18720a8758fe376e617a405e91ad2441b656991bd6b2"
+build_start_time: [1757587850, 383496000]
+build_end_time: [1757587858, 141120000]
+inputs:
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/window_manager-0.4.3/macos/Classes/WindowManager.swift": [1744032871, 883415091]
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/window_manager-0.4.3/macos/Classes/WindowManagerPlugin.swift": [1744032871, 883285633]

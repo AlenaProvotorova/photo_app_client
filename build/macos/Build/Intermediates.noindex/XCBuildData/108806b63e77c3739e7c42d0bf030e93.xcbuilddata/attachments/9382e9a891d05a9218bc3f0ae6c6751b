@@ -1,0 +1,15 @@
+{
+  "" : {
+    "const-values" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master.swiftconstvalues",
+    "dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master.d",
+    "diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master.dia",
+    "emit-module-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master-emit-module.dia",
+    "swift-dependencies" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/desktop_drop-master.swiftdeps"
+  },
+  "/Users/alenaprovotorova/.pub-cache/hosted/pub.dev/desktop_drop-0.4.4/macos/Classes/DesktopDropPlugin.swift" : {
+    "index-unit-output-path" : "/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/DesktopDropPlugin.o",
+    "llvm-bc" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/DesktopDropPlugin.bc",
+    "object" : "/Users/alenaprovotorova/flutter_projects/photo_app_client/build/macos/Build/Intermediates.noindex/Pods.build/Release/desktop_drop.build/Objects-normal/x86_64/DesktopDropPlugin.o"
+  }
+}
