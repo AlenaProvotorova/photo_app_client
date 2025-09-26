@@ -48,6 +48,11 @@ app.*.map.json
 build/
 **/build/
 
+# macOS build artifacts
+**/FlutterMacOS.framework.dSYM/
+**/App.framework/
+**/kernel_blob.bin
+
 # iOS specific
 ios/Pods/
 ios/.symlinks/
