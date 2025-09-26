@@ -25,7 +25,7 @@ final darkTheme = ThemeData(
         elevation: 0,
         backgroundColor: Colors.white,
         titleTextStyle: TextStyle(
-          color: Colors.black,
+          color: Color.fromARGB(255, 221, 10, 59),
           fontSize: 20,
           fontWeight: FontWeight.w700,
         )),

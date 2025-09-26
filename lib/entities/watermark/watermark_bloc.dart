@@ -24,8 +24,6 @@ class WatermarkBloc extends Bloc<WatermarkEvent, WatermarkState> {
     LoadWatermark event,
     Emitter<WatermarkState> emit,
   ) async {
-    print(
-        'Loading watermark for user: ${event.userId}'); // Отладочная информация
     emit(WatermarkLoading());
     try {
       final response = await sl<GetWatermarkUseCase>().call(
@@ -36,23 +34,13 @@ class WatermarkBloc extends Bloc<WatermarkEvent, WatermarkState> {
       response.fold(
         (error) => emit(WatermarkError(error.toString())),
         (data) {
-          print('Received data: $data'); // Отладочная информация
           if (data == null) {
-            print(
-                'Data is null, emitting empty watermark'); // Отладочная информация
             emit(WatermarkLoaded(watermark: null));
-            return;
+            throw Exception('Неверный формат данных от сервера');
           }
-          try {
-            final watermarks = data.map((json) => File.fromJson(json)).toList();
-            final watermark = watermarks.isEmpty ? null : watermarks[0];
-            print(
-                'Watermark loaded: ${watermark?.filename}'); // Отладочная информация
-            emit(WatermarkLoaded(watermark: watermark));
-          } catch (e) {
-            print('Error parsing watermark data: $e'); // Отладочная информация
-            emit(WatermarkError('Ошибка парсинга данных водяного знака: $e'));
-          }
+          final watermarks = data.map((json) => File.fromJson(json)).toList();
+          emit(WatermarkLoaded(
+              watermark: watermarks.isEmpty ? null : watermarks[0]));
         },
       );
     } catch (e) {

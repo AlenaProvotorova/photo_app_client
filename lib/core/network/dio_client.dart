@@ -17,14 +17,8 @@ class DioClient {
                 ...EnvironmentConfig.requestHeaders,
               },
               responseType: ResponseType.json,
-              connectTimeout: EnvironmentConfig.connectTimeout,
-              receiveTimeout: EnvironmentConfig.receiveTimeout,
-              sendTimeout: EnvironmentConfig.sendTimeout),
-        )..interceptors.addAll([
-            CorsInterceptor(),
-            ErrorHandlingInterceptor(),
-            LoggerInterceptor()
-          ]);
+              receiveTimeout: const Duration(seconds: 10)),
+        )..interceptors.addAll([LoggerInterceptor()]);
 
   Options get _sendTimeoutOption => Options(
         sendTimeout: const Duration(seconds: 10),

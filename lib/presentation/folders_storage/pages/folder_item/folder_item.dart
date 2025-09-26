@@ -47,6 +47,7 @@ class FolderItemScreen extends StatefulWidget {
 class FolderItemScreenState extends State<FolderItemScreen> {
   late final ImagePickerRepository _imagePickerService;
   late final FilesBloc _filesBloc;
+  late final UserBloc _userBloc;
   late final ClientsBloc _clientsBloc;
   late final SizesBloc _sizesBloc;
   late final OrderBloc _orderBloc;
@@ -55,6 +56,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   @override
   void initState() {
     super.initState();
+    _userBloc = UserBloc()..add(LoadUser());
     _imagePickerService = kIsWeb
         ? WebImagePickerRepositoryImplementation()
         : Platform.isAndroid || Platform.isIOS
@@ -136,6 +138,34 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           Container(
             margin: const EdgeInsets.all(8),
             height: 36,
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => _userBloc),
+                BlocProvider(create: (context) => _orderBloc),
+              ],
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, state) {
+                  if (state is UserLoaded && state.user.isAdmin) {
+                    return TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        side: BorderSide(color: theme.colorScheme.primary),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: _selectDirectory,
+                      child: const Text('Отсортировать'),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(8),
+            height: 36,
             child: TextButton(
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -154,37 +184,15 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       ),
       body: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (context) => _userBloc),
           BlocProvider(create: (context) => _filesBloc),
           BlocProvider(create: (context) => _clientsBloc),
           BlocProvider(create: (context) => _folderSettingsBloc),
           BlocProvider(create: (context) => _sizesBloc),
           BlocProvider(create: (context) => _orderBloc),
-          BlocProvider(create: (context) => UserBloc()..add(LoadUser())),
         ],
         child: Column(
           children: [
-            // Кнопка "Отсортировать" для админов
-            BlocBuilder<UserBloc, UserState>(
-              builder: (context, state) {
-                if (state is UserLoaded && state.user.isAdmin) {
-                  return Container(
-                    margin: const EdgeInsets.all(16),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        side: BorderSide(color: theme.colorScheme.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: _selectDirectory,
-                      child: const Text('Отсортировать'),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
             ClientSelector(
               folderId: widget.folderId,
             ),

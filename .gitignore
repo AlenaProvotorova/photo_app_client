@@ -52,6 +52,9 @@ build/
 **/FlutterMacOS.framework.dSYM/
 **/App.framework/
 **/kernel_blob.bin
+**/ModuleCache.noindex/
+**/ModuleCache/
+**/SDKStatCaches.noindex/
 
 # iOS specific
 ios/Pods/

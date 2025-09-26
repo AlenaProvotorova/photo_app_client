@@ -3,11 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  desktop_drop
   desktop_window
   file_selector_windows
   screen_retriever_windows
-  url_launcher_windows
   window_manager
 )
 

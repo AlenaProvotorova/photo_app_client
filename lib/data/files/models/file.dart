@@ -2,7 +2,7 @@ class File {
   final int id;
   final String filename;
   final String originalName;
-  final dynamic size;
+  final int size;
   final String mimetype;
   final String? deletedAt;
   final String url;
