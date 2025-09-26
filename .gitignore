@@ -68,6 +68,10 @@ macos/Pods/
 macos/Flutter/GeneratedPluginRegistrant.swift
 macos/Flutter/ephemeral/
 
+# macOS build cache and module cache
+**/ModuleCache.noindex/
+**/ModuleCache/
+
 # Android specific
 android/app/build/
 android/build/
