@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Блокировать доступ к служебным файлам
+Disallow: /build/
+Disallow: /.htaccess
+Disallow: /web_config/
+
+# Sitemap (добавить после создания)
+# Sitemap: https://yourdomain.ru/sitemap.xml
+
+# Crawl-delay для снижения нагрузки на сервер
+Crawl-delay: 1
+

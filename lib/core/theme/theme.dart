@@ -23,9 +23,9 @@ final darkTheme = ThemeData(
     ),
     appBarTheme: const AppBarTheme(
         elevation: 0,
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         titleTextStyle: TextStyle(
-          color: Color.fromARGB(255, 221, 10, 59),
+          color: Colors.black,
           fontSize: 20,
           fontWeight: FontWeight.w700,
         )),

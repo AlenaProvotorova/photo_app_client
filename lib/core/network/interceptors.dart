@@ -47,9 +47,11 @@ class CorsInterceptor extends Interceptor {
 
     // Add Origin header to help server identify the request source
     if (options.headers['Origin'] == null) {
-      options.headers['Origin'] =
-          'http://localhost:8080'; // Default Flutter web origin
+      options.headers['Origin'] = 'http://localhost:3000'; // Desktop app origin
     }
+
+    print('CORS Interceptor - Origin: ${options.headers['Origin']}'); // Debug
+    print('CORS Interceptor - URL: ${options.baseUrl}${options.path}'); // Debug
 
     handler.next(options);
   }
@@ -85,8 +87,16 @@ class CorsInterceptor extends Interceptor {
 class ErrorHandlingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
+    print('ErrorHandlingInterceptor - Error type: ${err.type}'); // Debug
+    print(
+        'ErrorHandlingInterceptor - Status code: ${err.response?.statusCode}'); // Debug
+    print('ErrorHandlingInterceptor - Error message: ${err.message}'); // Debug
+    print(
+        'ErrorHandlingInterceptor - URL: ${err.requestOptions.baseUrl}${err.requestOptions.path}'); // Debug
+
     // Handle CORS errors specifically
     if (err.type == DioExceptionType.connectionError) {
+      print('Connection error detected'); // Debug
       // Network error - could be CORS related
       final newError = DioException(
         requestOptions: err.requestOptions,
@@ -99,6 +109,7 @@ class ErrorHandlingInterceptor extends Interceptor {
     }
 
     if (err.response?.statusCode == 0) {
+      print('CORS error detected (status code 0)'); // Debug
       // CORS error typically returns status code 0
       final newError = DioException(
         requestOptions: err.requestOptions,

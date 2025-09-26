@@ -1,0 +1,108 @@
+# Включить сжатие для лучшей производительности
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/wasm
+</IfModule>
+
+# Кэширование статических ресурсов
+<IfModule mod_expires.c>
+    ExpiresActive on
+    
+    # HTML файлы - короткое кэширование
+    ExpiresByType text/html "access plus 1 hour"
+    
+    # CSS и JS файлы - долгое кэширование
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType application/x-javascript "access plus 1 year"
+    ExpiresByType application/json "access plus 1 year"
+    ExpiresByType application/wasm "access plus 1 year"
+    
+    # Изображения - долгое кэширование
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/ico "access plus 1 year"
+    
+    # Шрифты
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+</IfModule>
+
+# Заголовки кэширования
+<IfModule mod_headers.c>
+    # Кэширование для статических ресурсов
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2)$">
+        Header set Cache-Control "public, max-age=31536000"
+    </FilesMatch>
+    
+    # Кэширование для HTML
+    <FilesMatch "\.(html)$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+    
+    # Безопасность
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# SPA routing - перенаправление всех запросов на index.html
+RewriteEngine On
+RewriteBase /
+
+# Не перенаправлять существующие файлы и папки
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Перенаправлять все остальные запросы на index.html
+RewriteRule . /index.html [L]
+
+# Принудительное перенаправление на HTTPS (раскомментировать после настройки SSL)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Сжатие для лучшей производительности
+<IfModule mod_gzip.c>
+    mod_gzip_on Yes
+    mod_gzip_dechunk Yes
+    mod_gzip_item_include file \.(html?|txt|css|js|php|pl)$
+    mod_gzip_item_include handler ^cgi-script$
+    mod_gzip_item_include mime ^text/.*
+    mod_gzip_item_include mime ^application/x-javascript.*
+    mod_gzip_item_exclude mime ^image/.*
+    mod_gzip_item_exclude rspheader ^Content-Encoding:.*gzip.*
+</IfModule>
+
+# Защита от hotlinking изображений (опционально)
+# RewriteCond %{HTTP_REFERER} !^$
+# RewriteCond %{HTTP_REFERER} !^https?://(www\.)?yourdomain\.ru [NC]
+# RewriteRule \.(jpg|jpeg|png|gif|svg)$ - [F]
+
+# Блокировка доступа к служебным файлам
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Настройки для Flutter Web
+<IfModule mod_mime.c>
+    AddType application/wasm .wasm
+    AddType application/json .json
+</IfModule>
+

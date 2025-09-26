@@ -124,6 +124,13 @@ Desktop.ini
 *.apk
 *.aab
 
+# Large build artifacts
+**/FlutterMacOS.framework.dSYM/
+**/App.framework/
+**/kernel_blob.bin
+**/*.dSYM/
+**/DWARF/
+
 # Logs
 *.log
 logs/

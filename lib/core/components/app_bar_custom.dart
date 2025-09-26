@@ -28,7 +28,13 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
       leading: showLeading
           ? IconButton(
               onPressed: onPress,
-              icon: AppImages.arrowBackImage,
+              icon: ColorFiltered(
+                colorFilter: const ColorFilter.mode(
+                  Colors.black,
+                  BlendMode.srcIn,
+                ),
+                child: AppImages.arrowBackImage,
+              ),
             )
           : null,
     );
