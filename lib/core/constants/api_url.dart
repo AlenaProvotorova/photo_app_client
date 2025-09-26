@@ -1,3 +1,5 @@
+import 'environment.dart';
+
 class ApiUrl {
   static String baseURL = const String.fromEnvironment(
     'API_BASE_URL',

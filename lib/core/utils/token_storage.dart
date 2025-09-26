@@ -6,7 +6,20 @@ class TokenStorage {
   static const String _tokenKey = 'userToken';
 
   static Future<void> init() async {
-    await Hive.openBox(_tokenBox);
+    try {
+      if (!Hive.isBoxOpen(_tokenBox)) {
+        await Hive.openBox(_tokenBox);
+      }
+    } catch (e) {
+      debugPrint("Error initializing token storage: $e");
+      // Try to delete and recreate the box if there's a lock issue
+      try {
+        await Hive.deleteBoxFromDisk(_tokenBox);
+        await Hive.openBox(_tokenBox);
+      } catch (e2) {
+        debugPrint("Error recreating token storage: $e2");
+      }
+    }
   }
 
   static Future<void> saveToken(String token) async {

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:photo_app/core/constants/api_url.dart';
+import 'package:photo_app/core/constants/environment.dart';
 
 import 'interceptors.dart';
 
@@ -12,6 +13,8 @@ class DioClient {
               baseUrl: ApiUrl.baseURL,
               headers: {
                 'Content-Type': 'application/json; charset=UTF-8',
+                'Accept': 'application/json',
+                ...EnvironmentConfig.requestHeaders,
               },
               responseType: ResponseType.json,
               receiveTimeout: const Duration(seconds: 10)),
