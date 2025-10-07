@@ -7,14 +7,14 @@ import 'package:photo_app/entities/order/bloc/order_event.dart';
 
 class ImagePrintSelector extends StatefulWidget {
   final String size;
-  final int sizeId;
+  final String formatName;
   final int imageId;
   final int folderId;
   final int defaultQuantity;
   const ImagePrintSelector({
     super.key,
     required this.size,
-    required this.sizeId,
+    required this.formatName,
     required this.imageId,
     required this.folderId,
     this.defaultQuantity = 0,
@@ -100,7 +100,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
         fileId: widget.imageId.toString(),
         clientId: clientState.selectedClient!.id.toString(),
         folderId: widget.folderId.toString(),
-        sizeId: widget.sizeId,
+        formatName: widget.formatName,
         count: selectedQuantity.toString(),
       );
 

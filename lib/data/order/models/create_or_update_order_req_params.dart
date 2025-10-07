@@ -2,14 +2,14 @@ class CreateOrUpdateOrderReqParams {
   final int fileId;
   final int clientId;
   final int folderId;
-  final int sizeId;
+  final String formatName;
   final int count;
 
   CreateOrUpdateOrderReqParams({
     required this.fileId,
     required this.clientId,
     required this.folderId,
-    required this.sizeId,
+    required this.formatName,
     required this.count,
   });
 
@@ -18,7 +18,7 @@ class CreateOrUpdateOrderReqParams {
       'fileId': fileId,
       'clientId': clientId,
       'folderId': folderId,
-      'sizeId': sizeId,
+      'formatName': formatName,
       'count': count,
     };
   }

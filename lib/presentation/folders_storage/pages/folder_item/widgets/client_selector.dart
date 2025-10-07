@@ -135,14 +135,10 @@ void _showAlbumQuestionDialog(
         ),
         TextButton(
           onPressed: () {
-            print('==1 ${state.selectedClient!.id.toString()}');
             context.read<ClientsBloc>().add(UpdateOrderAlbum(
                   clientId: state.selectedClient!.id.toString(),
                   orderAlbum: false,
                 ));
-            // context.read<ClientsBloc>().add(LoadClients(
-            //       folderId: folderId,
-            //     ));
             Navigator.pop(context);
           },
           child: const Text('Нет'),

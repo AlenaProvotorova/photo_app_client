@@ -62,7 +62,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
           fileId: int.parse(event.fileId),
           clientId: int.parse(event.clientId),
           folderId: int.parse(event.folderId),
-          sizeId: event.sizeId,
+          formatName: event.formatName,
           count: int.parse(event.count),
         ),
       );

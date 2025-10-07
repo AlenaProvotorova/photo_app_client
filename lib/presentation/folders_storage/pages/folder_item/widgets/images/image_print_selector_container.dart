@@ -50,7 +50,6 @@ class ImagePrintSelectorContainer extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: sizesNames.map((sizeName) {
-                final sizeId = sizesNames.indexOf(sizeName) + 1;
                 if (settingsState is FolderSettingsLoaded) {
                   if (!settingsState.folderSettings.getShowProperty(sizeName)) {
                     return const SizedBox.shrink();
@@ -58,7 +57,7 @@ class ImagePrintSelectorContainer extends StatelessWidget {
                   return ImagePrintSelector(
                     size: settingsState.folderSettings
                         .getRuNameProperty(sizeName),
-                    sizeId: sizeId,
+                    formatName: sizeName,
                     imageId: imageId,
                     folderId: folderId,
                     defaultQuantity: getDefaultQuantity(sizeName),
