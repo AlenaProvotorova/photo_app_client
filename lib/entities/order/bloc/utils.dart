@@ -17,7 +17,7 @@ class OrderUtils {
             'sizes': <String, int>{},
           };
         }
-        fullOrderForTable[fileIdentifier]!['sizes'][order.size.name] =
+        fullOrderForTable[fileIdentifier]!['sizes'][order.formatName] =
             order.count;
       } catch (e) {}
     }
@@ -30,12 +30,12 @@ class OrderUtils {
       try {
         final order = Order.fromJson(item);
         final fileId = order.file.id.toString();
-        final sizeName = order.size.name;
+        final formatName = order.formatName;
         final count = order.count;
         if (!orderForCarusel.containsKey(fileId)) {
           orderForCarusel[fileId] = {};
         }
-        orderForCarusel[fileId]![sizeName] = count;
+        orderForCarusel[fileId]![formatName] = count;
       } catch (e) {}
     }
     return orderForCarusel;
@@ -47,16 +47,16 @@ class OrderUtils {
       try {
         final order = Order.fromJson(item);
         final clientName = order.client.name;
-        final sizeName = order.size.name;
+        final formatName = order.formatName;
         final fileName = order.file.originalName;
         final count = order.count;
         if (!fullOrderForSorting.containsKey(clientName)) {
           fullOrderForSorting[clientName] = {};
         }
-        if (!fullOrderForSorting[clientName]!.containsKey(sizeName)) {
-          fullOrderForSorting[clientName]![sizeName] = [];
+        if (!fullOrderForSorting[clientName]!.containsKey(formatName)) {
+          fullOrderForSorting[clientName]![formatName] = [];
         }
-        fullOrderForSorting[clientName]![sizeName]!.add({
+        fullOrderForSorting[clientName]![formatName]!.add({
           'fileName': fileName,
           'count': count,
         });

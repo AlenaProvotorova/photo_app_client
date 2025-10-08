@@ -7,14 +7,14 @@ class Order {
   final File file;
   final Client client;
   final int folderId;
-  final Size size;
+  final String formatName;
   final int count;
   Order({
     required this.id,
     required this.file,
     required this.client,
     required this.folderId,
-    required this.size,
+    required this.formatName,
     required this.count,
   });
 
@@ -24,7 +24,7 @@ class Order {
       file: File.fromJson(json['file']),
       client: Client.fromJson(json['client']),
       folderId: json['folderId'],
-      size: Size.fromJson(json['size']),
+      formatName: json['formatName'],
       count: json['count'],
     );
   }

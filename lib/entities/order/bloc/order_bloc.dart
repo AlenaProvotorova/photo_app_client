@@ -36,6 +36,8 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
             throw Exception('Неверный формат данных от сервера');
           }
           final orderForCarusel = OrderUtils.getFullOrderForCarusel(data);
+          print('orderForCaruseldata: $data');
+          print('orderForCarusel: $orderForCarusel');
           final fullOrderForTable = OrderUtils.getFullOrderForTable(data);
           final fullOrderForSorting = OrderUtils.getFullOrderForSorting(data);
 

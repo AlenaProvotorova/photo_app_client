@@ -29,13 +29,17 @@ class ImagePrintSelectorContainer extends StatelessWidget {
     int getDefaultQuantity(String sizeName) {
       if (orderBloc.state is! OrderLoaded) return 0;
 
+      print('getDefaultQuantity: 1');
       final orders =
           (orderBloc.state as OrderLoaded).orderForCarusel[imageId.toString()];
+      print('getDefaultQuantity2: ${orderBloc.state}');
       if (orders == null) return 0;
 
+      print('getDefaultQuantity: ${orders.entries}');
       final result = orders.entries
           .where((element) => element.key == sizeName)
           .fold(0, (sum, entry) => sum + entry.value);
+      print('result: $result');
       return result;
     }
 
