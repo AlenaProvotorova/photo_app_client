@@ -59,13 +59,14 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(OrderLoading());
     try {
+      final countValue = event.count == 'true' ? 1 : 0;
       final response = await sl<CreateOrUpdateOrderUseCase>().call(
         params: CreateOrUpdateOrderReqParams(
           fileId: int.parse(event.fileId),
           clientId: int.parse(event.clientId),
           folderId: int.parse(event.folderId),
           formatName: event.formatName,
-          count: int.parse(event.count),
+          count: countValue,
         ),
       );
 

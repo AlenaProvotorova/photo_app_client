@@ -139,9 +139,9 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     UpdateOrderAlbum event,
     Emitter<ClientsState> emit,
   ) async {
-    print('==22event: ${event}');
+    print(
+        '_onUpdateOrderAlbum вызван с clientId: ${event.clientId}, orderAlbum: ${event.orderAlbum}');
     try {
-      print('==event: ${event}');
       final response = await sl<UpdateOrderAlbumUseCase>().call(
         params: UpdateSelectedClientReqParams(
           clientId: int.parse(event.clientId),
@@ -150,12 +150,28 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
       );
 
       response.fold(
-        (error) => emit(ClientsError(message: error.toString())),
-        (data) {},
+        (error) {
+          print('Ошибка в _onUpdateOrderAlbum: $error');
+          emit(ClientsError(message: error.toString()));
+        },
+        (data) {
+          print('Успешное обновление orderAlbum: $data');
+          // При успешном обновлении возвращаемся к предыдущему состоянию
+          if (state is ClientsLoaded) {
+            final currentState = state as ClientsLoaded;
+            emit(ClientsLoaded(
+              namesList: currentState.namesList,
+              selectedClient: currentState.selectedClient,
+            ));
+          } else {
+            emit(ClientsLoaded(
+                namesList: _namesList, selectedClient: _selectedClient));
+          }
+        },
       );
     } catch (e) {
-      print('==error: $e');
-      emit(const ClientsError(message: 'Ошибка выбора альбомного заказа'));
+      print('Исключение в _onUpdateOrderAlbum: $e');
+      emit(ClientsError(message: 'Ошибка выбора альбомного заказа: $e'));
     }
   }
 

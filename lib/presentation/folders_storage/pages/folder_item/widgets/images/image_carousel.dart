@@ -7,7 +7,6 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
-import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_additional_photos_container.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector_container.dart';
 
@@ -36,6 +35,15 @@ class _ImageCarouselState extends State<ImageCarousel> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
+
+    if (widget.clientId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<OrderBloc>().add(LoadOrder(
+              folderId: widget.folderId.toString(),
+              clientId: widget.clientId!,
+            ));
+      });
+    }
   }
 
   @override
@@ -46,18 +54,9 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final sizesBloc = context.read<SizesBloc>();
-    final clientsBloc = context.read<ClientsBloc>();
-
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: sizesBloc),
-        BlocProvider.value(value: clientsBloc),
-        BlocProvider(
-          create: (context) => FolderSettingsBloc()
-            ..add(LoadFolderSettings(folderId: widget.folderId.toString())),
-        ),
-      ],
+    return BlocProvider(
+      create: (context) => FolderSettingsBloc()
+        ..add(LoadFolderSettings(folderId: widget.folderId.toString())),
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(

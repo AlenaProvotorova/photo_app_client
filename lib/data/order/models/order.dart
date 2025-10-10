@@ -1,6 +1,5 @@
 import 'package:photo_app/data/clients/models/client.dart';
 import 'package:photo_app/data/files/models/file.dart';
-import 'package:photo_app/data/sizes/models/size.dart';
 
 class Order {
   final int id;
