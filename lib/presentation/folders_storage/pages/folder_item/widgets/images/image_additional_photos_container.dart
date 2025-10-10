@@ -82,60 +82,97 @@ class _ImageAdditionalPhotosContainerState
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (state.folderSettings.photoOne.show)
-                        Row(
-                          children: [
-                            Switch(
-                              value: _photoOne,
-                              onChanged: (value) {
-                                setState(() {
-                                  _photoOne = value;
-                                });
-                                _updateOrder('photoOne', value);
-                              },
-                            ),
-                            Text(
-                              state.folderSettings.photoOne.ruName,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                      if (state.folderSettings.photoTwo.show)
-                        Row(
-                          children: [
-                            Switch(
-                              value: _photoTwo,
-                              onChanged: (value) {
-                                setState(() {
-                                  _photoTwo = value;
-                                });
-                                _updateOrder('photoTwo', value);
-                              },
-                            ),
-                            Text(
-                              state.folderSettings.photoTwo.ruName,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                      if (state.folderSettings.photoThree.show)
-                        Row(
-                          children: [
-                            Switch(
-                              value: _photoThree,
-                              onChanged: (value) {
-                                setState(() {
-                                  _photoThree = value;
-                                });
-                                _updateOrder('photoThree', value);
-                              },
-                            ),
-                            Text(
-                              state.folderSettings.photoThree.ruName,
-                              style: theme.textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
+                      // Получаем информацию о клиенте для проверки orderAlbum
+                      BlocBuilder<ClientsBloc, ClientsState>(
+                        builder: (context, clientState) {
+                          bool showPhotoOne = false;
+                          bool showPhotoTwo = false;
+                          bool showPhotoThree = false;
+
+                          if (clientState is ClientsLoaded &&
+                              clientState.selectedClient != null) {
+                            final orderAlbum =
+                                clientState.selectedClient!.orderAlbum;
+
+                            if (orderAlbum == false) {
+                              // Если orderAlbum = false, показываем только photoThree
+                              showPhotoThree =
+                                  state.folderSettings.photoThree.show;
+                            } else {
+                              // Если orderAlbum = true или null, показываем все доступные фото
+                              showPhotoOne = state.folderSettings.photoOne.show;
+                              showPhotoTwo = state.folderSettings.photoTwo.show;
+                              showPhotoThree =
+                                  state.folderSettings.photoThree.show;
+                            }
+                          } else {
+                            // Если клиент не выбран, показываем все доступные фото
+                            showPhotoOne = state.folderSettings.photoOne.show;
+                            showPhotoTwo = state.folderSettings.photoTwo.show;
+                            showPhotoThree =
+                                state.folderSettings.photoThree.show;
+                          }
+
+                          return Column(
+                            children: [
+                              if (showPhotoOne)
+                                Row(
+                                  children: [
+                                    Switch(
+                                      value: _photoOne,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _photoOne = value;
+                                        });
+                                        _updateOrder('photoOne', value);
+                                      },
+                                    ),
+                                    Text(
+                                      state.folderSettings.photoOne.ruName,
+                                      style: theme.textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                              if (showPhotoTwo)
+                                Row(
+                                  children: [
+                                    Switch(
+                                      value: _photoTwo,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _photoTwo = value;
+                                        });
+                                        _updateOrder('photoTwo', value);
+                                      },
+                                    ),
+                                    Text(
+                                      state.folderSettings.photoTwo.ruName,
+                                      style: theme.textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                              if (showPhotoThree)
+                                Row(
+                                  children: [
+                                    Switch(
+                                      value: _photoThree,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _photoThree = value;
+                                        });
+                                        _updateOrder('photoThree', value);
+                                      },
+                                    ),
+                                    Text(
+                                      state.folderSettings.photoThree.ruName,
+                                      style: theme.textTheme.titleMedium,
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

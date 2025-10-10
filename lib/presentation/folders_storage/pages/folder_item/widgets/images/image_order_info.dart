@@ -45,9 +45,13 @@ class ImageOrderInfo extends StatelessWidget {
                       final sizeText = orderedKeys
                           .where((key) =>
                               sizes.containsKey(key) && sizes[key] != 0)
-                          .map((key) =>
-                              '${settings.getRuNameProperty(key)} - ${sizes[key]}')
-                          .join('\n');
+                          .map((key) {
+                        if (key.startsWith('photo')) {
+                          return settings.getRuNameProperty(key);
+                        } else {
+                          return '${settings.getRuNameProperty(key)} - ${sizes[key]}';
+                        }
+                      }).join('\n');
                       return Container(
                         margin: const EdgeInsets.symmetric(
                           horizontal: 4,

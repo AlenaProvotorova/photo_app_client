@@ -156,17 +156,8 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
         },
         (data) {
           print('Успешное обновление orderAlbum: $data');
-          // При успешном обновлении возвращаемся к предыдущему состоянию
-          if (state is ClientsLoaded) {
-            final currentState = state as ClientsLoaded;
-            emit(ClientsLoaded(
-              namesList: currentState.namesList,
-              selectedClient: currentState.selectedClient,
-            ));
-          } else {
-            emit(ClientsLoaded(
-                namesList: _namesList, selectedClient: _selectedClient));
-          }
+          // После успешного обновления перезагружаем клиента с актуальными данными
+          add(LoadClientById(clientId: event.clientId));
         },
       );
     } catch (e) {

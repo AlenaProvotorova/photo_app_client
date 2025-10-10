@@ -39,8 +39,6 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
   void didUpdateWidget(ImagePrintSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.defaultQuantity != widget.defaultQuantity) {
-      print(
-          'ImagePrintSelector didUpdateWidget: oldDefaultQuantity=${oldWidget.defaultQuantity}, newDefaultQuantity=${widget.defaultQuantity}');
       selectedQuantity = widget.defaultQuantity;
     }
   }
