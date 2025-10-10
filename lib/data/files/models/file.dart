@@ -17,14 +17,24 @@ class File {
   });
 
   factory File.fromJson(Map<String, dynamic> json) {
-    return File(
-      id: json['id'],
-      filename: json['filename'],
-      originalName: json['originalName'],
-      size: json['size'],
-      mimetype: json['mimetype'],
-      deletedAt: json['deletedAt'],
-      url: json['url'],
-    );
+    print('Парсим File из JSON: $json');
+
+    try {
+      return File(
+        id: json['id'] ?? 0,
+        filename: json['filename'] ?? '',
+        originalName: json['originalName'] ?? '',
+        size: json['fileSize'] ??
+            json['size'] ??
+            0, // Используем fileSize вместо size
+        mimetype: json['mimetype'] ?? '',
+        deletedAt: json['deletedAt'],
+        url: json['url'] ?? '',
+      );
+    } catch (e) {
+      print('Ошибка парсинга File: $e');
+      print('JSON данные: $json');
+      rethrow;
+    }
   }
 }

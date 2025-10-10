@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
@@ -46,15 +47,25 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
   }
 
   Future<void> _pickImages(parentContext) async {
-    final selectedImages = await _imagePickerService.pickImages();
-    if (selectedImages.isNotEmpty) {
-      final bloc = context.read<WatermarkBloc>();
+    try {
+      final selectedImages = await _imagePickerService.pickImages();
+      if (selectedImages.isNotEmpty) {
+        final bloc = context.read<WatermarkBloc>();
 
-      bloc.add(UploadWatermark(
-        userId: widget.userId,
-        image: selectedImages.first,
-        context: context,
-      ));
+        print('Загружаем водяной знак для пользователя: ${widget.userId}');
+        print(
+            'Размер изображения: ${selectedImages.first.bytes?.length ?? 'неизвестно'} байт');
+        print('Путь к файлу: ${selectedImages.first.path}');
+
+        bloc.add(UploadWatermark(
+          userId: widget.userId,
+          image: selectedImages.first,
+          context: context,
+        ));
+      }
+    } catch (e) {
+      print('Ошибка при выборе изображения: $e');
+      DisplayMessage.showMessage(context, 'Ошибка при выборе изображения: $e');
     }
   }
 
@@ -69,7 +80,22 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
       }
     }, child:
         BlocBuilder<WatermarkBloc, WatermarkState>(builder: (context, state) {
+      print('Состояние водяного знака: ${state.runtimeType}');
+      if (state is WatermarkLoading) {
+        print('Показываем индикатор загрузки');
+        return const Center(child: CircularProgressIndicator());
+      }
       if (state is WatermarkLoaded) {
+        print('Состояние WatermarkLoaded, watermark: ${state.watermark}');
+        if (state.watermark != null) {
+          print('Водяной знак найден:');
+          print('  - ID: ${state.watermark!.id}');
+          print('  - Filename: ${state.watermark!.filename}');
+          print('  - URL: ${state.watermark!.url}');
+          print('  - URL пустой: ${state.watermark!.url.isEmpty}');
+        } else {
+          print('Водяной знак не найден (null)');
+        }
         return Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
@@ -98,61 +124,59 @@ class _UploadWatermarkState extends State<UploadWatermarkWidget> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (state.watermark?.filename == null)
-                        UploadWatermarkButton(
-                          pickImages: (parentContext) async {
-                            await _pickImages(parentContext);
-                          },
-                        )
-                      else
-                        Column(
-                          children: [
-                            WatermarkCard(url: state.watermark!.url),
-                            const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              alignment: WrapAlignment.center,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () => _pickImages(context),
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.black),
-                                  label: const Text('Изменить',
-                                      style: TextStyle(color: Colors.black)),
-                                  style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(
-                                      color: Colors.grey,
-                                    ),
-                                    shadowColor: Colors.transparent,
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
-                                  ),
-                                ),
-                                ElevatedButton.icon(
-                                  onPressed: _removeWatermark,
-                                  icon: const Icon(Icons.delete),
-                                  label: const Text('Удалить'),
-                                  style: ElevatedButton.styleFrom(
-                                    side: const BorderSide(
-                                      color: Colors.grey,
-                                    ),
-                                    shadowColor: Colors.transparent,
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                  if (state.watermark == null ||
+                      state.watermark!.url.isEmpty) ...[
+                    UploadWatermarkButton(
+                      pickImages: (parentContext) async {
+                        await _pickImages(parentContext);
+                      },
+                    ),
+                  ] else ...[
+                    WatermarkCard(url: state.watermark!.url),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _pickImages(context),
+                          icon: const Icon(Icons.edit, color: Colors.black),
+                          label: const Text('Изменить',
+                              style: TextStyle(color: Colors.black)),
+                          style: ElevatedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                            shadowColor: Colors.transparent,
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
                         ),
-                    ],
-                  ),
+                        ElevatedButton.icon(
+                          onPressed: _removeWatermark,
+                          icon: const Icon(Icons.delete),
+                          label: const Text('Удалить'),
+                          style: ElevatedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                            shadowColor: Colors.transparent,
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
+            ),
+          ),
+        );
+      } else if (state is WatermarkError) {
+        print('Состояние WatermarkError: ${state.message}');
+        return Center(
+          child: Text(
+            'Ошибка: ${state.message}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.red,
             ),
           ),
         );

@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
-import 'package:photo_app/data/files/models/file.dart';
+import 'package:photo_app/data/watermarks/models/watermark.dart';
 import 'package:photo_app/data/watermarks/models/get_watermark_req_params.dart';
 import 'package:photo_app/data/watermarks/models/remove_watermark_req_params.dart';
 import 'package:photo_app/data/watermarks/models/upload_watermark_req_params.dart';
@@ -26,25 +26,88 @@ class WatermarkBloc extends Bloc<WatermarkEvent, WatermarkState> {
   ) async {
     emit(WatermarkLoading());
     try {
+      print('Загружаем водяной знак для пользователя: ${event.userId}');
       final response = await sl<GetWatermarkUseCase>().call(
         params: GetAllWatermarksReqParams(
           userId: int.parse(event.userId),
         ),
       );
+
       response.fold(
-        (error) => emit(WatermarkError(error.toString())),
+        (error) {
+          print('❌ ОШИБКА получения водяного знака: $error');
+          emit(WatermarkError(error.toString()));
+        },
         (data) {
+          print('✅ УСПЕШНО получены данные от сервера');
+          print('📊 Тип данных: ${data.runtimeType}');
+          print('📊 Содержимое данных: $data');
+
           if (data == null) {
+            print('⚠️ Данные null - водяной знак не найден');
             emit(WatermarkLoaded(watermark: null));
-            throw Exception('Неверный формат данных от сервера');
+            return;
           }
-          final watermarks = data.map((json) => File.fromJson(json)).toList();
-          emit(WatermarkLoaded(
-              watermark: watermarks.isEmpty ? null : watermarks[0]));
+
+          try {
+            print('Тип данных: ${data.runtimeType}');
+            print('Содержимое данных: $data');
+
+            if (data is! List) {
+              print('Данные не являются списком, тип: ${data.runtimeType}');
+              emit(WatermarkError('Неверный формат данных: ожидается список'));
+              return;
+            }
+
+            final watermarks = <Watermark>[];
+            print('🔄 Начинаем обработку ${data.length} элементов');
+
+            for (int i = 0; i < data.length; i++) {
+              try {
+                print('🔍 Парсим элемент $i: ${data[i]}');
+                print('🔍 Тип элемента $i: ${data[i].runtimeType}');
+                final watermark = Watermark.fromJson(data[i]);
+                watermarks.add(watermark);
+                print(
+                    '✅ Успешно распарсен водяной знак: ${watermark.filename}');
+                print('✅ URL водяного знака: ${watermark.url}');
+              } catch (itemError) {
+                print('❌ Ошибка парсинга элемента $i: $itemError');
+                print('❌ Проблемный элемент: ${data[i]}');
+                print('❌ Тип проблемного элемента: ${data[i].runtimeType}');
+              }
+            }
+
+            print('Обработано водяных знаков: ${watermarks.length}');
+
+            if (watermarks.isEmpty) {
+              print('Список водяных знаков пуст - устанавливаем null');
+              emit(WatermarkLoaded(watermark: null));
+            } else {
+              final watermark = watermarks[0];
+              print('Выбран первый водяной знак: ${watermark.filename}');
+              print('URL водяного знака: ${watermark.url}');
+              print('URL пустой: ${watermark.url.isEmpty}');
+
+              // Проверяем, что водяной знак валиден (имеет URL)
+              if (watermark.url.isEmpty) {
+                print('URL водяного знака пустой - считаем как отсутствующий');
+                emit(WatermarkLoaded(watermark: null));
+              } else {
+                print('Водяной знак валиден - устанавливаем в состояние');
+                emit(WatermarkLoaded(watermark: watermark));
+              }
+            }
+          } catch (parseError) {
+            print('Общая ошибка парсинга данных: $parseError');
+            emit(WatermarkError(
+                'Ошибка обработки данных водяного знака: ${parseError.toString()}'));
+          }
         },
       );
     } catch (e) {
-      emit(WatermarkError('Ошибка загрузки водяного знака'));
+      print('Общая ошибка загрузки водяного знака: $e');
+      emit(WatermarkError('Ошибка загрузки водяного знака: ${e.toString()}'));
     }
   }
 
@@ -52,6 +115,7 @@ class WatermarkBloc extends Bloc<WatermarkEvent, WatermarkState> {
     UploadWatermark event,
     Emitter<WatermarkState> emit,
   ) async {
+    emit(WatermarkLoading());
     try {
       final result = await sl<UploadWatermarkUseCase>().call(
         params: UploadWatermarkReqParams(
@@ -68,13 +132,20 @@ class WatermarkBloc extends Bloc<WatermarkEvent, WatermarkState> {
       );
 
       result.fold(
-        (error) => DisplayMessage.showMessage(event.context, error),
+        (error) {
+          emit(WatermarkError('Ошибка загрузки: $error'));
+          DisplayMessage.showMessage(event.context, 'Ошибка загрузки: $error');
+        },
         (success) {
           add(LoadWatermark(userId: event.userId));
+          DisplayMessage.showMessage(
+              event.context, 'Водяной знак успешно загружен');
         },
       );
     } catch (e) {
-      emit(WatermarkError('Ошибка загрузки водяного знака'));
+      final errorMessage = 'Ошибка загрузки водяного знака: ${e.toString()}';
+      emit(WatermarkError(errorMessage));
+      DisplayMessage.showMessage(event.context, errorMessage);
     }
   }
 

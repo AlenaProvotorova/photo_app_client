@@ -1,11 +1,11 @@
-import 'package:photo_app/data/files/models/file.dart';
+import 'package:photo_app/data/watermarks/models/watermark.dart';
 
 abstract class WatermarkState {}
 
 class WatermarkLoading extends WatermarkState {}
 
 class WatermarkLoaded extends WatermarkState {
-  final File? watermark;
+  final Watermark? watermark;
 
   WatermarkLoaded({
     required this.watermark,
