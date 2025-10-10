@@ -18,6 +18,7 @@ class ClientsList extends StatefulWidget {
 class ClientsListState extends State<ClientsList> {
   final TextEditingController _clientNameController = TextEditingController();
   List<String> _namesList = [];
+  bool _isInitialized = false;
 
   @override
   void dispose() {
@@ -66,10 +67,23 @@ class ClientsListState extends State<ClientsList> {
                 if (state is ClientsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ClientsLoaded) {
-                  if (_namesList.isEmpty) {
+                  if (!_isInitialized) {
                     _namesList =
                         state.namesList.map((client) => client.name).toList();
+                    _isInitialized = true;
                   }
+                  if (_namesList.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'Список клиентов пуст',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    );
+                  }
+
                   return ListView.separated(
                     itemCount: _namesList.length,
                     separatorBuilder: (context, index) => const Divider(),

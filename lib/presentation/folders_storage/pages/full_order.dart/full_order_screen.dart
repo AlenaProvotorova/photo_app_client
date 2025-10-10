@@ -10,6 +10,8 @@ import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
+import 'widgets/order_table.dart';
+import 'widgets/digital_orders_header.dart';
 
 class FullOrderScreen extends StatelessWidget {
   final String folderId;
@@ -55,10 +57,6 @@ class FullOrderScreen extends StatelessWidget {
               return BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
                 builder: (context, folderSettingsState) {
                   if (folderSettingsState is FolderSettingsLoaded) {
-                    const columnSpacing = 0;
-                    const horizontalPadding = 16;
-                    const horizontalMargin = 16;
-
                     // Создаем список размеров на основе настроек папки
                     final List<Map<String, dynamic>> sizes = [];
                     if (folderSettingsState.folderSettings.sizeOne.show) {
@@ -107,125 +105,18 @@ class FullOrderScreen extends StatelessWidget {
                       });
                     }
 
-                    final columnCount = 2 + sizes.length + photos.length;
-                    const fixedColumnWidth =
-                        120.0; // Фиксированная ширина столбца
-                    final tableWidth = columnCount * fixedColumnWidth;
-                    print(
-                        'state.fullOrderForTable: ${state.fullOrderForTable}');
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: horizontalPadding.toDouble(),
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: SizedBox(
-                            width: tableWidth,
-                            child: DataTable(
-                              dividerThickness: 1,
-                              columnSpacing: columnSpacing.toDouble(),
-                              horizontalMargin: horizontalMargin.toDouble(),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: const Color(0xFFE4E4E4),
-                                ),
-                              ),
-                              columns: [
-                                DataColumn(
-                                  label: SizedBox(
-                                    width: fixedColumnWidth,
-                                    child: Text(
-                                      'В общую',
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: SizedBox(
-                                    width: fixedColumnWidth,
-                                    child: Text(
-                                      'Список имен',
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ),
-                                ),
-                                ...photos.map(
-                                  (photo) => DataColumn(
-                                    label: SizedBox(
-                                      width: fixedColumnWidth,
-                                      child: Text(
-                                        photo['name'],
-                                        style: theme.textTheme.titleMedium,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                ...sizes.map(
-                                  (size) => DataColumn(
-                                    label: SizedBox(
-                                      width: fixedColumnWidth,
-                                      child: Text(
-                                        size['name'],
-                                        style: theme.textTheme.titleMedium,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              rows: state.fullOrderForTable
-                                  .map((id, details) {
-                                    return MapEntry(
-                                      id,
-                                      DataRow(cells: [
-                                        DataCell(
-                                          ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                                maxWidth: fixedColumnWidth),
-                                            child: Tooltip(
-                                              message: details['fileName'],
-                                              child: Text(
-                                                details['fileName'],
-                                                style:
-                                                    theme.textTheme.labelLarge,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        DataCell(
-                                          Text(
-                                            details['clientName'],
-                                            style: theme.textTheme.labelLarge,
-                                          ),
-                                        ),
-                                        ...photos.map(
-                                          (photo) => DataCell(
-                                            _buildPhotoCell(
-                                              details['sizes']?[photo['key']],
-                                              theme,
-                                            ),
-                                          ),
-                                        ),
-                                        ...sizes.map(
-                                          (size) => DataCell(Text(
-                                            details['sizes'][size['key']]
-                                                    ?.toString() ??
-                                                '0',
-                                            style: theme.textTheme.labelLarge,
-                                          )),
-                                        ),
-                                      ]),
-                                    );
-                                  })
-                                  .values
-                                  .toList(),
-                            ),
+                    return Column(
+                      children: [
+                        const DigitalOrdersHeader(),
+                        Expanded(
+                          child: OrderTable(
+                            fullOrderForTable: state.fullOrderForTable,
+                            sizes: sizes,
+                            photos: photos,
+                            theme: theme,
                           ),
                         ),
-                      ),
+                      ],
                     );
                   }
                   return const Center(child: CircularProgressIndicator());
@@ -240,25 +131,5 @@ class FullOrderScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Widget _buildPhotoCell(dynamic value, ThemeData theme) {
-    final int count =
-        value is int ? value : (int.tryParse(value?.toString() ?? '0') ?? 0);
-
-    if (count == 1) {
-      return Icon(
-        Icons.check,
-        color: Colors.green,
-        size: 20,
-      );
-    } else {
-      return Text(
-        '-',
-        style: theme.textTheme.labelLarge?.copyWith(
-          color: Colors.grey,
-        ),
-      );
-    }
   }
 }
