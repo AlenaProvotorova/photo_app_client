@@ -156,15 +156,27 @@ class _ImageAdditionalPhotosContainerState
     if (clientState is ClientsLoaded && clientState.selectedClient != null) {
       final orderBloc = context.read<OrderBloc>();
 
-      final event = UpdateOrder(
-        fileId: widget.imageId.toString(),
-        clientId: clientState.selectedClient!.id.toString(),
-        folderId: widget.folderId.toString(),
-        formatName: formatName,
-        count: value ? '1' : '0',
-      );
-
-      orderBloc.add(event);
+      // Для типов фото, которые должны иметь единственный выбор
+      if (['photoOne', 'photoTwo', 'photoThree'].contains(formatName)) {
+        final event = UpdateSingleSelectionOrder(
+          fileId: widget.imageId.toString(),
+          clientId: clientState.selectedClient!.id.toString(),
+          folderId: widget.folderId.toString(),
+          formatName: formatName,
+          count: value ? '1' : '0',
+        );
+        orderBloc.add(event);
+      } else {
+        // Для остальных типов используем обычное обновление
+        final event = UpdateOrder(
+          fileId: widget.imageId.toString(),
+          clientId: clientState.selectedClient!.id.toString(),
+          folderId: widget.folderId.toString(),
+          formatName: formatName,
+          count: value ? '1' : '0',
+        );
+        orderBloc.add(event);
+      }
     }
   }
 }

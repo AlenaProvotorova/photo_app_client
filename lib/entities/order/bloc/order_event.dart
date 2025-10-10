@@ -25,3 +25,19 @@ class UpdateOrder extends OrderEvent {
     required this.count,
   });
 }
+
+class UpdateSingleSelectionOrder extends OrderEvent {
+  final String fileId;
+  final String clientId;
+  final String folderId;
+  final String formatName;
+  final String count;
+
+  UpdateSingleSelectionOrder({
+    required this.fileId,
+    required this.clientId,
+    required this.folderId,
+    required this.formatName,
+    required this.count,
+  });
+}

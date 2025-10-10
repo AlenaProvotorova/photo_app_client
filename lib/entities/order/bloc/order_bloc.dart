@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/order/models/create_or_update_order_req_params.dart';
 import 'package:photo_app/data/order/models/get_order_req_params.dart';
+import 'package:photo_app/data/order/models/order.dart';
 import 'package:photo_app/domain/order/usecases/get_order.dart';
 import 'package:photo_app/domain/order/usecases/update_order.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
@@ -13,6 +14,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<LoadOrder>(_onLoadOrder);
     on<UpdateOrder>((event, emit) {
       return _onUpdateOrder(event, emit);
+    });
+    on<UpdateSingleSelectionOrder>((event, emit) {
+      return _onUpdateSingleSelectionOrder(event, emit);
     });
   }
 
@@ -80,6 +84,84 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
             folderId: event.folderId,
             clientId: int.parse(event.clientId),
           ));
+        },
+      );
+    } catch (e) {
+      emit(OrderError('Ошибка изменения списка клиентов'));
+    }
+  }
+
+  Future<void> _onUpdateSingleSelectionOrder(
+    UpdateSingleSelectionOrder event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(OrderLoading());
+    try {
+      final countValue = int.parse(event.count);
+
+      // Сначала получаем текущие заказы для этого клиента и папки
+      final currentResponse = await sl<GetOrderUseCase>().call(
+        params: GetOrderReqParams(
+          folderId: int.parse(event.folderId),
+          clientId: int.parse(event.clientId),
+        ),
+      );
+
+      await currentResponse.fold(
+        (error) async {
+          emit(OrderError(error.toString()));
+        },
+        (data) async {
+          if (data == null || data is! List) {
+            throw Exception('Неверный формат данных от сервера');
+          }
+
+          // Находим все заказы этого клиента с тем же formatName и устанавливаем их в 0
+          for (final item in data) {
+            try {
+              final order = Order.fromJson(item);
+              if (order.formatName == event.formatName &&
+                  order.client.id.toString() == event.clientId) {
+                await sl<CreateOrUpdateOrderUseCase>().call(
+                  params: CreateOrUpdateOrderReqParams(
+                    fileId: order.file.id,
+                    clientId: order.client.id,
+                    folderId: order.folderId,
+                    formatName: order.formatName,
+                    count: 0,
+                  ),
+                );
+              }
+            } catch (e) {
+              // Игнорируем ошибки парсинга отдельных элементов
+            }
+          }
+
+          // Теперь устанавливаем выбранный заказ
+          final response = await sl<CreateOrUpdateOrderUseCase>().call(
+            params: CreateOrUpdateOrderReqParams(
+              fileId: int.parse(event.fileId),
+              clientId: int.parse(event.clientId),
+              folderId: int.parse(event.folderId),
+              formatName: event.formatName,
+              count: countValue,
+            ),
+          );
+
+          await response.fold(
+            (error) async {
+              emit(OrderError(error.toString()));
+            },
+            (data) async {
+              if (data == null) {
+                throw Exception('Неверный формат данных от сервера');
+              }
+              add(LoadOrder(
+                folderId: event.folderId,
+                clientId: int.parse(event.clientId),
+              ));
+            },
+          );
         },
       );
     } catch (e) {
