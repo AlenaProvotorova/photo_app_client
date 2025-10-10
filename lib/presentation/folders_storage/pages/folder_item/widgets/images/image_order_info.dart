@@ -33,19 +33,34 @@ class ImageOrderInfo extends StatelessWidget {
                         state is OrderLoaded &&
                         state.orderForCarusel.containsKey(imageId.toString())) {
                       final sizes = state.orderForCarusel[imageId.toString()]!;
-                      final sizeText = sizes.entries
-                          .where((element) => element.value != 0)
-                          .map((e) =>
-                              '${settings.getRuNameProperty(e.key)} - ${e.value}')
+
+                      final orderedKeys = [
+                        'photoOne',
+                        'photoTwo',
+                        'photoThree',
+                        'sizeOne',
+                        'sizeTwo',
+                        'sizeThree'
+                      ];
+                      final sizeText = orderedKeys
+                          .where((key) =>
+                              sizes.containsKey(key) && sizes[key] != 0)
+                          .map((key) =>
+                              '${settings.getRuNameProperty(key)} - ${sizes[key]}')
                           .join('\n');
                       return Container(
                         margin: const EdgeInsets.symmetric(
                           horizontal: 4,
                           vertical: 2,
                         ),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(8)),
+                          border: Border.all(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
                         ),
                         child: Text(
                           sizeText,
