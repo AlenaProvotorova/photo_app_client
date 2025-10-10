@@ -25,7 +25,7 @@ class RenameSetting extends StatelessWidget {
           builder: (BuildContext context) {
             String newName = '';
             return AlertDialog(
-              title: const Text('Изменить'),
+              title: const Text('Введите новое название'),
               content: TextField(
                 onChanged: (value) {
                   newName = value;

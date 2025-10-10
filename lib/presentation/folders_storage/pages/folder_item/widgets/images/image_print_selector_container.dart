@@ -9,7 +9,7 @@ import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector.dart';
 
-class ImagePrintSelectorContainer extends StatelessWidget {
+class ImagePrintSelectorContainer extends StatefulWidget {
   final int imageId;
   final int folderId;
   ImagePrintSelectorContainer({
@@ -17,6 +17,15 @@ class ImagePrintSelectorContainer extends StatelessWidget {
     required this.imageId,
     required this.folderId,
   });
+
+  @override
+  State<ImagePrintSelectorContainer> createState() =>
+      _ImagePrintSelectorContainerState();
+}
+
+class _ImagePrintSelectorContainerState
+    extends State<ImagePrintSelectorContainer> {
+  Map<String, Map<String, int>>? _cachedOrderData;
 
   final List<String> sizesNames = [
     'sizeOne',
@@ -30,11 +39,18 @@ class ImagePrintSelectorContainer extends StatelessWidget {
     final orderBloc = context.read<OrderBloc>();
 
     int getDefaultQuantity(String sizeName, OrderState orderState) {
-      if (orderState is! OrderLoaded) {
+      Map<String, Map<String, int>> orderData;
+
+      if (orderState is OrderLoaded) {
+        orderData = orderState.orderForCarusel;
+        _cachedOrderData = orderData;
+      } else if (_cachedOrderData != null) {
+        orderData = _cachedOrderData!;
+      } else {
         return 0;
       }
 
-      final orders = orderState.orderForCarusel[imageId.toString()];
+      final orders = orderData[widget.imageId.toString()];
       if (orders == null) {
         return 0;
       }
@@ -56,13 +72,12 @@ class ImagePrintSelectorContainer extends StatelessWidget {
             builder: (context, orderState) {
               return BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
                 builder: (context, settingsState) {
-                  // Проверяем, что клиент выбран и заказы загружены
                   if (clientsState is! ClientsLoaded ||
                       clientsState.selectedClient == null) {
                     return const SizedBox.shrink();
                   }
 
-                  if (orderState is! OrderLoaded) {
+                  if (orderState is! OrderLoaded && _cachedOrderData == null) {
                     return const SizedBox.shrink();
                   }
 
@@ -79,8 +94,8 @@ class ImagePrintSelectorContainer extends StatelessWidget {
                             size: settingsState.folderSettings
                                 .getRuNameProperty(sizeName),
                             formatName: sizeName,
-                            imageId: imageId,
-                            folderId: folderId,
+                            imageId: widget.imageId,
+                            folderId: widget.folderId,
                             defaultQuantity:
                                 getDefaultQuantity(sizeName, orderState),
                           );

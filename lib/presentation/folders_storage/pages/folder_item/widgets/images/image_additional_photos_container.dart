@@ -28,7 +28,8 @@ class _ImageAdditionalPhotosContainerState
   bool _photoTwo = false;
   bool _photoThree = false;
 
-  void _updateSwitchValues(Map<String, Map<String, int>> orderForCarusel) {
+  void _updateSwitchValuesFromOrder(
+      Map<String, Map<String, int>> orderForCarusel) {
     final imageId = widget.imageId.toString();
     final imageOrders = orderForCarusel[imageId];
 
@@ -44,14 +45,13 @@ class _ImageAdditionalPhotosContainerState
   void _initializeSwitchValues() {
     final orderState = context.read<OrderBloc>().state;
     if (orderState is OrderLoaded) {
-      _updateSwitchValues(orderState.orderForCarusel);
+      _updateSwitchValuesFromOrder(orderState.orderForCarusel);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    // Инициализируем значения после построения виджета
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSwitchValues();
     });
@@ -63,7 +63,7 @@ class _ImageAdditionalPhotosContainerState
     return BlocListener<OrderBloc, OrderState>(
       listener: (context, orderState) {
         if (orderState is OrderLoaded) {
-          _updateSwitchValues(orderState.orderForCarusel);
+          _updateSwitchValuesFromOrder(orderState.orderForCarusel);
         }
       },
       child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
@@ -110,13 +110,6 @@ class _ImageAdditionalPhotosContainerState
                                   _photoTwo = value;
                                 });
                                 _updateOrder('photoTwo', value);
-                                // context
-                                //     .read<ClientsBloc>()
-                                //     .add(UpdateOrderDigital(
-                                //       clientId:
-                                //           state.selectedClient!.id.toString(),
-                                //       orderDigital: value,
-                                //     ));
                               },
                             ),
                             Text(
@@ -135,13 +128,6 @@ class _ImageAdditionalPhotosContainerState
                                   _photoThree = value;
                                 });
                                 _updateOrder('photoThree', value);
-                                // context
-                                //     .read<ClientsBloc>()
-                                //     .add(UpdateOrderDigital(
-                                //       clientId:
-                                //           state.selectedClient!.id.toString(),
-                                //       orderDigital: value,
-                                //     ));
                               },
                             ),
                             Text(
@@ -175,7 +161,7 @@ class _ImageAdditionalPhotosContainerState
         clientId: clientState.selectedClient!.id.toString(),
         folderId: widget.folderId.toString(),
         formatName: formatName,
-        count: value.toString(),
+        count: value ? '1' : '0',
       );
 
       orderBloc.add(event);

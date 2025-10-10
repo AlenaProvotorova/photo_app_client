@@ -104,7 +104,7 @@ class FolderSettingsScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           title: Text(
-                            'Заказать фото ${getCheckboxTileName(setting, state.folderSettings)}',
+                            getCheckboxTileName(setting, state.folderSettings),
                             style: theme.textTheme.titleMedium,
                           ),
                           value: state.folderSettings
