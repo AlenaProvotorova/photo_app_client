@@ -45,7 +45,6 @@ class _LoginPageState extends State<LoginPage> {
     ));
 
     result.fold((e) {
-      print('====e: $e');
       DisplayMessage.showMessage(context, e);
     }, (data) {
       context.go('/home');

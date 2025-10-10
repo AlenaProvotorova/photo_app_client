@@ -50,9 +50,6 @@ class CorsInterceptor extends Interceptor {
       options.headers['Origin'] = 'http://localhost:3000'; // Desktop app origin
     }
 
-    print('CORS Interceptor - Origin: ${options.headers['Origin']}'); // Debug
-    print('CORS Interceptor - URL: ${options.baseUrl}${options.path}'); // Debug
-
     handler.next(options);
   }
 

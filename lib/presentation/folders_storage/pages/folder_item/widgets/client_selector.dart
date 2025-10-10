@@ -139,7 +139,6 @@ void _showAlbumQuestionDialog(BuildContext context, ClientsLoaded state,
       actions: [
         TextButton(
           onPressed: () {
-            print('Нажата кнопка Да для клиента: ${client.id}');
             clientsBloc.add(UpdateOrderAlbum(
               clientId: client.id.toString(),
               orderAlbum: true,
@@ -150,7 +149,6 @@ void _showAlbumQuestionDialog(BuildContext context, ClientsLoaded state,
         ),
         TextButton(
           onPressed: () {
-            print('Нажата кнопка Нет для клиента: ${client.id}');
             clientsBloc.add(UpdateOrderAlbum(
               clientId: client.id.toString(),
               orderAlbum: false,

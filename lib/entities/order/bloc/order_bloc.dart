@@ -36,8 +36,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
             throw Exception('Неверный формат данных от сервера');
           }
           final orderForCarusel = OrderUtils.getFullOrderForCarusel(data);
-          print('orderForCaruseldata: $data');
-          print('orderForCarusel: $orderForCarusel');
           final fullOrderForTable = OrderUtils.getFullOrderForTable(data);
           final fullOrderForSorting = OrderUtils.getFullOrderForSorting(data);
 
@@ -59,7 +57,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   ) async {
     emit(OrderLoading());
     try {
-      final countValue = event.count == 'true' ? 1 : 0;
+      final countValue = int.parse(event.count);
       final response = await sl<CreateOrUpdateOrderUseCase>().call(
         params: CreateOrUpdateOrderReqParams(
           fileId: int.parse(event.fileId),

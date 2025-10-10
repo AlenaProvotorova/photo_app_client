@@ -31,6 +31,18 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
   void initState() {
     super.initState();
     selectedQuantity = widget.defaultQuantity;
+    print(
+        'ImagePrintSelector initState: imageId=${widget.imageId}, formatName=${widget.formatName}, defaultQuantity=${widget.defaultQuantity}, selectedQuantity=$selectedQuantity');
+  }
+
+  @override
+  void didUpdateWidget(ImagePrintSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.defaultQuantity != widget.defaultQuantity) {
+      print(
+          'ImagePrintSelector didUpdateWidget: oldDefaultQuantity=${oldWidget.defaultQuantity}, newDefaultQuantity=${widget.defaultQuantity}');
+      selectedQuantity = widget.defaultQuantity;
+    }
   }
 
   @override
@@ -96,6 +108,9 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
     if (clientState is ClientsLoaded && clientState.selectedClient != null) {
       final orderBloc = context.read<OrderBloc>();
 
+      print(
+          '_updateOrder: imageId=${widget.imageId}, clientId=${clientState.selectedClient!.id}, folderId=${widget.folderId}, formatName=${widget.formatName}, count=$selectedQuantity');
+
       final event = UpdateOrder(
         fileId: widget.imageId.toString(),
         clientId: clientState.selectedClient!.id.toString(),
@@ -105,6 +120,8 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
       );
 
       orderBloc.add(event);
+    } else {
+      print('_updateOrder: client not selected or not loaded');
     }
   }
 }

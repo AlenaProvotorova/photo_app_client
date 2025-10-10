@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
@@ -26,20 +28,20 @@ class ImagePrintSelectorContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final sizesBloc = context.read<SizesBloc>();
     final orderBloc = context.read<OrderBloc>();
-    int getDefaultQuantity(String sizeName) {
-      if (orderBloc.state is! OrderLoaded) return 0;
 
-      print('getDefaultQuantity: 1');
-      final orders =
-          (orderBloc.state as OrderLoaded).orderForCarusel[imageId.toString()];
-      print('getDefaultQuantity2: ${orderBloc.state}');
-      if (orders == null) return 0;
+    int getDefaultQuantity(String sizeName, OrderState orderState) {
+      if (orderState is! OrderLoaded) {
+        return 0;
+      }
 
-      print('getDefaultQuantity: ${orders.entries}');
+      final orders = orderState.orderForCarusel[imageId.toString()];
+      if (orders == null) {
+        return 0;
+      }
+
       final result = orders.entries
           .where((element) => element.key == sizeName)
           .fold(0, (sum, entry) => sum + entry.value);
-      print('result: $result');
       return result;
     }
 
@@ -48,28 +50,48 @@ class ImagePrintSelectorContainer extends StatelessWidget {
         BlocProvider.value(value: sizesBloc),
         BlocProvider.value(value: orderBloc),
       ],
-      child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
-        builder: (context, settingsState) {
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: sizesNames.map((sizeName) {
-                if (settingsState is FolderSettingsLoaded) {
-                  if (!settingsState.folderSettings.getShowProperty(sizeName)) {
+      child: BlocBuilder<ClientsBloc, ClientsState>(
+        builder: (context, clientsState) {
+          return BlocBuilder<OrderBloc, OrderState>(
+            builder: (context, orderState) {
+              return BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
+                builder: (context, settingsState) {
+                  // Проверяем, что клиент выбран и заказы загружены
+                  if (clientsState is! ClientsLoaded ||
+                      clientsState.selectedClient == null) {
                     return const SizedBox.shrink();
                   }
-                  return ImagePrintSelector(
-                    size: settingsState.folderSettings
-                        .getRuNameProperty(sizeName),
-                    formatName: sizeName,
-                    imageId: imageId,
-                    folderId: folderId,
-                    defaultQuantity: getDefaultQuantity(sizeName),
+
+                  if (orderState is! OrderLoaded) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: sizesNames.map((sizeName) {
+                        if (settingsState is FolderSettingsLoaded) {
+                          if (!settingsState.folderSettings
+                              .getShowProperty(sizeName)) {
+                            return const SizedBox.shrink();
+                          }
+                          return ImagePrintSelector(
+                            size: settingsState.folderSettings
+                                .getRuNameProperty(sizeName),
+                            formatName: sizeName,
+                            imageId: imageId,
+                            folderId: folderId,
+                            defaultQuantity:
+                                getDefaultQuantity(sizeName, orderState),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      }).toList(),
+                    ),
                   );
-                }
-                return const SizedBox.shrink();
-              }).toList(),
-            ),
+                },
+              );
+            },
           );
         },
       ),
