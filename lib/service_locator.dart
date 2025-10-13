@@ -22,6 +22,8 @@ import 'package:photo_app/data/sizes/repositories/size.dart';
 import 'package:photo_app/data/sizes/sources/size_api_service.dart';
 import 'package:photo_app/data/user/repositories/user.dart';
 import 'package:photo_app/data/user/sources/user_api_service.dart';
+import 'package:photo_app/data/users/repositories/users.dart';
+import 'package:photo_app/data/users/sources/users_api_service.dart';
 import 'package:photo_app/data/watermarks/repositories/watermark.dart';
 import 'package:photo_app/data/watermarks/sourses/watermark_api_service.dart';
 import 'package:photo_app/domain/auth/repositories/auth.dart';
@@ -53,11 +55,15 @@ import 'package:photo_app/domain/sizes/repositories/sizes.dart';
 import 'package:photo_app/domain/sizes/usecases/get_sizes.dart';
 import 'package:photo_app/domain/user/repositories/user.dart';
 import 'package:photo_app/domain/user/usecases/get_user.dart';
+import 'package:photo_app/domain/users/repositories/users.dart';
+import 'package:photo_app/domain/users/usecases/get_all_users.dart';
+import 'package:photo_app/domain/users/usecases/update_user_is_admin.dart';
 import 'package:photo_app/domain/watermarks/repositories/watermark.dart';
 import 'package:photo_app/domain/watermarks/usecases/get_watermark.dart';
 import 'package:photo_app/domain/watermarks/usecases/remove_watermark.dart';
 import 'package:photo_app/domain/watermarks/usecases/upload_watermark.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folders_storage/bloc/folder_bloc.dart';
+import 'package:photo_app/entities/users/bloc/users_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -76,6 +82,7 @@ void setupServiceLocator() {
       FolderSettingsApiServiceImplementation());
   sl.registerSingleton<WatermarkApiService>(
       WatermarkApiServiceImplementation());
+  sl.registerSingleton<UsersApiService>(UsersApiServiceImplementation());
 
   //repositories
   sl.registerSingleton<AuthRepository>(AuthRepositoryImplementation());
@@ -99,6 +106,7 @@ void setupServiceLocator() {
       FolderSettingsRepositoryImplementation());
   sl.registerSingleton<WatermarkRepository>(
       WatermarkRepositoryImplementation());
+  sl.registerSingleton<UsersRepository>(UsersRepositoryImplementation());
 
   //usecases
   //auth
@@ -135,7 +143,11 @@ void setupServiceLocator() {
   sl.registerSingleton<UploadWatermarkUseCase>(UploadWatermarkUseCase());
   sl.registerSingleton<GetWatermarkUseCase>(GetWatermarkUseCase());
   sl.registerSingleton<RemoveWatermarkUseCase>(RemoveWatermarkUseCase());
+  //users
+  sl.registerSingleton<GetAllUsersUseCase>(GetAllUsersUseCase());
+  sl.registerSingleton<UpdateUserIsAdminUseCase>(UpdateUserIsAdminUseCase());
 
   //bloc
   sl.registerFactory(() => FolderBloc());
+  sl.registerFactory(() => UsersBloc());
 }

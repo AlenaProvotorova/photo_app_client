@@ -17,7 +17,6 @@ class WatermarkApiServiceImplementation extends WatermarkApiService {
   @override
   Future<Either> uploadWatermark(UploadWatermarkReqParams params) async {
     try {
-      // Добавляем timestamp для предотвращения кэширования
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       var response = await sl<DioClient>().post(
         '${ApiUrl.watermarks}?userId=${params.userId}&_t=$timestamp',
@@ -48,7 +47,6 @@ class WatermarkApiServiceImplementation extends WatermarkApiService {
   @override
   Future<Either> getWatermark(GetAllWatermarksReqParams params) async {
     try {
-      // Добавляем timestamp для предотвращения кэширования
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       var response = await sl<DioClient>().get(
         ApiUrl.watermarks,
@@ -57,13 +55,6 @@ class WatermarkApiServiceImplementation extends WatermarkApiService {
           '_t': timestamp,
         },
       );
-      print('=== ОТВЕТ СЕРВЕРА ДЛЯ ВОДЯНОГО ЗНАКА ===');
-      print('Статус код: ${response.statusCode}');
-      print('Тип данных: ${response.data.runtimeType}');
-      print('Содержимое: ${response.data}');
-      print(
-          'Длина данных: ${response.data is List ? response.data.length : 'не список'}');
-      print('==========================================');
       return Right(response.data);
     } on DioException catch (e) {
       String errorMessage = 'Неизвестная ошибка';
@@ -90,7 +81,6 @@ class WatermarkApiServiceImplementation extends WatermarkApiService {
   Future<Either<String, dynamic>> removeWatermark(
       RemoveWatermarkReqParams params) async {
     try {
-      // Добавляем timestamp для предотвращения кэширования
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       var response = await sl<DioClient>().delete(
         ApiUrl.watermarks,
