@@ -23,37 +23,37 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			FTeKxUyirOh8BSjbCknpeO3G2qg=
+			vabFzIJS3aqhWANkStmj3DYlq4A=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"15378ac54ca2ace87c0528db0a49e978edc6daa8"</string>
+			<string>cdhash H"bda6c5cc8252ddaaa15803644ad9a3dc3625ab80"</string>
 		</dict>
 		<key>Frameworks/FlutterMacOS.framework</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			Iz9H/8/2z2t8jm+/rpd/HIA1Yl8=
+			VA9Hb/7kCdMSvEavtyhA0mGA9Vo=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"233f47ffcff6cf6b7c8e6fbfae977f1c8035625f"</string>
+			<string>cdhash H"540f476ffee409d312bc46afb72840d26180f55a"</string>
 		</dict>
 		<key>Frameworks/desktop_window.framework</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			ibAl6d6RBAdbXHTdqPharfxU0PY=
+			Y1PXwbjltyx1FqvGDd4SzFL3eqE=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"89b025e9de9104075b5c74dda8f85aadfc54d0f6"</string>
+			<string>cdhash H"6353d7c1b8e5b72c7516abc60dde12cc52f77aa1"</string>
 		</dict>
 		<key>Frameworks/file_selector_macos.framework</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			gpw3lkZXEITuOfLuDUGisnjF/gI=
+			+Q/i7YtEZTPHHCKAZ1P+6frz4YU=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"829c379646571084ee39f2ee0d41a2b278c5fe02"</string>
+			<string>cdhash H"f90fe2ed8b446533c71c22806753fee9faf3e185"</string>
 		</dict>
 		<key>Frameworks/libswiftAppKit.dylib</key>
 		<dict>
@@ -221,46 +221,46 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			7FHtnmYtGuS6FIMUzoySvjIxQbo=
+			XKbFYOfsZnbJfBrO3LL1R8CRa+c=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"ec51ed9e662d1ae4ba148314ce8c92be323141ba"</string>
+			<string>cdhash H"5ca6c560e7ec6676c97c1acedcb2f547c0916be7"</string>
 		</dict>
 		<key>Frameworks/screen_retriever_macos.framework</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			iXZhAeHTF/eUibsOJ7eyt4iUD3U=
+			EePviNg7Ws4GkgD4OB367ZYDFoc=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"89766101e1d317f79489bb0e27b7b2b788940f75"</string>
+			<string>cdhash H"11e3ef88d83b5ace069200f8381dfaed96031687"</string>
 		</dict>
 		<key>Frameworks/window_manager.framework</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			HnerCgT+pRuQ1unygMGIzBT8sTA=
+			eaN0ZT0/YbYOUxk92xY4A8snV4g=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"1e77ab0a04fea51b90d6e9f280c188cc14fcb130"</string>
+			<string>cdhash H"79a374653d3f61b60e53193ddb163803cb275788"</string>
 		</dict>
 		<key>MacOS/__preview.dylib</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			PCHGrPtKzu3mgXaL638YBkBoPGQ=
+			olxVNND99X6pItAG03jzE6URGQ4=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"3c21c6acfb4aceede681768beb7f180640683c64"</string>
+			<string>cdhash H"a25c5534d0fdf57ea922d006d378f313a511190e"</string>
 		</dict>
 		<key>MacOS/photo_app.debug.dylib</key>
 		<dict>
 			<key>cdhash</key>
 			<data>
-			iTgKHaKt4KEaKsN4TqG+G6Nh518=
+			Da3KF5zdISrwZXNqEvjAWhcGeBk=
 			</data>
 			<key>requirement</key>
-			<string>cdhash H"89380a1da2ade0a11a2ac3784ea1be1ba361e75f"</string>
+			<string>cdhash H"0dadca179cdd212af065736a12f8c05a17067819"</string>
 		</dict>
 		<key>Resources/AppIcon.icns</key>
 		<dict>

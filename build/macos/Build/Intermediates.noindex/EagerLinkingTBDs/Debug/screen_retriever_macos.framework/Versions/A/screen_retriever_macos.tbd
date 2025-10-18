@@ -78,8 +78,8 @@
     ],
     "target_info": [
       {
-        "min_deployment": "10.14",
-        "target": "x86_64-macos"
+        "min_deployment": "11",
+        "target": "arm64-macos"
       }
     ]
   },

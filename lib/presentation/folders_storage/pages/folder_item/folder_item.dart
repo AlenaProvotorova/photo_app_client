@@ -13,6 +13,7 @@ import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
@@ -81,47 +82,213 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     }
   }
 
-  Future<void> _selectDirectory() async {
+  Future<void> _inRetouching() async {
     _orderBloc.add(LoadOrder(folderId: widget.folderId));
 
-    String? path = await FilePicker.platform.getDirectoryPath(
+    String? selectedPath = await FilePicker.platform.getDirectoryPath(
       lockParentWindow: false,
     );
 
-    if (path != null) {
+    if (selectedPath != null) {
+      await Future.delayed(const Duration(milliseconds: 500));
+
       final state = _orderBloc.state;
+
       if (state is OrderLoaded) {
         final order = state.fullOrderForSorting;
-        final orderClients = order.keys.toList();
 
-        for (final client in orderClients) {
-          final newClientDirectory = Directory('$path/$client');
+        final retouchDirectory = Directory('$selectedPath/РЕТУШЬ');
+        if (!await retouchDirectory.exists()) {
+          await retouchDirectory.create();
+        }
 
-          if (!await newClientDirectory.exists()) {
-            await newClientDirectory.create();
-          }
-
-          final sizes = order[client]?.keys.toList() ?? [];
-          for (final size in sizes) {
-            final newSizeDirectory = Directory('$path/$client/$size');
-
-            if (!await newSizeDirectory.exists()) {
-              await newSizeDirectory.create();
+        final Set<String> orderFileNames = {};
+        for (final client in order.keys) {
+          for (final size in order[client]?.keys ?? []) {
+            for (final file in order[client]?[size] ?? []) {
+              orderFileNames.add(file['fileName']);
             }
+          }
+        }
 
-            final orderFiles = order[client]?[size] ?? [];
-            for (final file in orderFiles) {
-              final sourceFile = File('$path/${file['fileName']}');
-              if (await sourceFile.exists()) {
-                final countText =
-                    file['count'] > 1 ? '${file['count']}шт ' : '';
-                final destinationPath =
-                    '${newSizeDirectory.path}/$countText${client}_${file['fileName']}';
-                await sourceFile.copy(destinationPath);
+        if (orderFileNames.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('В заказе нет файлов для копирования'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        final sourceDir = Directory(selectedPath);
+        if (!await sourceDir.exists()) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Выбранная папка не найдена'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        final sourceFiles = await sourceDir.list().toList();
+
+        int copiedFiles = 0;
+        int matchedFiles = 0;
+
+        bool isFileInOrder(String fileName) {
+          return orderFileNames.contains(fileName);
+        }
+
+        for (final fileEntity in sourceFiles) {
+          if (fileEntity is File) {
+            final fileName = fileEntity.path.split('/').last;
+
+            if (isFileInOrder(fileName)) {
+              matchedFiles++;
+
+              final destinationFile =
+                  File('${retouchDirectory.path}/$fileName');
+
+              if (!await destinationFile.exists()) {
+                try {
+                  await fileEntity.copy(destinationFile.path);
+                  copiedFiles++;
+                } catch (e) {}
               }
             }
           }
         }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Найдено совпадений: $matchedFiles, скопировано файлов: $copiedFiles'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Заказ не загружен. Попробуйте еще раз.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _sortingRetouching() async {
+    _orderBloc.add(LoadOrder(folderId: widget.folderId));
+    _folderSettingsBloc.add(LoadFolderSettings(folderId: widget.folderId));
+
+    String? selectedPath = await FilePicker.platform.getDirectoryPath(
+      lockParentWindow: false,
+    );
+
+    if (selectedPath != null) {
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final orderState = _orderBloc.state;
+      final settingsState = _folderSettingsBloc.state;
+
+      if (orderState is OrderLoaded && settingsState is FolderSettingsLoaded) {
+        final order = orderState.fullOrderForSorting;
+        final settings = settingsState.folderSettings;
+
+        final orderDirectory = Directory('$selectedPath/ЗАКАЗ');
+        if (!await orderDirectory.exists()) {
+          await orderDirectory.create();
+        }
+
+        final Set<String> orderSizes = {};
+        for (final client in order.keys) {
+          for (final size in order[client]?.keys ?? []) {
+            orderSizes.add(size.toString());
+          }
+        }
+
+        final Map<String, String> sizeToRuName = {};
+        sizeToRuName['sizeOne'] = settings.sizeOne.ruName;
+        sizeToRuName['sizeTwo'] = settings.sizeTwo.ruName;
+        sizeToRuName['sizeThree'] = settings.sizeThree.ruName;
+        sizeToRuName['photoOne'] = settings.photoOne.ruName;
+        sizeToRuName['photoTwo'] = settings.photoTwo.ruName;
+        sizeToRuName['photoThree'] = settings.photoThree.ruName;
+
+        int totalCopiedFiles = 0;
+
+        for (final size in orderSizes) {
+          final ruName = sizeToRuName[size] ?? size;
+          final sizeDirectory = Directory('${orderDirectory.path}/$ruName');
+
+          if (!await sizeDirectory.exists()) {
+            await sizeDirectory.create();
+          }
+
+          final Map<String, Map<String, dynamic>> filesForThisSize = {};
+          for (final client in order.keys) {
+            final files = order[client]?[size] ?? [];
+            for (final file in files) {
+              final fileName = file['fileName'];
+              filesForThisSize[fileName] = {
+                'client': client,
+                'count': file['count'] ?? 1,
+                'originalFileName': fileName,
+              };
+            }
+          }
+
+          final retouchDirectory = Directory('$selectedPath/РЕТУШЬ');
+          if (await retouchDirectory.exists()) {
+            final retouchFiles = await retouchDirectory.list().toList();
+
+            for (final fileEntity in retouchFiles) {
+              if (fileEntity is File) {
+                final fileName = fileEntity.path.split('/').last;
+
+                if (filesForThisSize.containsKey(fileName)) {
+                  final fileInfo = filesForThisSize[fileName]!;
+                  final client = fileInfo['client'] as String;
+                  final count = fileInfo['count'] as int;
+
+                  String newFileName;
+                  if (count > 1) {
+                    newFileName = '${count}_${client}_$fileName';
+                  } else {
+                    newFileName = '${client}_$fileName';
+                  }
+
+                  final destinationFile =
+                      File('${sizeDirectory.path}/$newFileName');
+
+                  if (!await destinationFile.exists()) {
+                    try {
+                      await fileEntity.copy(destinationFile.path);
+                      totalCopiedFiles++;
+                    } catch (e) {}
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Создано папок размеров/фото: ${orderSizes.length}, скопировано файлов: $totalCopiedFiles'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Не удалось загрузить данные заказа или настроек'),
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     }
   }
@@ -146,38 +313,65 @@ class FolderItemScreenState extends State<FolderItemScreen> {
               child: BlocBuilder<UserBloc, UserState>(
                 builder: (context, state) {
                   if (state is UserLoaded && state.user.isAdmin) {
-                    return TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        side: BorderSide(color: theme.colorScheme.primary),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            side: BorderSide(color: theme.colorScheme.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: _inRetouching,
+                          child: const Text('В ретушь'),
                         ),
-                      ),
-                      onPressed: _selectDirectory,
-                      child: const Text('Отсортировать'),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            side: BorderSide(color: theme.colorScheme.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: _sortingRetouching,
+                          child: const Text('Сортировка ретуши'),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            side: BorderSide(color: theme.colorScheme.primary),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            context
+                                .go('/folder/${widget.folderPath}/full-order');
+                          },
+                          child: const Text('Весь заказ'),
+                        ),
+                      ],
                     );
                   }
-                  return const SizedBox.shrink();
+                  return TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      side: BorderSide(color: theme.colorScheme.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () {
+                      context.go('/folder/${widget.folderPath}/full-order');
+                    },
+                    child: const Text('Весь заказ'),
+                  );
                 },
               ),
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.all(8),
-            height: 36,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                side: BorderSide(color: theme.colorScheme.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                context.go('/folder/${widget.folderPath}/full-order');
-              },
-              child: const Text('Весь заказ'),
             ),
           ),
         ],
