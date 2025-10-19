@@ -1,4 +1,4 @@
-name: Build Windows Desktop App
+name: Build Windows Desktop App V2
 
 on:
   push:
@@ -118,7 +118,7 @@ jobs:
         echo "version=$version" >> $env:GITHUB_OUTPUT
         echo "App version: $version"
         
-    - name: Create Windows installer package
+    - name: Find and package Windows files
       run: |
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "PhotoApp-Windows-v$version.zip"
