@@ -11,203 +11,216 @@ on:
       create_release:
         description: 'Create a new release'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 env:
-  FLUTTER_VERSION: '3.27.0'
+  FLUTTER_VERSION: '3.24.5'
 
 jobs:
   build-windows:
+    name: Build Windows App
     runs-on: windows-latest
     
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
       
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.22.6'
+        flutter-version: '3.24.5'
         channel: 'stable'
         cache: true
         
     - name: Verify Flutter installation
       run: |
-        echo "Flutter version:"
+        echo "=== Flutter Version ==="
         flutter --version
-        echo "Flutter doctor:"
+        echo ""
+        echo "=== Flutter Doctor ==="
         flutter doctor -v
         
     - name: Enable Windows desktop
-      run: flutter config --enable-windows-desktop
-      
-    - name: Verify Windows desktop support
       run: |
-        echo "Checking Windows desktop support:"
-        flutter config --list | findstr windows-desktop
-      
-    - name: Get dependencies
-      run: flutter pub get
-      
-    - name: Run tests
+        echo "Enabling Windows desktop support..."
+        flutter config --enable-windows-desktop
+        
+    - name: Get Flutter dependencies
+      run: |
+        echo "Getting Flutter dependencies..."
+        flutter pub get
+        echo "Dependencies installed successfully"
+        
+    - name: Verify project structure
+      run: |
+        echo "=== Project Structure ==="
+        echo "Current directory: $(Get-Location)"
+        echo ""
+        echo "=== Windows directory ==="
+        if (Test-Path "windows") {
+          Get-ChildItem "windows" -Recurse | Select-Object Name, Mode, Length
+        } else {
+          echo "ERROR: Windows directory not found"
+          exit 1
+        }
+        
+    - name: Run Flutter tests
       run: |
         echo "Running Flutter tests..."
-        flutter test || echo "Tests completed with warnings/errors, but continuing build"
+        flutter test --coverage || echo "Tests completed with warnings"
+      continue-on-error: true
+      
+    - name: Analyze Flutter code
+      run: |
+        echo "Analyzing Flutter code..."
+        flutter analyze || echo "Analysis completed with warnings"
       continue-on-error: true
       
     - name: Build Windows app
-      run: flutter build windows --release --verbose
-      
+      run: |
+        echo "Building Windows app..."
+        flutter build windows --release --verbose
+        
     - name: Verify build output
       run: |
-        echo "Checking build output structure..."
+        echo "=== Build Output Verification ==="
         echo "Current directory: $(Get-Location)"
-        echo "Build directory contents:"
+        echo ""
+        echo "=== Build directory structure ==="
         if (Test-Path "build") {
           Get-ChildItem "build" -Recurse -Directory | Select-Object FullName
         } else {
-          echo "Build directory does not exist"
+          echo "ERROR: Build directory not found"
+          exit 1
         }
-        
+        echo ""
+        echo "=== Windows build contents ==="
         if (Test-Path "build\windows") {
-          echo "Windows build directory exists"
-          Get-ChildItem "build\windows" -Recurse -Directory | Select-Object FullName
+          Get-ChildItem "build\windows" -Recurse | Select-Object Name, Mode, Length
         } else {
-          echo "Windows build directory does not exist"
+          echo "ERROR: Windows build directory not found"
+          exit 1
         }
         
-        if (Test-Path "build\windows\runner") {
-          echo "Runner directory exists"
-          Get-ChildItem "build\windows\runner" -Recurse -Directory | Select-Object FullName
-        } else {
-          echo "Runner directory does not exist"
-        }
-        
-        # Check for different possible build output structures
-        if (Test-Path "build\windows\runner\Release") {
-          echo "Release directory exists (old structure)"
-          Get-ChildItem "build\windows\runner\Release" | Select-Object Name, Mode, Length
-        } elseif (Test-Path "build\windows\x64") {
-          echo "x64 directory exists (new structure)"
-          Get-ChildItem "build\windows\x64" | Select-Object Name, Mode, Length
-        } elseif (Test-Path "build\windows") {
-          echo "Windows build directory exists with contents:"
-          Get-ChildItem "build\windows" | Select-Object Name, Mode, Length
-        } else {
-          echo "ERROR: No Windows build output found"
-          echo "Available build directories:"
-          Get-ChildItem "build" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object FullName
-        }
-      
-    - name: Get version from pubspec.yaml
+    - name: Get app version
       id: get_version
       run: |
         $version = (Get-Content pubspec.yaml | Select-String "version:" | ForEach-Object { $_.Line.Split(":")[1].Trim() })
         echo "version=$version" >> $env:GITHUB_OUTPUT
-        echo "Version: $version"
-      
-    - name: Create ZIP archive
+        echo "App version: $version"
+        
+    - name: Create Windows installer package
       run: |
         $version = "${{ steps.get_version.outputs.version }}"
-        $zipName = "PhotoApp-Windows-$version.zip"
-        echo "Creating ZIP archive: $zipName"
+        $zipName = "PhotoApp-Windows-v$version.zip"
+        echo "Creating Windows package: $zipName"
         
-        # Determine the correct source path based on build structure
+        # Determine source path based on build structure
         $sourcePath = $null
+        $sourceDir = $null
         
         if (Test-Path "build\windows\runner\Release") {
           $sourcePath = "build\windows\runner\Release\*"
-          echo "Using old structure: $sourcePath"
+          $sourceDir = "build\windows\runner\Release"
+          echo "Using Release structure: $sourcePath"
         } elseif (Test-Path "build\windows\x64") {
           $sourcePath = "build\windows\x64\*"
-          echo "Using new x64 structure: $sourcePath"
+          $sourceDir = "build\windows\x64"
+          echo "Using x64 structure: $sourcePath"
         } elseif (Test-Path "build\windows") {
           $sourcePath = "build\windows\*"
+          $sourceDir = "build\windows"
           echo "Using root windows structure: $sourcePath"
         } else {
           echo "ERROR: No Windows build output found"
-          echo "Available build directories:"
+          echo "Available directories:"
           Get-ChildItem "build" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object FullName
           exit 1
         }
         
-        echo "Source path: $sourcePath"
+        echo "Source directory: $sourceDir"
+        echo "Files to package:"
+        Get-ChildItem $sourceDir | Select-Object Name, Length
         
-        # List files that will be archived
-        echo "Files to be archived:"
-        $sourceDir = $sourcePath -replace "\\\*$", ""
-        if (Test-Path $sourceDir) {
-          Get-ChildItem $sourceDir | Select-Object Name, Length
-        } else {
-          echo "Source directory does not exist: $sourceDir"
-          exit 1
-        }
-        
+        # Create ZIP package
         try {
           Compress-Archive -Path $sourcePath -DestinationPath $zipName -Force
-          echo "Archive created successfully"
+          echo "Package created successfully: $zipName"
           
-          # Check if archive was created
+          # Verify package
           if (Test-Path $zipName) {
             $fileInfo = Get-ChildItem $zipName
-            echo "Archive details:"
-            echo "Name: $($fileInfo.Name)"
-            echo "Size: $($fileInfo.Length) bytes"
-            echo "Archive created at: $(Resolve-Path $zipName)"
+            echo "Package details:"
+            echo "  Name: $($fileInfo.Name)"
+            echo "  Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
+            echo "  Path: $(Resolve-Path $zipName)"
           } else {
-            echo "ERROR: Archive was not created"
+            echo "ERROR: Package was not created"
             exit 1
           }
         } catch {
-          echo "ERROR: Failed to create archive: $($_.Exception.Message)"
+          echo "ERROR: Failed to create package: $($_.Exception.Message)"
           exit 1
         }
-      
+        
     - name: Upload Windows build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: PhotoApp-Windows-${{ steps.get_version.outputs.version }}
-        path: PhotoApp-Windows-*.zip
+        name: PhotoApp-Windows-v${{ steps.get_version.outputs.version }}
+        path: PhotoApp-Windows-v*.zip
         retention-days: 30
         
-    - name: Upload coverage report
+    - name: Upload test coverage
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: coverage-report
+        name: test-coverage
         path: coverage/
         retention-days: 7
         
-    - name: Create Release
+    - name: Create GitHub Release
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.create_release == 'true')
       uses: softprops/action-gh-release@v1
       with:
         name: PhotoApp Windows v${{ steps.get_version.outputs.version }}
         tag_name: v${{ steps.get_version.outputs.version }}
-        files: PhotoApp-Windows-*.zip
+        files: PhotoApp-Windows-v*.zip
         generate_release_notes: true
         draft: false
-        prerelease: ${{ contains(steps.get_version.outputs.version, 'dev') || contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'alpha') }}
+        prerelease: false
         body: |
           ## PhotoApp Windows Desktop Application
           
-          **Version:** ${{ steps.get_version.outputs.version }}
-          **Build Date:** ${{ github.run_number }}
-          **Commit:** ${{ github.sha }}
+          **Version:** ${{ steps.get_version.outputs.version }}  
+          **Build Date:** ${{ github.run_number }}  
+          **Commit:** ${{ github.sha }}  
+          **Flutter Version:** 3.24.5
           
           ### Installation
-          1. Download the ZIP file
-          2. Extract to any folder (e.g., `C:\Program Files\PhotoApp\`)
-          3. Run `photo_app_client.exe`
+          1. Download the ZIP file below
+          2. Extract to any folder (e.g., C:\Program Files\PhotoApp\)
+          3. Run photo_app_client.exe
           
           ### System Requirements
-          - Windows 10 (version 1903 or later)
-          - 64-bit architecture
-          - 4 GB RAM minimum
-          - 1 GB free disk space
+          - OS: Windows 10 (version 1903 or later) / Windows 11
+          - Architecture: 64-bit (x64)
+          - RAM: 4 GB minimum, 8 GB recommended
+          - Storage: 1 GB free disk space
+          - Graphics: DirectX 11 compatible
+          
+          ### Features
+          - Modern Flutter-based UI
+          - Cross-platform compatibility
+          - Optimized for Windows desktop
           
           ### Changes
           ${{ github.event.head_commit.message }}
