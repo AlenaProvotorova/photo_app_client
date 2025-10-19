@@ -52,6 +52,19 @@ jobs:
     - name: Build Windows app
       run: flutter build windows --release --verbose
       
+    - name: Verify build output
+      run: |
+        echo "Checking build output structure..."
+        if (Test-Path "build\windows\runner\Release") {
+          echo "Release directory exists"
+          Get-ChildItem "build\windows\runner\Release" | Select-Object Name, Mode
+        } else {
+          echo "ERROR: Release directory not found"
+          echo "Available build directories:"
+          Get-ChildItem "build\windows" -Recurse -Directory | Select-Object FullName
+          exit 1
+        }
+      
     - name: Get version from pubspec.yaml
       id: get_version
       run: |
@@ -63,9 +76,31 @@ jobs:
       run: |
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "PhotoApp-Windows-$version.zip"
-        Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath $zipName -Force
-        echo "Created: $zipName"
-        Get-ChildItem $zipName | Select-Object Name, Length
+        echo "Creating ZIP archive: $zipName"
+        echo "Source path: build\windows\runner\Release\*"
+        
+        # Check if source directory exists
+        if (Test-Path "build\windows\runner\Release") {
+          echo "Source directory exists, creating archive..."
+          Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath $zipName -Force
+          echo "Archive created successfully"
+          
+          # Check if archive was created
+          if (Test-Path $zipName) {
+            $fileInfo = Get-ChildItem $zipName
+            echo "Archive details:"
+            echo "Name: $($fileInfo.Name)"
+            echo "Size: $($fileInfo.Length) bytes"
+          } else {
+            echo "ERROR: Archive was not created"
+            exit 1
+          }
+        } else {
+          echo "ERROR: Source directory does not exist: build\windows\runner\Release"
+          echo "Available directories:"
+          Get-ChildItem build\windows\runner -ErrorAction SilentlyContinue | Select-Object Name
+          exit 1
+        }
       
     - name: Upload Windows build artifact
       uses: actions/upload-artifact@v4
