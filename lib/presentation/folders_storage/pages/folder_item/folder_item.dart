@@ -74,11 +74,20 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   Future<void> _pickImages(context) async {
     final selectedImages = await _imagePickerService.pickImages();
     if (selectedImages.isNotEmpty) {
-      _filesBloc.add(UploadFiles(
-        folderId: widget.folderId,
-        images: selectedImages,
-        context: context,
-      ));
+      // Если файлов больше 10, используем массовую загрузку
+      if (selectedImages.length > 10) {
+        _filesBloc.add(UploadFilesBatch(
+          folderId: widget.folderId,
+          images: selectedImages,
+          context: context,
+        ));
+      } else {
+        _filesBloc.add(UploadFiles(
+          folderId: widget.folderId,
+          images: selectedImages,
+          context: context,
+        ));
+      }
     }
   }
 
@@ -293,6 +302,39 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     }
   }
 
+  void _showDeleteAllFilesDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Удалить все файлы'),
+          content: const Text(
+            'Вы уверены, что хотите удалить все файлы в этой папке? Это действие нельзя отменить.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _filesBloc.add(DeleteAllFiles(
+                  folderId: widget.folderId,
+                  context: context,
+                ));
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Удалить'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -353,6 +395,23 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                                 .go('/folder/${widget.folderPath}/full-order');
                           },
                           child: const Text('Весь заказ'),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                theme.colorScheme.error.withOpacity(0.1),
+                            side: BorderSide(color: theme.colorScheme.error),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () => _showDeleteAllFilesDialog(context),
+                          icon: Icon(
+                            Icons.delete_outline,
+                            color: theme.colorScheme.error,
+                          ),
+                          tooltip: 'Удалить все файлы',
                         ),
                       ],
                     );

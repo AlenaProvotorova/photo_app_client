@@ -6,6 +6,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/fi
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_container.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_progress_loader.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/batch_upload_progress_loader.dart';
 
 class FilesList extends StatelessWidget {
   final String folderId;
@@ -28,6 +29,10 @@ class FilesList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         } else if (state is FilesUploading) {
           return _buildUploadingState(context, state);
+        } else if (state is FilesBatchUploading) {
+          return _buildBatchUploadingState(context, state);
+        } else if (state is FilesDeleting) {
+          return _buildDeletingState(context, state);
         } else if (state is FilesLoaded) {
           return Column(
             children: [
@@ -78,6 +83,59 @@ class FilesList extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+
+  Widget _buildBatchUploadingState(
+      BuildContext context, FilesBatchUploading state) {
+    return Column(
+      children: [
+        // Прогресс массовой загрузки
+        BatchUploadProgressLoader(
+          totalFiles: state.totalFiles,
+          uploadedFiles: state.uploadedFiles,
+          failedFiles: state.failedFiles,
+          remainingFiles: state.remainingFiles,
+          progress: state.progress,
+          currentBatch: state.currentBatch,
+          totalBatches: state.totalBatches,
+          batchProgress: state.batchProgress,
+        ),
+
+        // Существующие файлы
+        if (state.existingFiles.isNotEmpty)
+          Expanded(
+            child: FilesContainer(
+              files: state.existingFiles,
+              folderId: folderId,
+              orderBloc: orderBloc,
+              clientsBloc: clientsBloc,
+              showSelected: showSelected,
+            ),
+          )
+        else
+          const Expanded(
+            child: Center(
+              child: Text('Загрузка изображений...'),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDeletingState(BuildContext context, FilesDeleting state) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(
+            state.message,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ],
+      ),
     );
   }
 }

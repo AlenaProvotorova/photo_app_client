@@ -36,9 +36,11 @@ import 'package:photo_app/domain/clients/usecases/update_clients.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_album.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_digital.dart';
 import 'package:photo_app/domain/files/repositories/files.dart';
+import 'package:photo_app/domain/files/usecases/delete_all_files.dart';
 import 'package:photo_app/domain/files/usecases/get_all_files.dart';
 import 'package:photo_app/domain/files/usecases/remove_files.dart';
 import 'package:photo_app/domain/files/usecases/upload_file.dart';
+import 'package:photo_app/domain/files/usecases/upload_files_batch.dart';
 import 'package:photo_app/domain/folder_settings/repositories/folder_settings.dart';
 import 'package:photo_app/domain/folder_settings/usecases/get_folder_settings.dart';
 import 'package:photo_app/domain/folder_settings/usecases/update_folder_settings.dart';
@@ -121,8 +123,10 @@ void setupServiceLocator() {
   sl.registerSingleton<EditFolderUseCase>(EditFolderUseCase());
   //files
   sl.registerSingleton<UploadFileUseCase>(UploadFileUseCase());
+  sl.registerSingleton<UploadFilesBatchUseCase>(UploadFilesBatchUseCase());
   sl.registerSingleton<GetAllFilesUseCase>(GetAllFilesUseCase());
   sl.registerSingleton<RemoveFilesUseCase>(RemoveFilesUseCase());
+  sl.registerSingleton<DeleteAllFilesUseCase>(DeleteAllFilesUseCase());
   //clients
   sl.registerSingleton<GetAllClientsUseCase>(GetAllClientsUseCase());
   sl.registerSingleton<UpdateClientsUseCase>(UpdateClientsUseCase());

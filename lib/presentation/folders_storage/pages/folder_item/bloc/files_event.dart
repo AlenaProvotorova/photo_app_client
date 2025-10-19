@@ -21,6 +21,18 @@ class UploadFiles extends FilesEvent {
   });
 }
 
+class UploadFilesBatch extends FilesEvent {
+  final String folderId;
+  final List<ImageData> images;
+  final BuildContext context;
+
+  UploadFilesBatch({
+    required this.folderId,
+    required this.images,
+    required this.context,
+  });
+}
+
 class UpdateFilePrintedFormats extends FilesEvent {
   final int fileId;
   final String sizeType;
@@ -30,5 +42,15 @@ class UpdateFilePrintedFormats extends FilesEvent {
     required this.fileId,
     required this.sizeType,
     required this.printFormat,
+  });
+}
+
+class DeleteAllFiles extends FilesEvent {
+  final String folderId;
+  final BuildContext context;
+
+  DeleteAllFiles({
+    required this.folderId,
+    required this.context,
   });
 }
