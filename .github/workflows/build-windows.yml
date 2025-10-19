@@ -77,12 +77,18 @@ jobs:
           echo "Runner directory does not exist"
         }
         
+        # Check for different possible build output structures
         if (Test-Path "build\windows\runner\Release") {
-          echo "Release directory exists"
+          echo "Release directory exists (old structure)"
           Get-ChildItem "build\windows\runner\Release" | Select-Object Name, Mode, Length
+        } elseif (Test-Path "build\windows\x64") {
+          echo "x64 directory exists (new structure)"
+          Get-ChildItem "build\windows\x64" | Select-Object Name, Mode, Length
+        } elseif (Test-Path "build\windows") {
+          echo "Windows build directory exists with contents:"
+          Get-ChildItem "build\windows" | Select-Object Name, Mode, Length
         } else {
-          echo "ERROR: Release directory not found"
-          echo "This is expected on non-Windows hosts, but should work in GitHub Actions"
+          echo "ERROR: No Windows build output found"
           echo "Available build directories:"
           Get-ChildItem "build" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object FullName
         }
@@ -99,49 +105,55 @@ jobs:
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "PhotoApp-Windows-$version.zip"
         echo "Creating ZIP archive: $zipName"
-        echo "Source path: build\windows\runner\Release\*"
         
-        # Check if source directory exists
+        # Determine the correct source path based on build structure
+        $sourcePath = $null
+        
         if (Test-Path "build\windows\runner\Release") {
-          echo "Source directory exists, creating archive..."
+          $sourcePath = "build\windows\runner\Release\*"
+          echo "Using old structure: $sourcePath"
+        } elseif (Test-Path "build\windows\x64") {
+          $sourcePath = "build\windows\x64\*"
+          echo "Using new x64 structure: $sourcePath"
+        } elseif (Test-Path "build\windows") {
+          $sourcePath = "build\windows\*"
+          echo "Using root windows structure: $sourcePath"
+        } else {
+          echo "ERROR: No Windows build output found"
+          echo "Available build directories:"
+          Get-ChildItem "build" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object FullName
+          exit 1
+        }
+        
+        echo "Source path: $sourcePath"
+        
+        # List files that will be archived
+        echo "Files to be archived:"
+        $sourceDir = $sourcePath -replace "\\\*$", ""
+        if (Test-Path $sourceDir) {
+          Get-ChildItem $sourceDir | Select-Object Name, Length
+        } else {
+          echo "Source directory does not exist: $sourceDir"
+          exit 1
+        }
+        
+        try {
+          Compress-Archive -Path $sourcePath -DestinationPath $zipName -Force
+          echo "Archive created successfully"
           
-          # List files that will be archived
-          echo "Files to be archived:"
-          Get-ChildItem "build\windows\runner\Release" | Select-Object Name, Length
-          
-          try {
-            Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath $zipName -Force
-            echo "Archive created successfully"
-            
-            # Check if archive was created
-            if (Test-Path $zipName) {
-              $fileInfo = Get-ChildItem $zipName
-              echo "Archive details:"
-              echo "Name: $($fileInfo.Name)"
-              echo "Size: $($fileInfo.Length) bytes"
-              echo "Archive created at: $(Resolve-Path $zipName)"
-            } else {
-              echo "ERROR: Archive was not created"
-              exit 1
-            }
-          } catch {
-            echo "ERROR: Failed to create archive: $($_.Exception.Message)"
+          # Check if archive was created
+          if (Test-Path $zipName) {
+            $fileInfo = Get-ChildItem $zipName
+            echo "Archive details:"
+            echo "Name: $($fileInfo.Name)"
+            echo "Size: $($fileInfo.Length) bytes"
+            echo "Archive created at: $(Resolve-Path $zipName)"
+          } else {
+            echo "ERROR: Archive was not created"
             exit 1
           }
-        } else {
-          echo "ERROR: Source directory does not exist: build\windows\runner\Release"
-          echo "Available directories:"
-          if (Test-Path "build\windows\runner") {
-            Get-ChildItem "build\windows\runner" -ErrorAction SilentlyContinue | Select-Object Name
-          } else {
-            echo "build\windows\runner directory does not exist"
-          }
-          if (Test-Path "build\windows") {
-            echo "build\windows contents:"
-            Get-ChildItem "build\windows" -ErrorAction SilentlyContinue | Select-Object Name
-          } else {
-            echo "build\windows directory does not exist"
-          }
+        } catch {
+          echo "ERROR: Failed to create archive: $($_.Exception.Message)"
           exit 1
         }
       
