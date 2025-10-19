@@ -1,0 +1,113 @@
+name: Build Windows Desktop App
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create a new release'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  FLUTTER_VERSION: '3.27.0'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+        
+    - name: Enable Windows desktop
+      run: flutter config --enable-windows-desktop
+      
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Verify Flutter installation
+      run: flutter doctor -v
+      
+    - name: Run tests
+      run: flutter test --coverage
+      
+    - name: Build Windows app
+      run: flutter build windows --release --verbose
+      
+    - name: Get version from pubspec.yaml
+      id: get_version
+      run: |
+        $version = (Get-Content pubspec.yaml | Select-String "version:" | ForEach-Object { $_.Line.Split(":")[1].Trim() })
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+        echo "Version: $version"
+      
+    - name: Create ZIP archive
+      run: |
+        $version = "${{ steps.get_version.outputs.version }}"
+        $zipName = "PhotoApp-Windows-$version.zip"
+        Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath $zipName -Force
+        echo "Created: $zipName"
+        Get-ChildItem $zipName | Select-Object Name, Length
+      
+    - name: Upload Windows build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PhotoApp-Windows-${{ steps.get_version.outputs.version }}
+        path: PhotoApp-Windows-*.zip
+        retention-days: 30
+        
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: coverage/
+        retention-days: 7
+        
+    - name: Create Release
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.create_release == 'true')
+      uses: softprops/action-gh-release@v1
+      with:
+        name: PhotoApp Windows v${{ steps.get_version.outputs.version }}
+        tag_name: v${{ steps.get_version.outputs.version }}
+        files: PhotoApp-Windows-*.zip
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ contains(steps.get_version.outputs.version, 'dev') || contains(steps.get_version.outputs.version, 'beta') || contains(steps.get_version.outputs.version, 'alpha') }}
+        body: |
+          ## PhotoApp Windows Desktop Application
+          
+          **Version:** ${{ steps.get_version.outputs.version }}
+          **Build Date:** ${{ github.run_number }}
+          **Commit:** ${{ github.sha }}
+          
+          ### Installation
+          1. Download the ZIP file
+          2. Extract to any folder (e.g., `C:\Program Files\PhotoApp\`)
+          3. Run `photo_app_client.exe`
+          
+          ### System Requirements
+          - Windows 10 (version 1903 or later)
+          - 64-bit architecture
+          - 4 GB RAM minimum
+          - 1 GB free disk space
+          
+          ### Changes
+          ${{ github.event.head_commit.message }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
