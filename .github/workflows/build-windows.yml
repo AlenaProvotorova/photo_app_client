@@ -229,3 +229,13 @@ jobs:
           ${{ github.event.head_commit.message }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
+        
+    - name: Notify about artifacts
+      if: always()
+      run: |
+        echo "=== Build Completed ==="
+        echo "ZIP file is available in the 'Artifacts' section below"
+        echo "Download: PhotoApp-Windows-v${{ steps.get_version.outputs.version }}"
+        echo ""
+        echo "If release creation failed, you can still download the ZIP file from artifacts"
