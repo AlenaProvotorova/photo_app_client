@@ -124,52 +124,47 @@ jobs:
         $zipName = "PhotoApp-Windows-v$version.zip"
         echo "Creating Windows package: $zipName"
         
-        # First, let's explore the actual build structure
-        echo "=== Exploring build structure ==="
-        if (Test-Path "build") {
-          echo "Build directory exists"
-          Get-ChildItem "build" -Recurse -Directory | Select-Object FullName
+        # Find all .exe files in build directory
+        echo "=== Searching for executable files ==="
+        $exeFiles = Get-ChildItem "build" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue
+        if ($exeFiles.Count -gt 0) {
+          echo "Found $($exeFiles.Count) executable files:"
+          foreach ($file in $exeFiles) {
+            echo "  $($file.FullName)"
+          }
+          
+          # Find the directory containing the main executable
+          $mainExe = $exeFiles | Where-Object { $_.Name -like "*photo_app*" -or $_.Name -like "*app*" } | Select-Object -First 1
+          if (-not $mainExe) {
+            $mainExe = $exeFiles | Select-Object -First 1
+          }
+          
+          $sourceDir = $mainExe.DirectoryName
+          echo "Using directory: $sourceDir"
+          echo "Main executable: $($mainExe.Name)"
         } else {
-          echo "ERROR: Build directory not found"
-          exit 1
-        }
-        
-        echo ""
-        echo "=== Windows build structure ==="
-        if (Test-Path "build\windows") {
-          echo "Windows build directory exists"
-          Get-ChildItem "build\windows" -Recurse | Select-Object Name, Mode, Length
-        } else {
-          echo "ERROR: Windows build directory not found"
-          exit 1
-        }
-        
-        # Determine source path based on actual build structure
-        $sourcePath = $null
-        $sourceDir = $null
-        
-        # Check for different possible structures
-        if (Test-Path "build\windows\runner\Release") {
-          $sourcePath = "build\windows\runner\Release\*"
-          $sourceDir = "build\windows\runner\Release"
-          echo "Using Release structure: $sourcePath"
-        } elseif (Test-Path "build\windows\runner") {
-          $sourcePath = "build\windows\runner\*"
-          $sourceDir = "build\windows\runner"
-          echo "Using runner structure: $sourcePath"
-        } elseif (Test-Path "build\windows\x64") {
-          $sourcePath = "build\windows\x64\*"
-          $sourceDir = "build\windows\x64"
-          echo "Using x64 structure: $sourcePath"
-        } elseif (Test-Path "build\windows") {
-          $sourcePath = "build\windows\*"
-          $sourceDir = "build\windows"
-          echo "Using root windows structure: $sourcePath"
-        } else {
-          echo "ERROR: No Windows build output found"
-          echo "Available directories:"
-          Get-ChildItem "build" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object FullName
-          exit 1
+          echo "No .exe files found, exploring build structure..."
+          
+          # Fallback: explore build structure
+          if (Test-Path "build") {
+            echo "Build directory exists"
+            Get-ChildItem "build" -Recurse -Directory | Select-Object FullName
+          }
+          
+          if (Test-Path "build\windows") {
+            echo "Windows build directory exists"
+            Get-ChildItem "build\windows" -Recurse | Select-Object Name, Mode, Length
+          }
+          
+          # Try to find any directory with files
+          $dirsWithFiles = Get-ChildItem "build" -Recurse -Directory | Where-Object { (Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue).Count -gt 0 }
+          if ($dirsWithFiles.Count -gt 0) {
+            $sourceDir = $dirsWithFiles[0].FullName
+            echo "Using directory with files: $sourceDir"
+          } else {
+            echo "ERROR: No suitable directory found"
+            exit 1
+          }
         }
         
         echo ""
@@ -188,6 +183,10 @@ jobs:
         echo ""
         echo "=== Creating ZIP package ==="
         try {
+          # Try different approaches to create the archive
+          $sourcePath = "$sourceDir\*"
+          echo "Attempting to archive: $sourcePath"
+          
           Compress-Archive -Path $sourcePath -DestinationPath $zipName -Force
           echo "Package created successfully: $zipName"
           
@@ -204,12 +203,12 @@ jobs:
           }
         } catch {
           echo "ERROR: Failed to create package: $($_.Exception.Message)"
-          echo "Trying alternative approach..."
+          echo "Trying alternative approach with individual files..."
           
           # Try creating archive from individual files
           $files = Get-ChildItem $sourceDir -File
           if ($files.Count -gt 0) {
-            echo "Creating archive from individual files..."
+            echo "Creating archive from $($files.Count) individual files..."
             Compress-Archive -Path $files -DestinationPath $zipName -Force
             echo "Alternative package created successfully: $zipName"
           } else {
