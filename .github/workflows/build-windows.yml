@@ -124,14 +124,39 @@ jobs:
         $zipName = "PhotoApp-Windows-v$version.zip"
         echo "Creating Windows package: $zipName"
         
-        # Determine source path based on build structure
+        # First, let's explore the actual build structure
+        echo "=== Exploring build structure ==="
+        if (Test-Path "build") {
+          echo "Build directory exists"
+          Get-ChildItem "build" -Recurse -Directory | Select-Object FullName
+        } else {
+          echo "ERROR: Build directory not found"
+          exit 1
+        }
+        
+        echo ""
+        echo "=== Windows build structure ==="
+        if (Test-Path "build\windows") {
+          echo "Windows build directory exists"
+          Get-ChildItem "build\windows" -Recurse | Select-Object Name, Mode, Length
+        } else {
+          echo "ERROR: Windows build directory not found"
+          exit 1
+        }
+        
+        # Determine source path based on actual build structure
         $sourcePath = $null
         $sourceDir = $null
         
+        # Check for different possible structures
         if (Test-Path "build\windows\runner\Release") {
           $sourcePath = "build\windows\runner\Release\*"
           $sourceDir = "build\windows\runner\Release"
           echo "Using Release structure: $sourcePath"
+        } elseif (Test-Path "build\windows\runner") {
+          $sourcePath = "build\windows\runner\*"
+          $sourceDir = "build\windows\runner"
+          echo "Using runner structure: $sourcePath"
         } elseif (Test-Path "build\windows\x64") {
           $sourcePath = "build\windows\x64\*"
           $sourceDir = "build\windows\x64"
@@ -147,11 +172,21 @@ jobs:
           exit 1
         }
         
+        echo ""
+        echo "=== Source directory verification ==="
         echo "Source directory: $sourceDir"
-        echo "Files to package:"
-        Get-ChildItem $sourceDir | Select-Object Name, Length
+        if (Test-Path $sourceDir) {
+          echo "Source directory exists"
+          echo "Files to package:"
+          Get-ChildItem $sourceDir | Select-Object Name, Length
+        } else {
+          echo "ERROR: Source directory does not exist: $sourceDir"
+          exit 1
+        }
         
         # Create ZIP package
+        echo ""
+        echo "=== Creating ZIP package ==="
         try {
           Compress-Archive -Path $sourcePath -DestinationPath $zipName -Force
           echo "Package created successfully: $zipName"
@@ -169,7 +204,18 @@ jobs:
           }
         } catch {
           echo "ERROR: Failed to create package: $($_.Exception.Message)"
-          exit 1
+          echo "Trying alternative approach..."
+          
+          # Try creating archive from individual files
+          $files = Get-ChildItem $sourceDir -File
+          if ($files.Count -gt 0) {
+            echo "Creating archive from individual files..."
+            Compress-Archive -Path $files -DestinationPath $zipName -Force
+            echo "Alternative package created successfully: $zipName"
+          } else {
+            echo "ERROR: No files found to archive"
+            exit 1
+          }
         }
         
     - name: Upload Windows build artifact
