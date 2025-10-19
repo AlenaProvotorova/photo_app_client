@@ -1,4 +1,4 @@
-name: Build Windows Desktop App V2
+name: Build Windows Desktop App
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
         type: boolean
 
 env:
-  FLUTTER_VERSION: '3.24.5'
+  FLUTTER_VERSION: '3.27.1'
 
 jobs:
   build-windows:
@@ -37,7 +37,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.5'
+        flutter-version: ${{ env.FLUTTER_VERSION }}
         channel: 'stable'
         cache: true
         
@@ -118,103 +118,61 @@ jobs:
         echo "version=$version" >> $env:GITHUB_OUTPUT
         echo "App version: $version"
         
-    - name: Find and package Windows files
+    - name: Create Windows installer package
       run: |
         $version = "${{ steps.get_version.outputs.version }}"
         $zipName = "PhotoApp-Windows-v$version.zip"
         echo "Creating Windows package: $zipName"
         
-        # Find all .exe files in build directory
-        echo "=== Searching for executable files ==="
-        $exeFiles = Get-ChildItem "build" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue
-        if ($exeFiles.Count -gt 0) {
-          echo "Found $($exeFiles.Count) executable files:"
-          foreach ($file in $exeFiles) {
-            echo "  $($file.FullName)"
-          }
-          
-          # Find the directory containing the main executable
-          $mainExe = $exeFiles | Where-Object { $_.Name -like "*photo_app*" -or $_.Name -like "*app*" } | Select-Object -First 1
-          if (-not $mainExe) {
-            $mainExe = $exeFiles | Select-Object -First 1
-          }
-          
-          $sourceDir = $mainExe.DirectoryName
-          echo "Using directory: $sourceDir"
-          echo "Main executable: $($mainExe.Name)"
+        # Find the main executable directory
+        $buildDir = "build\windows\x64\runner\Release"
+        if (Test-Path $buildDir) {
+          echo "Found build directory: $buildDir"
+          $sourceDir = $buildDir
         } else {
-          echo "No .exe files found, exploring build structure..."
-          
-          # Fallback: explore build structure
-          if (Test-Path "build") {
-            echo "Build directory exists"
-            Get-ChildItem "build" -Recurse -Directory | Select-Object FullName
-          }
-          
-          if (Test-Path "build\windows") {
-            echo "Windows build directory exists"
-            Get-ChildItem "build\windows" -Recurse | Select-Object Name, Mode, Length
-          }
-          
-          # Try to find any directory with files
-          $dirsWithFiles = Get-ChildItem "build" -Recurse -Directory | Where-Object { (Get-ChildItem $_.FullName -File -ErrorAction SilentlyContinue).Count -gt 0 }
-          if ($dirsWithFiles.Count -gt 0) {
-            $sourceDir = $dirsWithFiles[0].FullName
-            echo "Using directory with files: $sourceDir"
+          # Fallback: search for executable files
+          $exeFiles = Get-ChildItem "build" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue
+          if ($exeFiles.Count -gt 0) {
+            $mainExe = $exeFiles | Where-Object { $_.Name -like "*photo_app*" -or $_.Name -like "*app*" } | Select-Object -First 1
+            if (-not $mainExe) {
+              $mainExe = $exeFiles | Select-Object -First 1
+            }
+            $sourceDir = $mainExe.DirectoryName
+            echo "Using directory: $sourceDir"
           } else {
-            echo "ERROR: No suitable directory found"
+            echo "ERROR: No executable files found"
             exit 1
           }
         }
         
-        echo ""
-        echo "=== Source directory verification ==="
         echo "Source directory: $sourceDir"
         if (Test-Path $sourceDir) {
-          echo "Source directory exists"
           echo "Files to package:"
           Get-ChildItem $sourceDir | Select-Object Name, Length
+          
+          # Create ZIP package
+          try {
+            Compress-Archive -Path "$sourceDir\*" -DestinationPath $zipName -Force
+            echo "Package created successfully: $zipName"
+            
+            # Verify package
+            if (Test-Path $zipName) {
+              $fileInfo = Get-ChildItem $zipName
+              echo "Package details:"
+              echo "  Name: $($fileInfo.Name)"
+              echo "  Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
+              echo "  Path: $(Resolve-Path $zipName)"
+            } else {
+              echo "ERROR: Package was not created"
+              exit 1
+            }
+          } catch {
+            echo "ERROR: Failed to create package: $($_.Exception.Message)"
+            exit 1
+          }
         } else {
           echo "ERROR: Source directory does not exist: $sourceDir"
           exit 1
-        }
-        
-        # Create ZIP package
-        echo ""
-        echo "=== Creating ZIP package ==="
-        try {
-          # Try different approaches to create the archive
-          $sourcePath = "$sourceDir\*"
-          echo "Attempting to archive: $sourcePath"
-          
-          Compress-Archive -Path $sourcePath -DestinationPath $zipName -Force
-          echo "Package created successfully: $zipName"
-          
-          # Verify package
-          if (Test-Path $zipName) {
-            $fileInfo = Get-ChildItem $zipName
-            echo "Package details:"
-            echo "  Name: $($fileInfo.Name)"
-            echo "  Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
-            echo "  Path: $(Resolve-Path $zipName)"
-          } else {
-            echo "ERROR: Package was not created"
-            exit 1
-          }
-        } catch {
-          echo "ERROR: Failed to create package: $($_.Exception.Message)"
-          echo "Trying alternative approach with individual files..."
-          
-          # Try creating archive from individual files
-          $files = Get-ChildItem $sourceDir -File
-          if ($files.Count -gt 0) {
-            echo "Creating archive from $($files.Count) individual files..."
-            Compress-Archive -Path $files -DestinationPath $zipName -Force
-            echo "Alternative package created successfully: $zipName"
-          } else {
-            echo "ERROR: No files found to archive"
-            exit 1
-          }
         }
         
     - name: Upload Windows build artifact
@@ -248,7 +206,7 @@ jobs:
           **Version:** ${{ steps.get_version.outputs.version }}  
           **Build Date:** ${{ github.run_number }}  
           **Commit:** ${{ github.sha }}  
-          **Flutter Version:** 3.24.5
+          **Flutter Version:** ${{ env.FLUTTER_VERSION }}
           
           ### Installation
           1. Download the ZIP file below

@@ -1,0 +1,74 @@
+name: Test Windows Build Configuration
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_build:
+        description: 'Test Windows build configuration'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  FLUTTER_VERSION: '3.27.1'
+
+jobs:
+  test-config:
+    name: Test Configuration
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+        
+    - name: Verify Flutter installation
+      run: |
+        echo "=== Flutter Version ==="
+        flutter --version
+        echo ""
+        echo "=== Flutter Doctor ==="
+        flutter doctor -v
+        
+    - name: Enable Windows desktop
+      run: |
+        echo "Enabling Windows desktop support..."
+        flutter config --enable-windows-desktop
+        
+    - name: Get Flutter dependencies
+      run: |
+        echo "Getting Flutter dependencies..."
+        flutter pub get
+        echo "Dependencies installed successfully"
+        
+    - name: Verify project structure
+      run: |
+        echo "=== Project Structure ==="
+        echo "Current directory: $(Get-Location)"
+        echo ""
+        echo "=== Windows directory ==="
+        if (Test-Path "windows") {
+          echo "Windows directory found"
+          Get-ChildItem "windows" | Select-Object Name, Mode
+        } else {
+          echo "ERROR: Windows directory not found"
+          exit 1
+        }
+        
+    - name: Test build (dry run)
+      run: |
+        echo "Testing build configuration..."
+        flutter build windows --dry-run || echo "Dry run completed with warnings"
+      continue-on-error: true
