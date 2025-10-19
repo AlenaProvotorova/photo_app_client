@@ -30,18 +30,27 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
+        flutter-version: '3.22.6'
         channel: 'stable'
         cache: true
+        
+    - name: Verify Flutter installation
+      run: |
+        echo "Flutter version:"
+        flutter --version
+        echo "Flutter doctor:"
+        flutter doctor -v
         
     - name: Enable Windows desktop
       run: flutter config --enable-windows-desktop
       
+    - name: Verify Windows desktop support
+      run: |
+        echo "Checking Windows desktop support:"
+        flutter config --list | findstr windows-desktop
+      
     - name: Get dependencies
       run: flutter pub get
-      
-    - name: Verify Flutter installation
-      run: flutter doctor -v
       
     - name: Run tests
       run: |
