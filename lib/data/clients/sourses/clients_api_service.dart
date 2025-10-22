@@ -12,6 +12,7 @@ abstract class ClientsApiService {
   Future<Either> getAllClients(GetAllClientsReqParams params);
   Future<Either> getClientById(GetClientByIdReqParams params);
   Future<Either> updateClients(UpdateClientsReqParams params);
+  Future<Either> deleteClientByName(int folderId, String clientName);
   Future<Either> updateOrderDigital(UpdateSelectedClientReqParams params);
   Future<Either> updateOrderAlbum(UpdateSelectedClientReqParams params);
 }
@@ -51,6 +52,33 @@ class ClientsApiServiceImplementation extends ClientsApiService {
       return Right(response.data);
     } on DioException catch (e) {
       return Left(e.response!.data['message']);
+    }
+  }
+
+  @override
+  Future<Either> deleteClientByName(int folderId, String clientName) async {
+    try {
+      final encodedClientName = Uri.encodeComponent(clientName);
+      final url = '${ApiUrl.clients}/folder/$folderId/name/$encodedClientName';
+      var response = await sl<DioClient>().delete(url);
+
+      if (response.statusCode != null &&
+          response.statusCode! >= 200 &&
+          response.statusCode! < 300) {
+        return Right('Клиент успешно удален');
+      } else {
+        return Left('Ошибка сервера: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Ошибка удаления клиента';
+      if (e.response?.data != null) {
+        if (e.response!.data is Map<String, dynamic>) {
+          errorMessage = e.response!.data['message'] ?? errorMessage;
+        } else if (e.response!.data is String && e.response!.data.isNotEmpty) {
+          errorMessage = e.response!.data;
+        }
+      }
+      return Left(errorMessage);
     }
   }
 

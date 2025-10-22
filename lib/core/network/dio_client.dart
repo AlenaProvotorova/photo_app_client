@@ -128,7 +128,7 @@ class DioClient {
   }
 
   // DELETE METHOD
-  Future<dynamic> delete(
+  Future<Response> delete(
     String url, {
     data,
     Map<String, dynamic>? queryParameters,
@@ -145,7 +145,7 @@ class DioClient {
                 _sendTimeoutOption,
         cancelToken: cancelToken,
       );
-      return response.data;
+      return response;
     } catch (e) {
       rethrow;
     }

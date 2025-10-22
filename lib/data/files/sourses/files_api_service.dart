@@ -79,7 +79,6 @@ class FilesApiServiceImplementation extends FilesApiService {
   @override
   Future<Either> deleteAllFiles(DeleteAllFilesReqParams params) async {
     try {
-      // DioClient.delete() возвращает response.data, а не полный Response объект
       var responseData = await sl<DioClient>().delete(
         ApiUrl.filesFolder,
         queryParameters: {
@@ -87,31 +86,10 @@ class FilesApiServiceImplementation extends FilesApiService {
         },
       );
 
-      print('Delete all files response type: ${responseData.runtimeType}');
-      print('Delete all files response data: $responseData');
-
-      // Обрабатываем данные ответа
-      if (responseData != null) {
-        return Right(responseData);
-      } else {
-        return Right(
-            {'success': true, 'message': 'Files deleted successfully'});
-      }
+      return Right(responseData);
     } on DioException catch (e) {
-      print('Delete all files DioException: ${e.message}');
-      print('Delete all files response: ${e.response?.data}');
-
-      String errorMessage = 'Ошибка удаления файлов';
-      if (e.response?.data != null) {
-        if (e.response!.data is Map<String, dynamic>) {
-          errorMessage = e.response!.data['message'] ?? errorMessage;
-        } else if (e.response!.data is String) {
-          errorMessage = e.response!.data;
-        }
-      }
-      return Left(errorMessage);
+      return Left(e.response!.data['message']);
     } catch (e) {
-      print('Delete all files general exception: $e');
       return Left('Неожиданная ошибка: $e');
     }
   }

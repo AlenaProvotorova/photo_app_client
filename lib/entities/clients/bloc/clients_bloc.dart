@@ -7,6 +7,7 @@ import 'package:photo_app/data/clients/models/update_selected_client_req_params.
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_client_by_id.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
+import 'package:photo_app/domain/clients/usecases/delete_client_by_name.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_album.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_digital.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
@@ -21,6 +22,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     on<LoadClients>(_onLoadClients);
     on<LoadClientById>(_onLoadClientById);
     on<UpdateClients>(_onUpdateClients);
+    on<DeleteClientByName>(_onDeleteClientByName);
     on<SelectClient>(_onSelectClient);
     on<UpdateOrderDigital>(_onUpdateOrderDigital);
     on<UpdateOrderAlbum>(_onUpdateOrderAlbum);
@@ -106,11 +108,43 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
           if (data == null || data is! List) {
             throw Exception('Неверный формат данных от сервера');
           }
-          emit(ClientsLoaded(namesList: _namesList));
+          // После успешного обновления перезагружаем список клиентов
+          add(LoadClients(folderId: event.folderId));
         },
       );
     } catch (e) {
       emit(const ClientsError(message: 'Ошибка изменения списка клиентов'));
+    }
+  }
+
+  Future<void> _onDeleteClientByName(
+    DeleteClientByName event,
+    Emitter<ClientsState> emit,
+  ) async {
+    print(
+        '_onDeleteClientByName вызван: folderId=${event.folderId}, clientName=${event.clientName}');
+    emit(ClientsLoading());
+    try {
+      final response = await sl<DeleteClientByNameUseCase>().call(
+        folderId: int.parse(event.folderId),
+        clientName: event.clientName,
+      );
+
+      response.fold(
+        (error) {
+          print('Ошибка удаления клиента: $error');
+          emit(ClientsError(
+              message: error is String ? error : error.toString()));
+        },
+        (data) {
+          print('Клиент успешно удален: $data');
+          // После успешного удаления перезагружаем список клиентов
+          add(LoadClients(folderId: event.folderId));
+        },
+      );
+    } catch (e) {
+      print('Исключение при удалении клиента: $e');
+      emit(const ClientsError(message: 'Ошибка удаления клиента'));
     }
   }
 

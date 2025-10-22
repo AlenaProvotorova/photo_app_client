@@ -24,6 +24,12 @@ class ClientsRepositoryImplementation extends ClientsRepository {
   }
 
   @override
+  Future<Either> deleteClientByName(int folderId, String clientName) async {
+    return await sl<ClientsApiService>()
+        .deleteClientByName(folderId, clientName);
+  }
+
+  @override
   Future<Either> updateOrderDigital(
       UpdateSelectedClientReqParams params) async {
     return await sl<ClientsApiService>().updateOrderDigital(params);

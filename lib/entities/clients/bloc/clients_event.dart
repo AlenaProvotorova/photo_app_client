@@ -21,6 +21,13 @@ class UpdateClients extends ClientsEvent {
   UpdateClients({required this.folderId, required this.clients});
 }
 
+class DeleteClientByName extends ClientsEvent {
+  final String folderId;
+  final String clientName;
+
+  DeleteClientByName({required this.folderId, required this.clientName});
+}
+
 class SelectClient extends ClientsEvent {
   final Client client;
 

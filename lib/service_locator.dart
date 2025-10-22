@@ -33,6 +33,7 @@ import 'package:photo_app/domain/clients/repositories/clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_all_clients.dart';
 import 'package:photo_app/domain/clients/usecases/get_client_by_id.dart';
 import 'package:photo_app/domain/clients/usecases/update_clients.dart';
+import 'package:photo_app/domain/clients/usecases/delete_client_by_name.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_album.dart';
 import 'package:photo_app/domain/clients/usecases/update_order_digital.dart';
 import 'package:photo_app/domain/files/repositories/files.dart';
@@ -130,6 +131,7 @@ void setupServiceLocator() {
   //clients
   sl.registerSingleton<GetAllClientsUseCase>(GetAllClientsUseCase());
   sl.registerSingleton<UpdateClientsUseCase>(UpdateClientsUseCase());
+  sl.registerSingleton<DeleteClientByNameUseCase>(DeleteClientByNameUseCase());
   sl.registerSingleton<UpdateOrderDigitalUseCase>(UpdateOrderDigitalUseCase());
   sl.registerSingleton<UpdateOrderAlbumUseCase>(UpdateOrderAlbumUseCase());
   sl.registerSingleton<GetClientByIdUseCase>(GetClientByIdUseCase());

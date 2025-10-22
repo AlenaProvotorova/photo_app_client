@@ -18,7 +18,6 @@ class ClientsList extends StatefulWidget {
 class ClientsListState extends State<ClientsList> {
   final TextEditingController _clientNameController = TextEditingController();
   List<String> _namesList = [];
-  bool _isInitialized = false;
 
   @override
   void dispose() {
@@ -36,6 +35,23 @@ class ClientsListState extends State<ClientsList> {
     } catch (e) {
       DisplayMessage.showMessage(
           context, 'Ошибка при сохранении списка клиентов');
+    }
+  }
+
+  void _deleteClient(String clientName) {
+    try {
+      // Сразу удаляем клиента из локального списка для мгновенного отклика
+      setState(() {
+        _namesList.remove(clientName);
+      });
+
+      context.read<ClientsBloc>().add(DeleteClientByName(
+            folderId: widget.folderId,
+            clientName: clientName,
+          ));
+      DisplayMessage.showMessage(context, 'Клиент успешно удален');
+    } catch (e) {
+      DisplayMessage.showMessage(context, 'Ошибка при удалении клиента');
     }
   }
 
@@ -67,10 +83,17 @@ class ClientsListState extends State<ClientsList> {
                 if (state is ClientsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ClientsLoaded) {
-                  if (!_isInitialized) {
-                    _namesList =
-                        state.namesList.map((client) => client.name).toList();
-                    _isInitialized = true;
+                  // Синхронизируем локальный список с состоянием блока только при первой загрузке
+                  final serverNames =
+                      state.namesList.map((client) => client.name).toList();
+                  if (_namesList.isEmpty) {
+                    _namesList = serverNames;
+                  } else {
+                    // Если сервер вернул больше клиентов, чем у нас локально, обновляем список
+                    // Это может произойти при перезагрузке страницы или синхронизации
+                    if (serverNames.length > _namesList.length) {
+                      _namesList = serverNames;
+                    }
                   }
                   if (_namesList.isEmpty) {
                     return const Center(
@@ -91,10 +114,8 @@ class ClientsListState extends State<ClientsList> {
                       return SurnameListTile(
                         name: _namesList[index],
                         onDelete: (context) {
-                          setState(() {
-                            _namesList.removeAt(index);
-                          });
-                          _updateClients();
+                          final clientName = _namesList[index];
+                          _deleteClient(clientName);
                         },
                       );
                     },
