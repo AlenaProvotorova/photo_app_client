@@ -1,16 +1,19 @@
 class Setting {
   final bool show;
   final String ruName;
+  final int? price;
 
   Setting({
     required this.show,
     required this.ruName,
+    this.price,
   });
 
   factory Setting.fromJson(Map<String, dynamic> json) {
     return Setting(
       show: json['show'],
       ruName: json['ruName'],
+      price: json['price'],
     );
   }
 }
@@ -89,6 +92,27 @@ class FolderSettings {
         return sizeTwo.ruName;
       case 'sizeThree':
         return sizeThree.ruName;
+      default:
+        return null;
+    }
+  }
+
+  dynamic getPriceProperty(String propertyName) {
+    switch (propertyName) {
+      case 'showSelectAllDigital':
+        return showSelectAllDigital.price;
+      case 'photoOne':
+        return photoOne.price;
+      case 'photoTwo':
+        return photoTwo.price;
+      case 'photoThree':
+        return photoThree.price;
+      case 'sizeOne':
+        return sizeOne.price;
+      case 'sizeTwo':
+        return sizeTwo.price;
+      case 'sizeThree':
+        return sizeThree.price;
       default:
         return null;
     }

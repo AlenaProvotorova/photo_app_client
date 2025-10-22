@@ -21,7 +21,7 @@ class FolderSettingsScreen extends StatelessWidget {
     {
       'tileText': "Переключатель",
       'name': 'showSelectAllDigital',
-      'showRenameButton': false,
+      'showRenameButton': true,
     },
     {
       'tileText': 'Переключатель',
@@ -59,9 +59,14 @@ class FolderSettingsScreen extends StatelessWidget {
     final baseName = setting['tileText'];
     final tileName = setting['name'];
     final ruName = state.getRuNameProperty(tileName);
+    final price = state.getPriceProperty(tileName);
 
     if (ruName != null) {
-      return '$baseName "$ruName"';
+      String result = '$baseName "$ruName"';
+      if (price != null && price != 0) {
+        result += ' - $price ₽';
+      }
+      return result;
     } else {
       return '$baseName';
     }
@@ -124,6 +129,11 @@ class FolderSettingsScreen extends StatelessWidget {
                           secondary: setting['showRenameButton'] == true
                               ? RenameSetting(
                                   settingName: setting['name'] as String,
+                                  currentName: state.folderSettings
+                                      .getRuNameProperty(
+                                          setting['name'] as String),
+                                  price: state.folderSettings.getPriceProperty(
+                                      setting['name'] as String),
                                   onSave: (settingName, newName) {
                                     context
                                         .read<FolderSettingsBloc>()
@@ -132,6 +142,26 @@ class FolderSettingsScreen extends StatelessWidget {
                                           settings: {
                                             'settingName': setting['name'],
                                             'newName': newName,
+                                          },
+                                        ));
+                                  },
+                                  onSavePrice: (settingName, price) {
+                                    int? priceValue;
+                                    if (price.isNotEmpty) {
+                                      final normalizedPrice =
+                                          price.replaceAll(',', '.');
+                                      priceValue =
+                                          double.tryParse(normalizedPrice)
+                                              ?.round();
+                                    }
+
+                                    context
+                                        .read<FolderSettingsBloc>()
+                                        .add(UpdateFolderSettings(
+                                          folderId: folderId,
+                                          settings: {
+                                            'settingName': setting['name'],
+                                            'price': priceValue,
                                           },
                                         ));
                                   },
