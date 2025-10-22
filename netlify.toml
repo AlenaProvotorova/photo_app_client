@@ -10,7 +10,7 @@
 
 [build.environment]
   # Версия Flutter (если нужно)
-  FLUTTER_VERSION = "3.6.0"
+  FLUTTER_VERSION = "3.27.0"
 
 # Настройки для SPA (Single Page Application)
 [[redirects]]
