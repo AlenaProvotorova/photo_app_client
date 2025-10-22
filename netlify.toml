@@ -4,9 +4,6 @@
   
   # Папка с результатом сборки
   publish = "build/web"
-  
-  # Функции (если нужны)
-  functions = "netlify/functions"
 
 [build.environment]
   # Версия Flutter (если нужно)
