@@ -1,6 +1,6 @@
 [build]
-  # Команда сборки
-  command = "./build_web.sh"
+  # Команда сборки - используем прямую команду Flutter
+  command = "flutter build web && cp web_config/_redirects build/web/"
   
   # Папка с результатом сборки
   publish = "build/web"
