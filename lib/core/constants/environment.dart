@@ -5,7 +5,7 @@ enum Environment {
 }
 
 class EnvironmentConfig {
-  static const Environment _currentEnvironment = Environment.development;
+  static const Environment _currentEnvironment = Environment.production;
 
   static Environment get current => _currentEnvironment;
 

@@ -34,8 +34,10 @@ flutter --version
 echo "🛠 Enabling web support"
 flutter config --enable-web
 
-echo "🌐 Switching environment to production"
-bash scripts/switch_environment.sh production || true
+echo "🌐 Ensuring production environment"
+# Force production environment in environment.dart
+sed -i 's/static const Environment _currentEnvironment = Environment\.[^;]*;/static const Environment _currentEnvironment = Environment.production;/' lib/core/constants/environment.dart
+echo "✅ Environment set to production"
 
 echo "📚 Pub get"
 flutter pub get
