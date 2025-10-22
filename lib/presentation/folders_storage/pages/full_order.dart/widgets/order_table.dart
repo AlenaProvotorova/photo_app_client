@@ -7,6 +7,8 @@ class OrderTable extends StatelessWidget {
   final List<Map<String, dynamic>> photos;
   final ThemeData theme;
   final List<Client> clients;
+  final String digitalPhotoName;
+  final int digitalPhotoPrice;
 
   const OrderTable({
     super.key,
@@ -15,6 +17,8 @@ class OrderTable extends StatelessWidget {
     required this.photos,
     required this.theme,
     required this.clients,
+    required this.digitalPhotoName,
+    required this.digitalPhotoPrice,
   });
 
   @override
@@ -105,7 +109,7 @@ class OrderTable extends StatelessWidget {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           decoration: BoxDecoration(
             color: Colors.orange[50],
             borderRadius: BorderRadius.circular(8),
@@ -114,7 +118,7 @@ class OrderTable extends StatelessWidget {
             ),
           ),
           child: Text(
-            'ОБЩИЙ ИТОГ: ${nestedData.grandTotal}',
+            'ОБЩИЙ ИТОГ: ${nestedData.grandTotal.toStringAsFixed(0)} ₽',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
               color: Colors.orange[800],
@@ -162,6 +166,12 @@ class OrderTable extends StatelessWidget {
       for (final orderEntry in clientOrders) {
         final orderRow = _buildOrderRow(orderEntry.value);
         rows.add(orderRow);
+        clientTotal += _calculateRowTotal(orderEntry.value);
+      }
+
+      if (client.orderDigital && digitalPhotoPrice > 0) {
+        rows.add(_buildDigitalPhotoRow());
+        clientTotal += digitalPhotoPrice;
       }
 
       rows.add(_buildClientTotalRow(client, clientTotal));
@@ -191,6 +201,8 @@ class OrderTable extends StatelessWidget {
   }
 
   DataRow _buildOrderRow(Map<String, dynamic> orderData) {
+    double rowTotal = _calculateRowTotal(orderData);
+
     return DataRow(
       cells: [
         DataCell(
@@ -215,12 +227,50 @@ class OrderTable extends StatelessWidget {
           ),
         ),
         ...sizes.map(
-          (size) => DataCell(Text(
-            orderData['sizes'][size['key']]?.toString() ?? '0',
-            style: theme.textTheme.labelLarge,
-          )),
+          (size) => DataCell(
+            _buildSizeCell(
+              orderData['sizes'][size['key']],
+              theme,
+            ),
+          ),
         ),
-        const DataCell(Text('')),
+        DataCell(
+          Text(
+            rowTotal > 0 ? '${rowTotal.toStringAsFixed(0)} ₽' : '',
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: rowTotal > 0 ? Colors.green[700] : Colors.grey,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  DataRow _buildDigitalPhotoRow() {
+    return DataRow(
+      color: WidgetStateProperty.all(Colors.purple[50]),
+      cells: [
+        DataCell(
+          Text(
+            '+ все фото в цифровом виде',
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: Colors.purple[700],
+            ),
+          ),
+        ),
+        ...List.generate(
+            photos.length + sizes.length, (index) => const DataCell(Text(''))),
+        DataCell(
+          Text(
+            '${digitalPhotoPrice.toStringAsFixed(0)} ₽',
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.purple[700],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -234,9 +284,10 @@ class OrderTable extends StatelessWidget {
             photos.length + sizes.length, (index) => const DataCell(Text(''))),
         DataCell(
           Text(
-            'ИТОГО: $total',
+            'ИТОГО: ${total.toStringAsFixed(0)} ₽',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: Colors.blue[700],
             ),
           ),
         ),
@@ -262,5 +313,46 @@ class OrderTable extends StatelessWidget {
         ),
       );
     }
+  }
+
+  Widget _buildSizeCell(dynamic value, ThemeData theme) {
+    final int count =
+        value is int ? value : (int.tryParse(value?.toString() ?? '0') ?? 0);
+
+    if (count > 0) {
+      return Text(
+        count.toString(),
+        style: theme.textTheme.labelLarge,
+      );
+    } else {
+      return Text(
+        '-',
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: Colors.grey,
+        ),
+      );
+    }
+  }
+
+  double _calculateRowTotal(Map<String, dynamic> orderData) {
+    double total = 0.0;
+
+    for (final photo in photos) {
+      final count = orderData['sizes']?[photo['key']] ?? 0;
+      final price = photo['price'] ?? 0;
+      if (count is int && count > 0) {
+        total += count * price;
+      }
+    }
+
+    for (final size in sizes) {
+      final count = orderData['sizes']?[size['key']] ?? 0;
+      final price = size['price'] ?? 0;
+      if (count is int && count > 0) {
+        total += count * price;
+      }
+    }
+
+    return total;
   }
 }

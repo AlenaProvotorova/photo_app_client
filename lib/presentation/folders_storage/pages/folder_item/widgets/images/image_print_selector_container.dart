@@ -12,7 +12,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 class ImagePrintSelectorContainer extends StatefulWidget {
   final int imageId;
   final int folderId;
-  ImagePrintSelectorContainer({
+  const ImagePrintSelectorContainer({
     super.key,
     required this.imageId,
     required this.folderId,
@@ -90,9 +90,18 @@ class _ImagePrintSelectorContainerState
                               .getShowProperty(sizeName)) {
                             return const SizedBox.shrink();
                           }
+                          final ruName = settingsState.folderSettings
+                              .getRuNameProperty(sizeName);
+                          final price = settingsState.folderSettings
+                              .getPriceProperty(sizeName);
+
+                          String displayName = ruName ?? sizeName;
+                          if (price != null && price != 0) {
+                            displayName += ' ($price ₽)';
+                          }
+
                           return ImagePrintSelector(
-                            size: settingsState.folderSettings
-                                .getRuNameProperty(sizeName),
+                            size: displayName,
                             formatName: sizeName,
                             imageId: widget.imageId,
                             folderId: widget.folderId,

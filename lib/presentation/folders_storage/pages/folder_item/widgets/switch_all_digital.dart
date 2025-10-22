@@ -42,32 +42,46 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
           return BlocBuilder<ClientsBloc, ClientsState>(
             builder: (context, state) {
               if (state is ClientsLoaded && state.selectedClient != null) {
-                return Row(
-                  children: [
-                    Switch(
-                      value: _printAll,
-                      onChanged: (value) {
-                        setState(() {
-                          _printAll = value;
-                        });
-                        context.read<ClientsBloc>().add(UpdateOrderDigital(
-                              clientId: state.selectedClient!.id.toString(),
-                              orderDigital: value,
-                            ));
+                return BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
+                  builder: (context, settingsState) {
+                    if (settingsState is FolderSettingsLoaded) {
+                      return Row(
+                        children: [
+                          Switch(
+                            value: _printAll,
+                            onChanged: (value) {
+                              setState(() {
+                                _printAll = value;
+                              });
+                              context
+                                  .read<ClientsBloc>()
+                                  .add(UpdateOrderDigital(
+                                    clientId:
+                                        state.selectedClient!.id.toString(),
+                                    orderDigital: value,
+                                  ));
 
-                        context.read<OrderBloc>().add(
-                              LoadOrder(
-                                folderId: widget.folderId,
-                                clientId: state.selectedClient!.id,
-                              ),
-                            );
-                      },
-                    ),
-                    Text(
-                      'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ],
+                              context.read<OrderBloc>().add(
+                                    LoadOrder(
+                                      folderId: widget.folderId,
+                                      clientId: state.selectedClient!.id,
+                                    ),
+                                  );
+                            },
+                          ),
+                          Text(
+                            _getDisplayName(
+                                settingsState
+                                    .folderSettings.showSelectAllDigital.ruName,
+                                settingsState
+                                    .folderSettings.showSelectAllDigital.price),
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 );
               }
               return const SizedBox.shrink();
@@ -76,5 +90,13 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
         },
       ),
     );
+  }
+
+  String _getDisplayName(String? ruName, int? price) {
+    String displayName = ruName ?? 'ВСЕ ФОТО В ЦИФРОВОМ ВИДЕ';
+    if (price != null && price != 0) {
+      displayName += ' ($price ₽)';
+    }
+    return displayName;
   }
 }

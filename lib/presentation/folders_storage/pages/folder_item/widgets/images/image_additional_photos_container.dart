@@ -128,7 +128,9 @@ class _ImageAdditionalPhotosContainerState
                                       },
                                     ),
                                     Text(
-                                      state.folderSettings.photoOne.ruName,
+                                      _getDisplayName(
+                                          state.folderSettings.photoOne.ruName,
+                                          state.folderSettings.photoOne.price),
                                       style: theme.textTheme.titleMedium,
                                     ),
                                   ],
@@ -146,7 +148,9 @@ class _ImageAdditionalPhotosContainerState
                                       },
                                     ),
                                     Text(
-                                      state.folderSettings.photoTwo.ruName,
+                                      _getDisplayName(
+                                          state.folderSettings.photoTwo.ruName,
+                                          state.folderSettings.photoTwo.price),
                                       style: theme.textTheme.titleMedium,
                                     ),
                                   ],
@@ -164,7 +168,11 @@ class _ImageAdditionalPhotosContainerState
                                       },
                                     ),
                                     Text(
-                                      state.folderSettings.photoThree.ruName,
+                                      _getDisplayName(
+                                          state
+                                              .folderSettings.photoThree.ruName,
+                                          state
+                                              .folderSettings.photoThree.price),
                                       style: theme.textTheme.titleMedium,
                                     ),
                                   ],
@@ -215,5 +223,14 @@ class _ImageAdditionalPhotosContainerState
         orderBloc.add(event);
       }
     }
+  }
+
+  // Формирует отображаемое название с ценой
+  String _getDisplayName(String? ruName, int? price) {
+    String displayName = ruName ?? '';
+    if (price != null && price != 0) {
+      displayName += ' ($price ₽)';
+    }
+    return displayName;
   }
 }

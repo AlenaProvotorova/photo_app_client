@@ -59,46 +59,72 @@ class FullOrderScreen extends StatelessWidget {
                     final List<Map<String, dynamic>> sizes = [];
                     if (folderSettingsState.folderSettings.sizeOne.show) {
                       sizes.add({
-                        'name':
+                        'name': _getDisplayName(
                             folderSettingsState.folderSettings.sizeOne.ruName,
-                        'key': 'sizeOne'
+                            folderSettingsState.folderSettings.sizeOne.price),
+                        'key': 'sizeOne',
+                        'price':
+                            folderSettingsState.folderSettings.sizeOne.price ??
+                                0
                       });
                     }
                     if (folderSettingsState.folderSettings.sizeTwo.show) {
                       sizes.add({
-                        'name':
+                        'name': _getDisplayName(
                             folderSettingsState.folderSettings.sizeTwo.ruName,
-                        'key': 'sizeTwo'
+                            folderSettingsState.folderSettings.sizeTwo.price),
+                        'key': 'sizeTwo',
+                        'price':
+                            folderSettingsState.folderSettings.sizeTwo.price ??
+                                0
                       });
                     }
                     if (folderSettingsState.folderSettings.sizeThree.show) {
                       sizes.add({
-                        'name':
+                        'name': _getDisplayName(
                             folderSettingsState.folderSettings.sizeThree.ruName,
-                        'key': 'sizeThree'
+                            folderSettingsState.folderSettings.sizeThree.price),
+                        'key': 'sizeThree',
+                        'price': folderSettingsState
+                                .folderSettings.sizeThree.price ??
+                            0
                       });
                     }
 
                     final List<Map<String, dynamic>> photos = [];
                     if (folderSettingsState.folderSettings.photoOne.show) {
                       photos.add({
-                        'name':
+                        'name': _getDisplayName(
                             folderSettingsState.folderSettings.photoOne.ruName,
-                        'key': 'photoOne'
+                            folderSettingsState.folderSettings.photoOne.price),
+                        'key': 'photoOne',
+                        'price':
+                            folderSettingsState.folderSettings.photoOne.price ??
+                                0
                       });
                     }
                     if (folderSettingsState.folderSettings.photoTwo.show) {
                       photos.add({
-                        'name':
+                        'name': _getDisplayName(
                             folderSettingsState.folderSettings.photoTwo.ruName,
-                        'key': 'photoTwo'
+                            folderSettingsState.folderSettings.photoTwo.price),
+                        'key': 'photoTwo',
+                        'price':
+                            folderSettingsState.folderSettings.photoTwo.price ??
+                                0
                       });
                     }
                     if (folderSettingsState.folderSettings.photoThree.show) {
                       photos.add({
-                        'name': folderSettingsState
-                            .folderSettings.photoThree.ruName,
-                        'key': 'photoThree'
+                        'name': _getDisplayName(
+                            folderSettingsState
+                                .folderSettings.photoThree.ruName,
+                            folderSettingsState
+                                .folderSettings.photoThree.price),
+                        'key': 'photoThree',
+                        'price': folderSettingsState
+                                .folderSettings.photoThree.price ??
+                            0
                       });
                     }
 
@@ -114,6 +140,15 @@ class FullOrderScreen extends StatelessWidget {
                                   photos: photos,
                                   theme: theme,
                                   clients: clientsState.namesList,
+                                  digitalPhotoName: folderSettingsState
+                                      .folderSettings
+                                      .showSelectAllDigital
+                                      .ruName,
+                                  digitalPhotoPrice: folderSettingsState
+                                          .folderSettings
+                                          .showSelectAllDigital
+                                          .price ??
+                                      0,
                                 ),
                               ),
                             ],
@@ -135,5 +170,14 @@ class FullOrderScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Формирует отображаемое название с ценой
+  String _getDisplayName(String? ruName, int? price) {
+    String displayName = ruName ?? '';
+    if (price != null && price != 0) {
+      displayName += ' ($price ₽)';
+    }
+    return displayName;
   }
 }
