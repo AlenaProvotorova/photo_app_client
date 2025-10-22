@@ -11,10 +11,14 @@ import 'package:photo_app/entities/order/bloc/order_state.dart';
 class ImageAdditionalPhotosContainer extends StatefulWidget {
   final int imageId;
   final int folderId;
+  final Function()? onChangesMade;
+  final Function(VoidCallback)? onConfirmCallback;
   const ImageAdditionalPhotosContainer({
     super.key,
     required this.imageId,
     required this.folderId,
+    this.onChangesMade,
+    this.onConfirmCallback,
   });
 
   @override
@@ -27,6 +31,9 @@ class _ImageAdditionalPhotosContainerState
   bool _photoOne = false;
   bool _photoTwo = false;
   bool _photoThree = false;
+
+  // Локальные изменения для подтверждения
+  Map<String, bool> _pendingChanges = {};
 
   void _updateSwitchValuesFromOrder(
       Map<String, Map<String, int>> orderForCarusel) {
@@ -54,6 +61,10 @@ class _ImageAdditionalPhotosContainerState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSwitchValues();
+      // Регистрируем callback для подтверждения
+      if (widget.onConfirmCallback != null) {
+        widget.onConfirmCallback!(confirmChanges);
+      }
     });
   }
 
@@ -119,7 +130,8 @@ class _ImageAdditionalPhotosContainerState
                                 Row(
                                   children: [
                                     Switch(
-                                      value: _photoOne,
+                                      value: _pendingChanges['photoOne'] ??
+                                          _photoOne,
                                       onChanged: (value) {
                                         setState(() {
                                           _photoOne = value;
@@ -139,7 +151,8 @@ class _ImageAdditionalPhotosContainerState
                                 Row(
                                   children: [
                                     Switch(
-                                      value: _photoTwo,
+                                      value: _pendingChanges['photoTwo'] ??
+                                          _photoTwo,
                                       onChanged: (value) {
                                         setState(() {
                                           _photoTwo = value;
@@ -159,7 +172,8 @@ class _ImageAdditionalPhotosContainerState
                                 Row(
                                   children: [
                                     Switch(
-                                      value: _photoThree,
+                                      value: _pendingChanges['photoThree'] ??
+                                          _photoThree,
                                       onChanged: (value) {
                                         setState(() {
                                           _photoThree = value;
@@ -197,31 +211,53 @@ class _ImageAdditionalPhotosContainerState
   }
 
   void _updateOrder(String formatName, bool value) {
+    // Сохраняем изменения локально
+    setState(() {
+      _pendingChanges[formatName] = value;
+    });
+
+    // Уведомляем родительский компонент об изменениях
+    if (widget.onChangesMade != null) {
+      widget.onChangesMade!();
+    }
+  }
+
+  void confirmChanges() {
     final clientState = context.read<ClientsBloc>().state;
     if (clientState is ClientsLoaded && clientState.selectedClient != null) {
       final orderBloc = context.read<OrderBloc>();
 
-      // Для типов фото, которые должны иметь единственный выбор
-      if (['photoOne', 'photoTwo', 'photoThree'].contains(formatName)) {
-        final event = UpdateSingleSelectionOrder(
-          fileId: widget.imageId.toString(),
-          clientId: clientState.selectedClient!.id.toString(),
-          folderId: widget.folderId.toString(),
-          formatName: formatName,
-          count: value ? '1' : '0',
-        );
-        orderBloc.add(event);
-      } else {
-        // Для остальных типов используем обычное обновление
-        final event = UpdateOrder(
-          fileId: widget.imageId.toString(),
-          clientId: clientState.selectedClient!.id.toString(),
-          folderId: widget.folderId.toString(),
-          formatName: formatName,
-          count: value ? '1' : '0',
-        );
-        orderBloc.add(event);
+      // Применяем все изменения
+      for (final entry in _pendingChanges.entries) {
+        final formatName = entry.key;
+        final value = entry.value;
+
+        // Для типов фото, которые должны иметь единственный выбор
+        if (['photoOne', 'photoTwo', 'photoThree'].contains(formatName)) {
+          final event = UpdateSingleSelectionOrder(
+            fileId: widget.imageId.toString(),
+            clientId: clientState.selectedClient!.id.toString(),
+            folderId: widget.folderId.toString(),
+            formatName: formatName,
+            count: value ? '1' : '0',
+          );
+          orderBloc.add(event);
+        } else {
+          // Для остальных типов используем обычное обновление
+          final event = UpdateOrder(
+            fileId: widget.imageId.toString(),
+            clientId: clientState.selectedClient!.id.toString(),
+            folderId: widget.folderId.toString(),
+            formatName: formatName,
+            count: value ? '1' : '0',
+          );
+          orderBloc.add(event);
+        }
       }
+
+      setState(() {
+        _pendingChanges.clear();
+      });
     }
   }
 

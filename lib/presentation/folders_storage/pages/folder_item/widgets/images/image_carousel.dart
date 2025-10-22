@@ -7,8 +7,7 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_additional_photos_container.dart';
-import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector_container.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_order_container.dart';
 
 class ImageCarousel extends StatefulWidget {
   final List<File> images;
@@ -105,40 +104,15 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.only(
-                                        left: 8,
-                                        right: 8,
-                                        top: 8,
-                                      ),
+                                      padding: const EdgeInsets.all(16),
                                       decoration: const BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(16),
-                                          topRight: Radius.circular(16),
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(16),
                                         ),
                                       ),
                                       width: 400,
-                                      child: ImageAdditionalPhotosContainer(
-                                        imageId: widget.images[index].id,
-                                        folderId: widget.folderId,
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.only(
-                                        left: 16,
-                                        right: 16,
-                                        top: 8,
-                                        bottom: 8,
-                                      ),
-                                      width: 400,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.only(
-                                          bottomLeft: Radius.circular(16),
-                                          bottomRight: Radius.circular(16),
-                                        ),
-                                      ),
-                                      child: ImagePrintSelectorContainer(
+                                      child: ImageOrderContainer(
                                         imageId: widget.images[index].id,
                                         folderId: widget.folderId,
                                       ),

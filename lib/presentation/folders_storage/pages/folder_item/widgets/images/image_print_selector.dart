@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
-import 'package:photo_app/entities/clients/bloc/clients_state.dart';
-import 'package:photo_app/entities/order/bloc/order_bloc.dart';
-import 'package:photo_app/entities/order/bloc/order_event.dart';
 
 class ImagePrintSelector extends StatefulWidget {
   final String size;
@@ -11,6 +6,9 @@ class ImagePrintSelector extends StatefulWidget {
   final int imageId;
   final int folderId;
   final int defaultQuantity;
+  final Function(int) onQuantityChanged;
+  final bool isConfirmed;
+
   const ImagePrintSelector({
     super.key,
     required this.size,
@@ -18,6 +16,8 @@ class ImagePrintSelector extends StatefulWidget {
     required this.imageId,
     required this.folderId,
     this.defaultQuantity = 0,
+    required this.onQuantityChanged,
+    this.isConfirmed = false,
   });
 
   @override
@@ -70,7 +70,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                         setState(() {
                           selectedQuantity--;
                         });
-                        _updateOrder();
+                        widget.onQuantityChanged(selectedQuantity);
                       }
                     : null,
                 icon: const Icon(Icons.remove),
@@ -89,7 +89,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                         setState(() {
                           selectedQuantity++;
                         });
-                        _updateOrder();
+                        widget.onQuantityChanged(selectedQuantity);
                       }
                     : null,
                 icon: const Icon(Icons.add),
@@ -99,27 +99,5 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
         ),
       ],
     );
-  }
-
-  void _updateOrder() {
-    final clientState = context.read<ClientsBloc>().state;
-    if (clientState is ClientsLoaded && clientState.selectedClient != null) {
-      final orderBloc = context.read<OrderBloc>();
-
-      print(
-          '_updateOrder: imageId=${widget.imageId}, clientId=${clientState.selectedClient!.id}, folderId=${widget.folderId}, formatName=${widget.formatName}, count=$selectedQuantity');
-
-      final event = UpdateOrder(
-        fileId: widget.imageId.toString(),
-        clientId: clientState.selectedClient!.id.toString(),
-        folderId: widget.folderId.toString(),
-        formatName: widget.formatName,
-        count: selectedQuantity.toString(),
-      );
-
-      orderBloc.add(event);
-    } else {
-      print('_updateOrder: client not selected or not loaded');
-    }
   }
 }

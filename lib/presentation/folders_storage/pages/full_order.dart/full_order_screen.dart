@@ -172,7 +172,6 @@ class FullOrderScreen extends StatelessWidget {
     );
   }
 
-  // Формирует отображаемое название с ценой
   String _getDisplayName(String? ruName, int? price) {
     String displayName = ruName ?? '';
     if (price != null && price != 0) {
