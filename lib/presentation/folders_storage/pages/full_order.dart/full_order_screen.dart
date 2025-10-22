@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
@@ -11,7 +12,6 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'widgets/order_table.dart';
-import 'widgets/digital_orders_header.dart';
 
 class FullOrderScreen extends StatelessWidget {
   final String folderId;
@@ -23,7 +23,6 @@ class FullOrderScreen extends StatelessWidget {
   });
 
   @override
-  // ignore: avoid_renaming_method_parameters
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return MultiBlocProvider(
@@ -57,7 +56,6 @@ class FullOrderScreen extends StatelessWidget {
               return BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
                 builder: (context, folderSettingsState) {
                   if (folderSettingsState is FolderSettingsLoaded) {
-                    // Создаем список размеров на основе настроек папки
                     final List<Map<String, dynamic>> sizes = [];
                     if (folderSettingsState.folderSettings.sizeOne.show) {
                       sizes.add({
@@ -81,7 +79,6 @@ class FullOrderScreen extends StatelessWidget {
                       });
                     }
 
-                    // Создаем список фото полей на основе настроек папки
                     final List<Map<String, dynamic>> photos = [];
                     if (folderSettingsState.folderSettings.photoOne.show) {
                       photos.add({
@@ -105,18 +102,25 @@ class FullOrderScreen extends StatelessWidget {
                       });
                     }
 
-                    return Column(
-                      children: [
-                        const DigitalOrdersHeader(),
-                        Expanded(
-                          child: OrderTable(
-                            fullOrderForTable: state.fullOrderForTable,
-                            sizes: sizes,
-                            photos: photos,
-                            theme: theme,
-                          ),
-                        ),
-                      ],
+                    return BlocBuilder<ClientsBloc, ClientsState>(
+                      builder: (context, clientsState) {
+                        if (clientsState is ClientsLoaded) {
+                          return Column(
+                            children: [
+                              Expanded(
+                                child: OrderTable(
+                                  fullOrderForTable: state.fullOrderForTable,
+                                  sizes: sizes,
+                                  photos: photos,
+                                  theme: theme,
+                                  clients: clientsState.namesList,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      },
                     );
                   }
                   return const Center(child: CircularProgressIndicator());
