@@ -34,6 +34,9 @@ flutter --version
 echo "🛠 Enabling web support"
 flutter config --enable-web
 
+echo "🌐 Switching environment to production"
+bash scripts/switch_environment.sh production || true
+
 echo "📚 Pub get"
 flutter pub get
 
