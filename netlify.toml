@@ -6,8 +6,10 @@
   publish = "build/web"
 
 [build.environment]
-  # Версия Flutter (если нужно)
+  # Версия Flutter
   FLUTTER_VERSION = "3.27.0"
+  # Версия Node.js для сборки
+  NODE_VERSION = "18"
 
 # Настройки для SPA (Single Page Application)
 [[redirects]]
