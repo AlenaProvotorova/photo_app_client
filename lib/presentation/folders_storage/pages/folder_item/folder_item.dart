@@ -74,7 +74,6 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   Future<void> _pickImages(context) async {
     final selectedImages = await _imagePickerService.pickImages();
     if (selectedImages.isNotEmpty) {
-      // Если файлов больше 10, используем массовую загрузку
       if (selectedImages.length > 10) {
         _filesBloc.add(UploadFilesBatch(
           folderId: widget.folderId,
@@ -115,7 +114,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         for (final client in order.keys) {
           for (final size in order[client]?.keys ?? []) {
             for (final file in order[client]?[size] ?? []) {
-              orderFileNames.add(file['fileName']);
+              final fileName = file['fileName'];
+              final nameWithoutExtension = fileName.split('.').first;
+              orderFileNames.add(nameWithoutExtension);
             }
           }
         }
@@ -147,7 +148,8 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         int matchedFiles = 0;
 
         bool isFileInOrder(String fileName) {
-          return orderFileNames.contains(fileName);
+          final nameWithoutExtension = fileName.split('.').first;
+          return orderFileNames.contains(nameWithoutExtension);
         }
 
         for (final fileEntity in sourceFiles) {
@@ -235,36 +237,57 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           if (!await sizeDirectory.exists()) {
             await sizeDirectory.create();
           }
+        }
 
-          final Map<String, Map<String, dynamic>> filesForThisSize = {};
-          for (final client in order.keys) {
+        final Map<String, Map<String, dynamic>> allOrderFiles = {};
+        for (final client in order.keys) {
+          for (final size in order[client]?.keys ?? []) {
             final files = order[client]?[size] ?? [];
             for (final file in files) {
               final fileName = file['fileName'];
-              filesForThisSize[fileName] = {
-                'client': client,
-                'count': file['count'] ?? 1,
-                'originalFileName': fileName,
-              };
+              final nameWithoutExtension = fileName.split('.').first;
+              final fileCount = file['count'] ?? 1;
+
+              if (!allOrderFiles.containsKey(nameWithoutExtension)) {
+                allOrderFiles[nameWithoutExtension] = {
+                  'client': client,
+                  'originalFileName': fileName,
+                  'sizes': <String, int>{},
+                };
+              }
+              allOrderFiles[nameWithoutExtension]!['sizes'][size.toString()] =
+                  fileCount;
             }
           }
+        }
 
-          final retouchDirectory = Directory('$selectedPath/РЕТУШЬ');
-          if (await retouchDirectory.exists()) {
-            final retouchFiles = await retouchDirectory.list().toList();
+        final sourceDirectory = Directory(selectedPath);
+        if (await sourceDirectory.exists()) {
+          final sourceFiles = await sourceDirectory.list().toList();
 
-            for (final fileEntity in retouchFiles) {
-              if (fileEntity is File) {
-                final fileName = fileEntity.path.split('/').last;
+          for (final fileEntity in sourceFiles) {
+            if (fileEntity is File) {
+              final fileName = fileEntity.path.split('/').last;
+              final nameWithoutExtension = fileName.split('.').first;
 
-                if (filesForThisSize.containsKey(fileName)) {
-                  final fileInfo = filesForThisSize[fileName]!;
-                  final client = fileInfo['client'] as String;
-                  final count = fileInfo['count'] as int;
+              if (allOrderFiles.containsKey(nameWithoutExtension)) {
+                final fileInfo = allOrderFiles[nameWithoutExtension]!;
+                final client = fileInfo['client'] as String;
+                final sizes = fileInfo['sizes'] as Map<String, int>;
+
+                for (final sizeEntry in sizes.entries) {
+                  final size = sizeEntry.key;
+                  final count = sizeEntry.value;
+
+                  final ruName = sizeToRuName[size] ?? size;
+                  final sizeDirectory =
+                      Directory('${orderDirectory.path}/$ruName');
 
                   String newFileName;
-                  if (count > 1) {
-                    newFileName = '${count}_${client}_$fileName';
+                  final intCount = int.tryParse(count.toString()) ?? 1;
+
+                  if (intCount > 1) {
+                    newFileName = '${intCount}_${client}_$fileName';
                   } else {
                     newFileName = '${client}_$fileName';
                   }
