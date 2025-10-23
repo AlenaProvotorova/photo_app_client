@@ -32,6 +32,14 @@ class _ImageCardContainerState extends State<ImageCardContainer> {
   bool isHovered = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateDisabledState();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final imageSize = MediaQuery.of(context).size.width * 0.28;
     final containerSize = imageSize * 1.15;
@@ -40,43 +48,48 @@ class _ImageCardContainerState extends State<ImageCardContainer> {
       listener: (context, state) {
         _updateDisabledState();
       },
-      child: MouseRegion(
-        onEnter: (_) => setState(() => isHovered = true),
-        onExit: (_) => setState(() => isHovered = false),
-        cursor: disabled ? MouseCursor.defer : SystemMouseCursors.click,
-        child: SizedBox(
-          width: containerSize,
-          height: containerSize,
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  ImageCard(
-                    disabled: disabled,
-                    url: widget.url,
-                  ),
-                  if (isHovered && !disabled) const ImageSelectText(),
-                  ImageDelete(
-                    imageId: widget.id,
-                    folderId: widget.folderId,
-                  ),
-                  ImageOrderInfo(
-                    imageId: widget.id,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                width: imageSize,
-                child: Text(
-                  widget.originalName,
-                  style: theme.textTheme.labelLarge,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+      child: BlocListener<UserBloc, UserState>(
+        listener: (context, state) {
+          _updateDisabledState();
+        },
+        child: MouseRegion(
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
+          cursor: disabled ? MouseCursor.defer : SystemMouseCursors.click,
+          child: SizedBox(
+            width: containerSize,
+            height: containerSize,
+            child: Column(
+              children: [
+                Stack(
+                  children: [
+                    ImageCard(
+                      disabled: disabled,
+                      url: widget.url,
+                    ),
+                    if (isHovered && !disabled) const ImageSelectText(),
+                    ImageDelete(
+                      imageId: widget.id,
+                      folderId: widget.folderId,
+                    ),
+                    ImageOrderInfo(
+                      imageId: widget.id,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: imageSize,
+                  child: Text(
+                    widget.originalName,
+                    style: theme.textTheme.labelLarge,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

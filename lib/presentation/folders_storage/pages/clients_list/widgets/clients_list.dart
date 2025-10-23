@@ -40,7 +40,6 @@ class ClientsListState extends State<ClientsList> {
 
   void _deleteClient(String clientName) {
     try {
-      // Сразу удаляем клиента из локального списка для мгновенного отклика
       setState(() {
         _namesList.remove(clientName);
       });
@@ -49,7 +48,6 @@ class ClientsListState extends State<ClientsList> {
             folderId: widget.folderId,
             clientName: clientName,
           ));
-      DisplayMessage.showMessage(context, 'Клиент успешно удален');
     } catch (e) {
       DisplayMessage.showMessage(context, 'Ошибка при удалении клиента');
     }
@@ -83,14 +81,11 @@ class ClientsListState extends State<ClientsList> {
                 if (state is ClientsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ClientsLoaded) {
-                  // Синхронизируем локальный список с состоянием блока только при первой загрузке
                   final serverNames =
                       state.namesList.map((client) => client.name).toList();
                   if (_namesList.isEmpty) {
                     _namesList = serverNames;
                   } else {
-                    // Если сервер вернул больше клиентов, чем у нас локально, обновляем список
-                    // Это может произойти при перезагрузке страницы или синхронизации
                     if (serverNames.length > _namesList.length) {
                       _namesList = serverNames;
                     }

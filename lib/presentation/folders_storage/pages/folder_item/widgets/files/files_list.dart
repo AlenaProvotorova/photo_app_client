@@ -56,7 +56,6 @@ class FilesList extends StatelessWidget {
   Widget _buildUploadingState(BuildContext context, FilesUploading state) {
     return Column(
       children: [
-        // Прогресс загрузки
         UploadProgressLoader(
           totalFiles: state.totalFiles,
           uploadedFiles: state.uploadedFiles,
@@ -64,8 +63,6 @@ class FilesList extends StatelessWidget {
           remainingFiles: state.remainingFiles,
           progress: state.progress,
         ),
-
-        // Существующие файлы
         if (state.existingFiles.isNotEmpty)
           Expanded(
             child: FilesContainer(
@@ -90,7 +87,6 @@ class FilesList extends StatelessWidget {
       BuildContext context, FilesBatchUploading state) {
     return Column(
       children: [
-        // Прогресс массовой загрузки
         BatchUploadProgressLoader(
           totalFiles: state.totalFiles,
           uploadedFiles: state.uploadedFiles,
@@ -101,8 +97,6 @@ class FilesList extends StatelessWidget {
           totalBatches: state.totalBatches,
           batchProgress: state.batchProgress,
         ),
-
-        // Существующие файлы
         if (state.existingFiles.isNotEmpty)
           Expanded(
             child: FilesContainer(

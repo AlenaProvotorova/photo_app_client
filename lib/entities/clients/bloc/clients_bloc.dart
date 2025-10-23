@@ -50,6 +50,7 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
 
           final clients = data.map((json) => Client.fromJson(json)).toList();
           _namesList = clients;
+
           emit(ClientsLoaded(namesList: _namesList));
         },
       );
@@ -108,7 +109,6 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
           if (data == null || data is! List) {
             throw Exception('Неверный формат данных от сервера');
           }
-          // После успешного обновления перезагружаем список клиентов
           add(LoadClients(folderId: event.folderId));
         },
       );
@@ -121,8 +121,6 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     DeleteClientByName event,
     Emitter<ClientsState> emit,
   ) async {
-    print(
-        '_onDeleteClientByName вызван: folderId=${event.folderId}, clientName=${event.clientName}');
     emit(ClientsLoading());
     try {
       final response = await sl<DeleteClientByNameUseCase>().call(
@@ -132,18 +130,14 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
 
       response.fold(
         (error) {
-          print('Ошибка удаления клиента: $error');
           emit(ClientsError(
               message: error is String ? error : error.toString()));
         },
         (data) {
-          print('Клиент успешно удален: $data');
-          // После успешного удаления перезагружаем список клиентов
           add(LoadClients(folderId: event.folderId));
         },
       );
     } catch (e) {
-      print('Исключение при удалении клиента: $e');
       emit(const ClientsError(message: 'Ошибка удаления клиента'));
     }
   }
@@ -173,8 +167,6 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
     UpdateOrderAlbum event,
     Emitter<ClientsState> emit,
   ) async {
-    print(
-        '_onUpdateOrderAlbum вызван с clientId: ${event.clientId}, orderAlbum: ${event.orderAlbum}');
     try {
       final response = await sl<UpdateOrderAlbumUseCase>().call(
         params: UpdateSelectedClientReqParams(
@@ -185,17 +177,13 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
 
       response.fold(
         (error) {
-          print('Ошибка в _onUpdateOrderAlbum: $error');
           emit(ClientsError(message: error.toString()));
         },
         (data) {
-          print('Успешное обновление orderAlbum: $data');
-          // После успешного обновления перезагружаем клиента с актуальными данными
           add(LoadClientById(clientId: event.clientId));
         },
       );
     } catch (e) {
-      print('Исключение в _onUpdateOrderAlbum: $e');
       emit(ClientsError(message: 'Ошибка выбора альбомного заказа: $e'));
     }
   }
