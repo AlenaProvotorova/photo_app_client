@@ -14,8 +14,12 @@ final router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const AuthGuard(
-        child: LoginPage(),
+        child: HomeScreen(),
       ),
+    ),
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
       path: '/sign-up',

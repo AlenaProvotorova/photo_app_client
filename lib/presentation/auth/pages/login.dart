@@ -6,6 +6,7 @@ import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/core/theme/app_images.dart';
 import 'package:photo_app/data/auth/models/signin_req_params.dart';
 import 'package:photo_app/domain/auth/usecases/signin.dart';
+import 'package:photo_app/data/auth/services/login_data_service.dart';
 import 'package:photo_app/service_locator.dart';
 
 class LoginPage extends StatefulWidget {
@@ -20,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool isLoginEnabled = false;
   bool isPasswordEnabled = false;
+  bool _rememberMe = false;
 
   @override
   void initState() {
@@ -27,6 +29,9 @@ class _LoginPageState extends State<LoginPage> {
 
     _userEmailController.addListener(_updateLoginState);
     _passwordController.addListener(_updateLoginState);
+
+    // Загружаем сохраненные данные входа
+    _loadSavedLoginData();
   }
 
   @override
@@ -34,6 +39,16 @@ class _LoginPageState extends State<LoginPage> {
     _userEmailController.removeListener(_updateLoginState);
     _userEmailController.dispose();
     super.dispose();
+  }
+
+  void _loadSavedLoginData() {
+    final savedData = LoginDataService.getSavedLoginData();
+    if (savedData != null) {
+      _userEmailController.text = savedData.email;
+      _passwordController.text = savedData.password;
+      _rememberMe = savedData.rememberMe;
+      _updateLoginState();
+    }
   }
 
   bool get isLoginButtonEnabled => isLoginEnabled && isPasswordEnabled;
@@ -47,6 +62,12 @@ class _LoginPageState extends State<LoginPage> {
     result.fold((e) {
       DisplayMessage.showMessage(context, e);
     }, (data) {
+      // Сохраняем данные входа, если пользователь выбрал "Запомнить меня"
+      LoginDataService.saveLoginData(
+        email: _userEmailController.text,
+        password: _passwordController.text,
+        rememberMe: _rememberMe,
+      );
       context.go('/home');
     });
   }
@@ -135,6 +156,23 @@ class _LoginPageState extends State<LoginPage> {
                           onFieldSubmitted:
                               isLoginButtonEnabled ? (_) => _login() : null,
                         )),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rememberMe = value ?? false;
+                                });
+                              },
+                            ),
+                            Text(
+                              'Запомнить меня',
+                              style: theme.textTheme.titleSmall,
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 20),
                         PrimaryButton(
                           title: 'Войти',
