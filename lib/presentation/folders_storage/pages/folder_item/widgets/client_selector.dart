@@ -20,6 +20,7 @@ class ClientSelector extends StatefulWidget {
 
 class _ClientSelectorState extends State<ClientSelector> {
   final FocusNode _focusNode = FocusNode();
+  String? _pendingClientId;
 
   @override
   void dispose() {
@@ -36,6 +37,20 @@ class _ClientSelectorState extends State<ClientSelector> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Ошибка: ${state.message}')),
           );
+        } else if (state is ClientsLoaded &&
+            state.selectedClient != null &&
+            _pendingClientId != null &&
+            state.selectedClient!.id.toString() == _pendingClientId) {
+          if (state.selectedClient!.orderAlbum == null) {
+            _showAlbumQuestionDialog(
+              context,
+              state,
+              widget.folderId,
+              context.read<ClientsBloc>(),
+              state.selectedClient!,
+            );
+          }
+          _pendingClientId = null;
         }
       },
       child: BlocBuilder<ClientsBloc, ClientsState>(
@@ -94,7 +109,8 @@ class _ClientSelectorState extends State<ClientSelector> {
                           (client) => client.name == newValue,
                         );
 
-                        // Сначала загружаем полную информацию о клиенте
+                        _pendingClientId = selectedClient.id.toString();
+
                         context.read<ClientsBloc>().add(LoadClientById(
                             clientId: selectedClient.id.toString()));
 
@@ -104,16 +120,6 @@ class _ClientSelectorState extends State<ClientSelector> {
                                 clientId: selectedClient.id,
                               ),
                             );
-
-                        // Проверяем orderAlbum из исходного объекта клиента
-                        if (selectedClient.orderAlbum == null) {
-                          _showAlbumQuestionDialog(
-                              context,
-                              state,
-                              widget.folderId,
-                              context.read<ClientsBloc>(),
-                              selectedClient);
-                        }
                       }
                     },
                   ),

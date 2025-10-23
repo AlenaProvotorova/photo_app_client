@@ -459,7 +459,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                 SwitchAllDigital(
                   folderId: widget.folderId,
                 ),
-                const OrderAlbum()
+                OrderAlbum(
+                  folderId: widget.folderId,
+                )
               ]),
             ),
             ShowSelectedButton(

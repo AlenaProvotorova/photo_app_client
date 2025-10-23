@@ -79,6 +79,13 @@ class ClientsBloc extends Bloc<ClientsEvent, ClientsState> {
 
           final client = Client.fromJson(data);
           _selectedClient = client;
+
+          // Обновляем клиента в списке namesList
+          final clientIndex = _namesList.indexWhere((c) => c.id == client.id);
+          if (clientIndex != -1) {
+            _namesList[clientIndex] = client;
+          }
+
           emit(ClientsLoaded(
             namesList: _namesList,
             selectedClient: _selectedClient,
