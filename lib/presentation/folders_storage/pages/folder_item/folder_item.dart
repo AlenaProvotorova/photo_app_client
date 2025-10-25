@@ -25,6 +25,7 @@ import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/date_selection_info.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/order_album.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/show_selected_button.dart';
@@ -470,6 +471,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         child: Column(
           children: [
             ClientSelector(
+              folderId: widget.folderId,
+            ),
+            DateSelectionInfo(
               folderId: widget.folderId,
             ),
             Container(

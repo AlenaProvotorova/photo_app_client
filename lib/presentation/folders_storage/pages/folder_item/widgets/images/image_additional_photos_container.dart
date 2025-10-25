@@ -7,6 +7,8 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.da
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 
 class ImageAdditionalPhotosContainer extends StatefulWidget {
   final int imageId;
@@ -56,6 +58,33 @@ class _ImageAdditionalPhotosContainerState
     }
   }
 
+  bool _isOrderBlocked() {
+    final folderSettingsState = context.read<FolderSettingsBloc>().state;
+    final userState = context.read<UserBloc>().state;
+
+    // Если пользователь админ, блокировка не применяется
+    if (userState is UserLoaded && userState.user.isAdmin) {
+      return false;
+    }
+
+    if (folderSettingsState is FolderSettingsLoaded) {
+      final dateSelectTo = folderSettingsState.folderSettings.dateSelectTo;
+
+      // Если дата не установлена, блокировка не применяется
+      if (dateSelectTo == null) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      final daysUntilDeadline = dateSelectTo.difference(now).inDays;
+
+      // Блокируем, если текущая дата больше dateSelectTo
+      return daysUntilDeadline < 0;
+    }
+
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -77,135 +106,153 @@ class _ImageAdditionalPhotosContainerState
           _updateSwitchValuesFromOrder(orderState.orderForCarusel);
         }
       },
-      child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
-        builder: (context, state) {
-          if (state is FolderSettingsLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is FolderSettingsLoaded) {
-            return ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(1),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Получаем информацию о клиенте для проверки orderAlbum
-                      BlocBuilder<ClientsBloc, ClientsState>(
-                        builder: (context, clientState) {
-                          bool showPhotoOne = false;
-                          bool showPhotoTwo = false;
-                          bool showPhotoThree = false;
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<UserBloc>()),
+        ],
+        child: BlocBuilder<FolderSettingsBloc, FolderSettingsState>(
+          builder: (context, state) {
+            if (state is FolderSettingsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is FolderSettingsLoaded) {
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(1),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Получаем информацию о клиенте для проверки orderAlbum
+                        BlocBuilder<ClientsBloc, ClientsState>(
+                          builder: (context, clientState) {
+                            bool showPhotoOne = false;
+                            bool showPhotoTwo = false;
+                            bool showPhotoThree = false;
 
-                          if (clientState is ClientsLoaded &&
-                              clientState.selectedClient != null) {
-                            final orderAlbum =
-                                clientState.selectedClient!.orderAlbum;
+                            if (clientState is ClientsLoaded &&
+                                clientState.selectedClient != null) {
+                              final orderAlbum =
+                                  clientState.selectedClient!.orderAlbum;
 
-                            if (orderAlbum == false) {
-                              // Если orderAlbum = false, показываем только photoThree
-                              showPhotoThree =
-                                  state.folderSettings.photoThree.show;
+                              if (orderAlbum == false) {
+                                // Если orderAlbum = false, показываем только photoThree
+                                showPhotoThree =
+                                    state.folderSettings.photoThree.show;
+                              } else {
+                                // Если orderAlbum = true или null, показываем все доступные фото
+                                showPhotoOne =
+                                    state.folderSettings.photoOne.show;
+                                showPhotoTwo =
+                                    state.folderSettings.photoTwo.show;
+                                showPhotoThree =
+                                    state.folderSettings.photoThree.show;
+                              }
                             } else {
-                              // Если orderAlbum = true или null, показываем все доступные фото
+                              // Если клиент не выбран, показываем все доступные фото
                               showPhotoOne = state.folderSettings.photoOne.show;
                               showPhotoTwo = state.folderSettings.photoTwo.show;
                               showPhotoThree =
                                   state.folderSettings.photoThree.show;
                             }
-                          } else {
-                            // Если клиент не выбран, показываем все доступные фото
-                            showPhotoOne = state.folderSettings.photoOne.show;
-                            showPhotoTwo = state.folderSettings.photoTwo.show;
-                            showPhotoThree =
-                                state.folderSettings.photoThree.show;
-                          }
 
-                          return Column(
-                            children: [
-                              if (showPhotoOne)
-                                Row(
-                                  children: [
-                                    Switch(
-                                      value: _pendingChanges['photoOne'] ??
-                                          _photoOne,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _photoOne = value;
-                                        });
-                                        _updateOrder('photoOne', value);
-                                      },
-                                    ),
-                                    Text(
-                                      _getDisplayName(
-                                          state.folderSettings.photoOne.ruName,
-                                          state.folderSettings.photoOne.price),
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ],
-                                ),
-                              if (showPhotoTwo)
-                                Row(
-                                  children: [
-                                    Switch(
-                                      value: _pendingChanges['photoTwo'] ??
-                                          _photoTwo,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _photoTwo = value;
-                                        });
-                                        _updateOrder('photoTwo', value);
-                                      },
-                                    ),
-                                    Text(
-                                      _getDisplayName(
-                                          state.folderSettings.photoTwo.ruName,
-                                          state.folderSettings.photoTwo.price),
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ],
-                                ),
-                              if (showPhotoThree)
-                                Row(
-                                  children: [
-                                    Switch(
-                                      value: _pendingChanges['photoThree'] ??
-                                          _photoThree,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _photoThree = value;
-                                        });
-                                        _updateOrder('photoThree', value);
-                                      },
-                                    ),
-                                    Text(
-                                      _getDisplayName(
-                                          state
-                                              .folderSettings.photoThree.ruName,
-                                          state
-                                              .folderSettings.photoThree.price),
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                  ],
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
+                            return Column(
+                              children: [
+                                if (showPhotoOne)
+                                  Row(
+                                    children: [
+                                      Switch(
+                                        value: _pendingChanges['photoOne'] ??
+                                            _photoOne,
+                                        onChanged: !_isOrderBlocked()
+                                            ? (value) {
+                                                setState(() {
+                                                  _photoOne = value;
+                                                });
+                                                _updateOrder('photoOne', value);
+                                              }
+                                            : null,
+                                      ),
+                                      Text(
+                                        _getDisplayName(
+                                            state
+                                                .folderSettings.photoOne.ruName,
+                                            state
+                                                .folderSettings.photoOne.price),
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                                if (showPhotoTwo)
+                                  Row(
+                                    children: [
+                                      Switch(
+                                        value: _pendingChanges['photoTwo'] ??
+                                            _photoTwo,
+                                        onChanged: !_isOrderBlocked()
+                                            ? (value) {
+                                                setState(() {
+                                                  _photoTwo = value;
+                                                });
+                                                _updateOrder('photoTwo', value);
+                                              }
+                                            : null,
+                                      ),
+                                      Text(
+                                        _getDisplayName(
+                                            state
+                                                .folderSettings.photoTwo.ruName,
+                                            state
+                                                .folderSettings.photoTwo.price),
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                                if (showPhotoThree)
+                                  Row(
+                                    children: [
+                                      Switch(
+                                        value: _pendingChanges['photoThree'] ??
+                                            _photoThree,
+                                        onChanged: !_isOrderBlocked()
+                                            ? (value) {
+                                                setState(() {
+                                                  _photoThree = value;
+                                                });
+                                                _updateOrder(
+                                                    'photoThree', value);
+                                              }
+                                            : null,
+                                      ),
+                                      Text(
+                                        _getDisplayName(
+                                            state.folderSettings.photoThree
+                                                .ruName,
+                                            state.folderSettings.photoThree
+                                                .price),
+                                        style: theme.textTheme.titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
-          if (state is FolderSettingsError) {
-            return const Center(child: Text('Ошибка загрузки'));
-          }
-          return const Center(child: Text(''));
-        },
+              );
+            }
+            if (state is FolderSettingsError) {
+              return const Center(child: Text('Ошибка загрузки'));
+            }
+            return const Center(child: Text(''));
+          },
+        ),
       ),
     );
   }

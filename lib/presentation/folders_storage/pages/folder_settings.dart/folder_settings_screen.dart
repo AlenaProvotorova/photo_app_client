@@ -7,6 +7,7 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/rename_setting.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/date_selector.dart';
 
 class FolderSettingsScreen extends StatelessWidget {
   final String folderId;
@@ -108,6 +109,7 @@ class FolderSettingsScreen extends StatelessWidget {
                           checkboxShape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
+                          activeColor: theme.colorScheme.primary,
                           title: Text(
                             getCheckboxTileName(setting, state.folderSettings),
                             style: theme.textTheme.titleMedium,
@@ -168,6 +170,21 @@ class FolderSettingsScreen extends StatelessWidget {
                                 )
                               : null,
                         )),
+                    const SizedBox(height: 20),
+                    DateSelector(
+                      initialDate: state.folderSettings.getDateSelectTo(),
+                      onDateChanged: (date) {},
+                      onApply: (date) {
+                        context
+                            .read<FolderSettingsBloc>()
+                            .add(UpdateFolderSettings(
+                              folderId: folderId,
+                              settings: {
+                                'dateSelectTo': date?.toIso8601String(),
+                              },
+                            ));
+                      },
+                    ),
                   ],
                 ),
               );

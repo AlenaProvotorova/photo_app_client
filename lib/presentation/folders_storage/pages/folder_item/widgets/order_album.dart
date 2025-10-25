@@ -8,6 +8,8 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.da
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 
 class OrderAlbum extends StatefulWidget {
   final String folderId;
@@ -23,6 +25,30 @@ class OrderAlbum extends StatefulWidget {
 
 class _OrderAlbumState extends State<OrderAlbum> {
   bool _orderAlbum = false;
+
+  bool _isOrderBlocked() {
+    final folderSettingsState = context.read<FolderSettingsBloc>().state;
+    final userState = context.read<UserBloc>().state;
+
+    if (userState is UserLoaded && userState.user.isAdmin) {
+      return false;
+    }
+
+    if (folderSettingsState is FolderSettingsLoaded) {
+      final dateSelectTo = folderSettingsState.folderSettings.dateSelectTo;
+
+      if (dateSelectTo == null) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      final daysUntilDeadline = dateSelectTo.difference(now).inDays;
+
+      return daysUntilDeadline < 0;
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +78,17 @@ class _OrderAlbumState extends State<OrderAlbum> {
                       children: [
                         Switch(
                           value: _orderAlbum,
-                          onChanged: (value) {
-                            _showAlbumConfirmationDialog(
-                              context,
-                              state,
-                              settingsState,
-                              widget.folderId,
-                              value,
-                            );
-                          },
+                          onChanged: !_isOrderBlocked()
+                              ? (value) {
+                                  _showAlbumConfirmationDialog(
+                                    context,
+                                    state,
+                                    settingsState,
+                                    widget.folderId,
+                                    value,
+                                  );
+                                }
+                              : null,
                         ),
                         Text(
                           _getDisplayName(

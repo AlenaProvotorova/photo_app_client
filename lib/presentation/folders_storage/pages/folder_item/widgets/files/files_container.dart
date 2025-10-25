@@ -76,6 +76,7 @@ class FilesContainer extends StatelessWidget {
                     BlocProvider.value(value: clientsBloc),
                     BlocProvider.value(value: orderBloc),
                     BlocProvider.value(value: settingsBloc),
+                    BlocProvider.value(value: userBloc),
                   ],
                   child: ImageCarousel(
                     images: filesToRender,
@@ -135,6 +136,7 @@ class FilesContainer extends StatelessWidget {
                         BlocProvider.value(value: clientsBloc),
                         BlocProvider.value(value: orderBloc),
                         BlocProvider.value(value: settingsBloc),
+                        BlocProvider.value(value: userBloc),
                       ],
                       child: ImageCarousel(
                         images: filesToRender,

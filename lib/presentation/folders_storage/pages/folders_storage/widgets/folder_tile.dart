@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:photo_app/core/constants/environment.dart';
 import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/folders/models/edit_folder_req_params.dart';
 import 'package:photo_app/data/folders/models/folder.dart';
@@ -58,7 +59,7 @@ class FolderTile extends StatelessWidget {
           PopupMenuAction(
             title: 'Скопировать ссылку',
             onTap: () {
-              final baseUrl = Uri.base.toString().split('#')[0];
+              final baseUrl = EnvironmentConfig.frontendBaseURL;
               final fullUrl = '${baseUrl}#/folder/${folder.url}';
 
               Clipboard.setData(ClipboardData(text: fullUrl));

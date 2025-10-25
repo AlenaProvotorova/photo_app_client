@@ -8,6 +8,7 @@ class ImagePrintSelector extends StatefulWidget {
   final int defaultQuantity;
   final Function(int) onQuantityChanged;
   final bool isConfirmed;
+  final bool isBlocked;
 
   const ImagePrintSelector({
     super.key,
@@ -18,6 +19,7 @@ class ImagePrintSelector extends StatefulWidget {
     this.defaultQuantity = 0,
     required this.onQuantityChanged,
     this.isConfirmed = false,
+    this.isBlocked = false,
   });
 
   @override
@@ -31,8 +33,6 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
   void initState() {
     super.initState();
     selectedQuantity = widget.defaultQuantity;
-    print(
-        'ImagePrintSelector initState: imageId=${widget.imageId}, formatName=${widget.formatName}, defaultQuantity=${widget.defaultQuantity}, selectedQuantity=$selectedQuantity');
   }
 
   @override
@@ -65,7 +65,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: selectedQuantity > 0
+                onPressed: !widget.isBlocked && selectedQuantity > 0
                     ? () {
                         setState(() {
                           selectedQuantity--;
@@ -73,7 +73,10 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                         widget.onQuantityChanged(selectedQuantity);
                       }
                     : null,
-                icon: const Icon(Icons.remove),
+                icon: Icon(
+                  Icons.remove,
+                  color: widget.isBlocked ? Colors.grey : null,
+                ),
               ),
               SizedBox(
                 width: 40,
@@ -84,7 +87,7 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                 ),
               ),
               IconButton(
-                onPressed: selectedQuantity < 10
+                onPressed: !widget.isBlocked && selectedQuantity < 10
                     ? () {
                         setState(() {
                           selectedQuantity++;
@@ -92,7 +95,10 @@ class _ImagePrintSelectorState extends State<ImagePrintSelector> {
                         widget.onQuantityChanged(selectedQuantity);
                       }
                     : null,
-                icon: const Icon(Icons.add),
+                icon: Icon(
+                  Icons.add,
+                  color: widget.isBlocked ? Colors.grey : null,
+                ),
               ),
             ],
           ),

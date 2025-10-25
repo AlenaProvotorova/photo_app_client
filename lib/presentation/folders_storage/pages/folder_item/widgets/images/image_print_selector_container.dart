@@ -8,6 +8,8 @@ import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
 import 'package:photo_app/entities/sizes/bloc/sizes_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/images/image_print_selector.dart';
 
 class ImagePrintSelectorContainer extends StatefulWidget {
@@ -52,6 +54,30 @@ class _ImagePrintSelectorContainerState
     });
   }
 
+  bool _isOrderBlocked() {
+    final folderSettingsState = context.read<FolderSettingsBloc>().state;
+    final userState = context.read<UserBloc>().state;
+
+    if (userState is UserLoaded && userState.user.isAdmin) {
+      return false;
+    }
+
+    if (folderSettingsState is FolderSettingsLoaded) {
+      final dateSelectTo = folderSettingsState.folderSettings.dateSelectTo;
+
+      if (dateSelectTo == null) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      final daysUntilDeadline = dateSelectTo.difference(now).inDays;
+
+      return daysUntilDeadline < 0;
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final sizesBloc = context.read<SizesBloc>();
@@ -84,6 +110,7 @@ class _ImagePrintSelectorContainerState
       providers: [
         BlocProvider.value(value: sizesBloc),
         BlocProvider.value(value: orderBloc),
+        BlocProvider.value(value: context.read<UserBloc>()),
       ],
       child: BlocListener<OrderBloc, OrderState>(
         listener: (context, orderState) {
@@ -145,6 +172,7 @@ class _ImagePrintSelectorContainerState
                                   folderId: widget.folderId,
                                   defaultQuantity: currentQuantity,
                                   isConfirmed: !_hasUnconfirmedChanges,
+                                  isBlocked: _isOrderBlocked(),
                                   onQuantityChanged: (newQuantity) {
                                     setState(() {
                                       _pendingChanges[sizeName] = newQuantity;

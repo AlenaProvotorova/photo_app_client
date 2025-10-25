@@ -7,6 +7,8 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
 
 class SwitchAllDigital extends StatefulWidget {
   final String folderId;
@@ -21,6 +23,33 @@ class SwitchAllDigital extends StatefulWidget {
 
 class _SwitchAllDigitalState extends State<SwitchAllDigital> {
   bool _printAll = false;
+
+  bool _isOrderBlocked() {
+    final folderSettingsState = context.read<FolderSettingsBloc>().state;
+    final userState = context.read<UserBloc>().state;
+
+    // Если пользователь админ, блокировка не применяется
+    if (userState is UserLoaded && userState.user.isAdmin) {
+      return false;
+    }
+
+    if (folderSettingsState is FolderSettingsLoaded) {
+      final dateSelectTo = folderSettingsState.folderSettings.dateSelectTo;
+
+      // Если дата не установлена, блокировка не применяется
+      if (dateSelectTo == null) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      final daysUntilDeadline = dateSelectTo.difference(now).inDays;
+
+      // Блокируем, если текущая дата больше dateSelectTo
+      return daysUntilDeadline < 0;
+    }
+
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,25 +80,28 @@ class _SwitchAllDigitalState extends State<SwitchAllDigital> {
                           children: [
                             Switch(
                               value: _printAll,
-                              onChanged: (value) {
-                                setState(() {
-                                  _printAll = value;
-                                });
-                                context
-                                    .read<ClientsBloc>()
-                                    .add(UpdateOrderDigital(
-                                      clientId:
-                                          state.selectedClient!.id.toString(),
-                                      orderDigital: value,
-                                    ));
+                              onChanged: !_isOrderBlocked()
+                                  ? (value) {
+                                      setState(() {
+                                        _printAll = value;
+                                      });
+                                      context
+                                          .read<ClientsBloc>()
+                                          .add(UpdateOrderDigital(
+                                            clientId: state.selectedClient!.id
+                                                .toString(),
+                                            orderDigital: value,
+                                          ));
 
-                                context.read<OrderBloc>().add(
-                                      LoadOrder(
-                                        folderId: widget.folderId,
-                                        clientId: state.selectedClient!.id,
-                                      ),
-                                    );
-                              },
+                                      context.read<OrderBloc>().add(
+                                            LoadOrder(
+                                              folderId: widget.folderId,
+                                              clientId:
+                                                  state.selectedClient!.id,
+                                            ),
+                                          );
+                                    }
+                                  : null,
                             ),
                             Text(
                               _getDisplayName(

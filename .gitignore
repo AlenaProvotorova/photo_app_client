@@ -135,6 +135,13 @@ Desktop.ini
 *.rpm
 *.apk
 *.aab
+*.zip
+
+# Release archives
+photo_app_macos_release*.zip
+photo_app_windows_release*.zip
+photo_app_linux_release*.zip
+photo_app_web_release*.zip
 
 # Large build artifacts
 **/FlutterMacOS.framework.dSYM/
