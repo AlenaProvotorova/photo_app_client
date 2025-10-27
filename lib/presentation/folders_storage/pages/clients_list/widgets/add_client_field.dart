@@ -87,10 +87,6 @@ class _AddClientFieldState extends State<AddClientField> {
             ),
           ],
         ),
-        Text(
-          'Вы можете добавить несколько клиентов, разделяя их запятыми',
-          style: theme.textTheme.titleSmall,
-        ),
       ],
     );
   }

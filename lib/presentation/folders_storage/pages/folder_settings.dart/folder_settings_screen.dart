@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart' as router;
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/core/helpers/message/display_message.dart';
 import 'package:photo_app/data/folder_settings/models/folder_settings.dart';
+import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
+import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
+import 'package:photo_app/presentation/folders_storage/pages/clients_list/widgets/add_client_field.dart';
+import 'package:photo_app/presentation/folders_storage/pages/clients_list/widgets/list_tile.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/rename_setting.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_settings.dart/widgets/date_selector.dart';
 
@@ -27,6 +33,11 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
   bool _hasChanges = false;
   bool _applyingChanges = false;
   FolderSettingsBloc? _bloc;
+  ClientsBloc? _clientsBloc;
+
+  // Клиенты
+  final TextEditingController _clientNameController = TextEditingController();
+  List<String> _namesList = [];
 
   void _resetChanges() {
     setState(() {
@@ -75,8 +86,38 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
 
   @override
   void dispose() {
+    _clientNameController.dispose();
     _bloc?.close();
+    _clientsBloc?.close();
     super.dispose();
+  }
+
+  void _saveClientsToServer() {
+    try {
+      _clientsBloc?.add(UpdateClients(
+        folderId: widget.folderId,
+        clients: _namesList,
+      ));
+      DisplayMessage.showMessage(context, 'Список клиентов успешно обновлен');
+    } catch (e) {
+      DisplayMessage.showMessage(
+          context, 'Ошибка при сохранении списка клиентов');
+    }
+  }
+
+  void _deleteClient(String clientName) {
+    try {
+      setState(() {
+        _namesList.remove(clientName);
+      });
+
+      _clientsBloc?.add(DeleteClientByName(
+        folderId: widget.folderId,
+        clientName: clientName,
+      ));
+    } catch (e) {
+      DisplayMessage.showMessage(context, 'Ошибка при удалении клиента');
+    }
   }
 
   final defaultSettingsList = [
@@ -147,8 +188,15 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
         ..add(LoadFolderSettings(folderId: widget.folderId));
     }
 
-    return BlocProvider(
-      create: (context) => _bloc!,
+    if (_clientsBloc == null) {
+      _clientsBloc = ClientsBloc()..add(LoadClients(folderId: widget.folderId));
+    }
+
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => _bloc!),
+        BlocProvider(create: (context) => _clientsBloc!),
+      ],
       child: BlocListener<FolderSettingsBloc, FolderSettingsState>(
         listener: (context, state) {
           if (state is FolderSettingsLoaded && _applyingChanges) {
@@ -171,7 +219,7 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
                 );
               }
               if (state is FolderSettingsLoaded) {
-                return Padding(
+                return SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +332,125 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
                           ));
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 40),
+                      Row(
+                        children: [
+                          Text(
+                            'Добавьте список клиентов',
+                            style: theme.textTheme.titleSmall,
+                          ),
+                          const SizedBox(width: 8),
+                          Tooltip(
+                            message:
+                                'Вы можете добавить несколько клиентов, разделяя их запятыми',
+                            child: Icon(
+                              Icons.info_outline,
+                              color: Colors.grey,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      AddClientField(
+                        controllerName: _clientNameController,
+                        onSubmit: () {
+                          final names = _clientNameController.text
+                              .split(',')
+                              .map((name) => name.trim())
+                              .where((name) => name.isNotEmpty)
+                              .toList();
+                          setState(() {
+                            _namesList.addAll(names);
+                          });
+                          _clientNameController.clear();
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      BlocListener<ClientsBloc, ClientsState>(
+                        listener: (context, clientState) {
+                          if (clientState is ClientsLoaded) {
+                            final serverNames = clientState.namesList
+                                .map((client) => client.name)
+                                .toList();
+                            if (_namesList.isEmpty ||
+                                serverNames.length > _namesList.length) {
+                              setState(() {
+                                _namesList = serverNames;
+                              });
+                            }
+                          }
+                        },
+                        child: BlocBuilder<ClientsBloc, ClientsState>(
+                          builder: (context, clientState) {
+                            if (clientState is ClientsLoaded) {
+                              final serverNames = clientState.namesList
+                                  .map((client) => client.name)
+                                  .toList();
+                              if (_namesList.isEmpty) {
+                                _namesList = serverNames;
+                              } else {
+                                if (serverNames.length > _namesList.length) {
+                                  _namesList = serverNames;
+                                }
+                              }
+                            }
+                            if (_namesList.isEmpty) {
+                              return const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: Text(
+                                    'Список клиентов пуст',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _namesList.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(),
+                              itemBuilder: (context, index) {
+                                return SurnameListTile(
+                                  name: _namesList[index],
+                                  onDelete: (context) {
+                                    final clientName = _namesList[index];
+                                    _deleteClient(clientName);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      if (_namesList.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: _saveClientsToServer,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Сохранить список клиентов'),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 40),
                       ElevatedButton(
                         onPressed: () => _openFolder(context),
                         style: ElevatedButton.styleFrom(
