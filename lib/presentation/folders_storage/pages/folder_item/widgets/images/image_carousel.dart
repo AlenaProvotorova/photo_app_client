@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/data/files/models/file.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
@@ -29,11 +30,24 @@ class ImageCarousel extends StatefulWidget {
 
 class _ImageCarouselState extends State<ImageCarousel> {
   late PageController _pageController;
+  late FocusNode _focusNode;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
+    _currentIndex = widget.initialIndex;
+    _focusNode = FocusNode();
+
+    // Listen to page changes to update current index
+    _pageController.addListener(() {
+      if (_pageController.page != null) {
+        setState(() {
+          _currentIndex = _pageController.page!.round();
+        });
+      }
+    });
 
     if (widget.clientId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,7 +62,26 @@ class _ImageCarouselState extends State<ImageCarousel> {
   @override
   void dispose() {
     _pageController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _goToPreviousPage() {
+    if (_currentIndex > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _goToNextPage() {
+    if (_currentIndex < widget.images.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -71,10 +104,21 @@ class _ImageCarouselState extends State<ImageCarousel> {
             },
           ),
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
+        body: KeyboardListener(
+          autofocus: true,
+          focusNode: _focusNode,
+          onKeyEvent: (event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                _goToPreviousPage();
+              } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                _goToNextPage();
+              }
+            }
+          },
+          child: Stack(
+            children: [
+              PageView.builder(
                 controller: _pageController,
                 itemCount: widget.images.length,
                 itemBuilder: (context, index) {
@@ -104,7 +148,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: const EdgeInsets.only(
+                                          left: 16,
+                                          right: 16,
+                                          top: 0,
+                                          bottom: 16),
                                       decoration: const BoxDecoration(
                                         color: Colors.white,
                                         borderRadius: BorderRadius.all(
@@ -129,8 +177,81 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   );
                 },
               ),
-            ),
-          ],
+              // Left arrow button
+              Positioned(
+                left: 16,
+                top: 0,
+                bottom: 0,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: AnimatedOpacity(
+                    opacity: _currentIndex > 0 ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: IgnorePointer(
+                      ignoring: _currentIndex == 0,
+                      child: InkWell(
+                        onTap: _goToPreviousPage,
+                        borderRadius: BorderRadius.circular(25),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(
+                              Icons.arrow_back_ios,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Right arrow button
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: AnimatedOpacity(
+                    opacity:
+                        _currentIndex < widget.images.length - 1 ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: IgnorePointer(
+                      ignoring: _currentIndex == widget.images.length - 1,
+                      child: InkWell(
+                        onTap: _goToNextPage,
+                        borderRadius: BorderRadius.circular(25),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
