@@ -31,7 +31,7 @@ if %errorlevel% equ 0 (
     
     REM Создаем ZIP архив
     echo 📦 Создаем ZIP дистрибутив...
-    powershell -command "Compress-Archive -Path 'build\windows\runner\Release\*' -DestinationPath 'PhotoApp-Windows-%VERSION%.zip' -Force"
+    powershell -Command "$files = Get-ChildItem -Path 'build\windows\runner\Release' -Recurse -File; if ($files.Count -gt 0) { Compress-Archive -LiteralPath $files.FullName -DestinationPath 'PhotoApp-Windows-%VERSION%.zip' -Force; Write-Host 'Package created successfully' } else { Write-Error 'No files found' }"
     
     if %errorlevel% equ 0 (
         echo ✅ ZIP дистрибутив создан: PhotoApp-Windows-%VERSION%.zip

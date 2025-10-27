@@ -152,7 +152,25 @@ jobs:
           
           # Create ZIP package
           try {
-            Compress-Archive -Path "$sourceDir\*" -DestinationPath $zipName -Force
+            # Get all files and directories to compress
+            $items = Get-ChildItem -Path $sourceDir
+            if ($items.Count -eq 0) {
+              echo "ERROR: No files found in $sourceDir"
+              exit 1
+            }
+            
+            echo "Creating ZIP archive..."
+            # Get all files recursively
+            $allFiles = Get-ChildItem -Path $sourceDir -Recurse -File
+            if ($allFiles.Count -eq 0) {
+              echo "ERROR: No files found to compress"
+              exit 1
+            }
+            
+            echo "Found $($allFiles.Count) files to compress"
+            # Use -LiteralPath to avoid glob expansion issues
+            Compress-Archive -LiteralPath $allFiles.FullName -DestinationPath $zipName -Force
+            
             echo "Package created successfully: $zipName"
             
             # Verify package
