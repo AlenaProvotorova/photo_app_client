@@ -5,7 +5,8 @@ import 'package:photo_app/data/files/models/upload_progress.dart';
 import 'package:photo_app/data/image_picker/models/image_data.dart';
 
 class FileUploadService {
-  static const int maxFilesPerBatch = 200;
+  static const int maxFilesPerBatch =
+      4; // Уменьшено для стабильности батч-загрузок
   static const int maxFileSize = 5 * 1024 * 1024; // 5MB
   static const int maxTotalFiles = 1000;
 

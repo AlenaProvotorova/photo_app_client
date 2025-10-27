@@ -5,7 +5,7 @@ enum Environment {
 }
 
 class EnvironmentConfig {
-  static const Environment _currentEnvironment = Environment.development;
+  static const Environment _currentEnvironment = Environment.production;
 
   static Environment get current => _currentEnvironment;
 
@@ -21,6 +21,11 @@ class EnvironmentConfig {
   static const String _productionUrl =
       'https://photoappserver-production.up.railway.app/api/';
 
+  // Frontend URLs for different environments
+  static const String _developmentFrontendUrl = 'http://localhost:3000';
+  static const String _stagingFrontendUrl = 'https://fastselect.ru';
+  static const String _productionFrontendUrl = 'https://fastselect.ru';
+
   static String get apiBaseURL {
     switch (_currentEnvironment) {
       case Environment.development:
@@ -29,6 +34,17 @@ class EnvironmentConfig {
         return _stagingUrl;
       case Environment.production:
         return _productionUrl;
+    }
+  }
+
+  static String get frontendBaseURL {
+    switch (_currentEnvironment) {
+      case Environment.development:
+        return _developmentFrontendUrl;
+      case Environment.staging:
+        return _stagingFrontendUrl;
+      case Environment.production:
+        return _productionFrontendUrl;
     }
   }
 

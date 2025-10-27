@@ -10,18 +10,25 @@ class DioClient {
   DioClient()
       : _dio = Dio(
           BaseOptions(
-              baseUrl: ApiUrl.baseURL,
-              headers: {
-                'Content-Type': 'application/json; charset=UTF-8',
-                'Accept': 'application/json',
-                ...EnvironmentConfig.requestHeaders,
-              },
-              responseType: ResponseType.json,
-              receiveTimeout: const Duration(seconds: 10)),
+            baseUrl: ApiUrl.baseURL,
+            headers: {
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Accept': 'application/json',
+              ...EnvironmentConfig.requestHeaders,
+            },
+            responseType: ResponseType.json,
+            connectTimeout:
+                const Duration(minutes: 5), // Увеличено для batch загрузок
+            receiveTimeout:
+                const Duration(minutes: 5), // Увеличено для batch загрузок
+            sendTimeout:
+                const Duration(minutes: 5), // Увеличено для batch загрузок
+            maxRedirects: 5,
+          ),
         )..interceptors.addAll([LoggerInterceptor()]);
 
   Options get _sendTimeoutOption => Options(
-        sendTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(minutes: 5), // Увеличено для batch загрузок
       );
 
   // GET METHOD
@@ -56,12 +63,18 @@ class DioClient {
     ProgressCallback? onReceiveProgress,
   }) async {
     try {
+      // Используем переданные options или объединяем с таймаутами по умолчанию
+      final finalOptions = options?.copyWith(
+            sendTimeout: options.sendTimeout ?? _sendTimeoutOption.sendTimeout,
+            receiveTimeout:
+                options.receiveTimeout ?? _sendTimeoutOption.sendTimeout,
+          ) ??
+          _sendTimeoutOption;
+
       final Response response = await _dio.post(
         url,
         data: data,
-        options:
-            options?.copyWith(sendTimeout: _sendTimeoutOption.sendTimeout) ??
-                _sendTimeoutOption,
+        options: finalOptions,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );

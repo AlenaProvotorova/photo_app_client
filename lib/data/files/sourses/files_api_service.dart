@@ -34,9 +34,14 @@ class FilesApiServiceImplementation extends FilesApiService {
   @override
   Future<Either> uploadFilesBatch(UploadFilesBatchReqParams params) async {
     try {
+      // Специальный таймаут для batch загрузок - 5 минут
       var response = await sl<DioClient>().post(
         '${ApiUrl.filesBatch}?folderId=${params.folderId}',
         data: params.formData,
+        options: Options(
+          sendTimeout: const Duration(minutes: 5),
+          receiveTimeout: const Duration(minutes: 5),
+        ),
       );
       return Right(response.data);
     } on DioException catch (e) {
