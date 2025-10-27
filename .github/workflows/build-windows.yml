@@ -193,11 +193,182 @@ jobs:
           exit 1
         }
         
+    - name: Setup Chocolatey
+      run: |
+        echo "Checking for Chocolatey..."
+        if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+          echo "Installing Chocolatey..."
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        }
+        choco --version
+        echo "Chocolatey is ready"
+        
+    - name: Setup Inno Setup
+      run: |
+        echo "Installing Inno Setup..."
+        choco install innosetup -y --accept-license --limit-output --no-progress
+        echo "Inno Setup installed"
+        
+        # Verify installation
+        $isccPaths = @(
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+          "C:\Program Files\Inno Setup 6\ISCC.exe"
+        )
+        
+        $found = $false
+        foreach ($path in $isccPaths) {
+          if (Test-Path $path) {
+            echo "Inno Setup found at: $path"
+            $found = $true
+            break
+          }
+        }
+        
+        if (-not $found) {
+          echo "ERROR: Inno Setup installation verification failed"
+          echo "Trying alternative method..."
+          $isccCheck = Get-Command iscc -ErrorAction SilentlyContinue
+          if ($isccCheck) {
+            echo "Inno Setup found in PATH"
+          } else {
+            echo "Inno Setup not found. Installation may have failed."
+            exit 1
+          }
+        }
+        
+    - name: Find executable and update setup script
+      run: |
+        echo "Finding the main executable..."
+        
+        # Try different locations
+        $releaseDirs = @(
+          "build\windows\x64\runner\Release",
+          "build\windows\runner\Release"
+        )
+        
+        $exeName = $null
+        $releaseDir = $null
+        
+        foreach ($dir in $releaseDirs) {
+          if (Test-Path $dir) {
+            $releaseDir = $dir
+            # Find the main .exe file (not uninstaller)
+            $exeFiles = Get-ChildItem $dir -Filter "*.exe" -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike "*uninstall*" -and $_.Name -notlike "*unins*" }
+            
+            if ($exeFiles.Count -gt 0) {
+              $exeName = $exeFiles[0].Name
+              echo "Found executable: $exeName in $releaseDir"
+              break
+            }
+          }
+        }
+        
+        if (-not $exeName) {
+          echo "ERROR: Could not find main executable"
+          echo "Searching for all .exe files in build directory..."
+          $allExe = Get-ChildItem "build\windows" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue
+          if ($allExe) {
+            echo "Found .exe files:"
+            $allExe | ForEach-Object { echo "  $($_.FullName)" }
+          }
+          exit 1
+        }
+        
+        # Update setup.iss with the correct executable name
+        echo "Updating setup.iss with executable: $exeName"
+        $setupContent = Get-Content "setup.iss" -Raw
+        
+        # Replace all occurrences of the executable name in Icons and Run sections
+        $setupContent = $setupContent -replace 'runner\.exe', $exeName
+        $setupContent = $setupContent -replace 'photo_app_client\.exe', $exeName
+        $setupContent = $setupContent -replace 'photo_app\.exe', $exeName
+        
+        Set-Content "setup.iss" -Value $setupContent -NoNewline
+        echo "setup.iss updated successfully"
+        
+        # Set the exe name as an output for later steps
+        echo "EXE_NAME=$exeName" >> $env:GITHUB_ENV
+        
+    - name: Create Windows installer
+      run: |
+        echo "Creating installer with Inno Setup..."
+        $version = "${{ steps.get_version.outputs.version }}"
+        $exeName = $env:EXE_NAME
+        
+        echo "Using executable: $exeName"
+        
+        # Create installer directory if it doesn't exist
+        if (-not (Test-Path "installer")) {
+          New-Item -ItemType Directory -Path "installer" | Out-Null
+          echo "Created installer directory"
+        }
+        
+        # Try to find Inno Setup
+        $isccPaths = @(
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+          "C:\Program Files\Inno Setup 6\ISCC.exe",
+          "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+        )
+        
+        $iscc = $null
+        foreach ($path in $isccPaths) {
+          if (Test-Path $path) {
+            $iscc = $path
+            echo "Found Inno Setup at: $iscc"
+            break
+          }
+        }
+        
+        if (-not $iscc) {
+          echo "ERROR: Inno Setup not found"
+          exit 1
+        }
+        
+        echo "Compiling installer with: $iscc"
+        echo "Setup script: setup.iss"
+        echo "Output name: PhotoApp_Setup_$version"
+        
+        # Run Inno Setup compiler
+        $result = & $iscc setup.iss /O"installer" /F"PhotoApp_Setup_$version" 2>&1 | ForEach-Object {
+          if ($_ -is [string]) {
+            echo $_
+          } else {
+            $_.ToString()
+          }
+        }
+        
+        # Check for created installer
+        $installerFiles = Get-ChildItem "installer" -Filter "PhotoApp_Setup_*.exe" -ErrorAction SilentlyContinue
+        if ($installerFiles.Count -gt 0) {
+          echo "✅ Installer created successfully!"
+          foreach ($file in $installerFiles) {
+            $fileInfo = Get-ChildItem $file.FullName
+            echo "  File: $($fileInfo.Name)"
+            echo "  Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB"
+          }
+        } else {
+          echo "❌ ERROR: Installer was not created"
+          echo "Contents of installer directory:"
+          Get-ChildItem "installer" -ErrorAction SilentlyContinue | ForEach-Object { echo "  $($_.Name)" }
+          exit 1
+        }
+        
     - name: Upload Windows build artifact
       uses: actions/upload-artifact@v4
       with:
         name: PhotoApp-Windows-v${{ steps.get_version.outputs.version }}
         path: PhotoApp-Windows-v*.zip
+        retention-days: 30
+        
+    - name: Upload Windows installer
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: PhotoApp-Installer-v${{ steps.get_version.outputs.version }}
+        path: installer/*.exe
+        if-no-files-found: warn
         retention-days: 30
         
     - name: Upload test coverage
@@ -214,7 +385,9 @@ jobs:
       with:
         name: PhotoApp Windows v${{ steps.get_version.outputs.version }}
         tag_name: v${{ steps.get_version.outputs.version }}
-        files: PhotoApp-Windows-v*.zip
+        files: |
+          PhotoApp-Windows-v*.zip
+          installer/*.exe
         generate_release_notes: true
         draft: false
         prerelease: false
@@ -226,24 +399,33 @@ jobs:
           **Commit:** ${{ github.sha }}  
           **Flutter Version:** ${{ env.FLUTTER_VERSION }}
           
-          ### Installation
-          1. Download the ZIP file below
-          2. Extract to any folder (e.g., C:\Program Files\PhotoApp\)
-          3. Run photo_app_client.exe
+          ### 🚀 Installation Options
           
-          ### System Requirements
+          **Option 1: Installer (Recommended)**
+          1. Download `PhotoApp_Setup_*.exe`
+          2. Run the installer
+          3. Follow the installation wizard
+          4. Launch PhotoApp from Start menu or desktop shortcut
+          
+          **Option 2: Portable ZIP**
+          1. Download `PhotoApp-Windows-v*.zip`
+          2. Extract to any folder (e.g., C:\Program Files\PhotoApp\)
+          3. Run `photo_app_client.exe`
+          
+          ### 💻 System Requirements
           - OS: Windows 10 (version 1903 or later) / Windows 11
           - Architecture: 64-bit (x64)
           - RAM: 4 GB minimum, 8 GB recommended
           - Storage: 1 GB free disk space
           - Graphics: DirectX 11 compatible
           
-          ### Features
+          ### ✨ Features
           - Modern Flutter-based UI
           - Cross-platform compatibility
           - Optimized for Windows desktop
+          - Easy installation with installer
           
-          ### Changes
+          ### 📝 Changes
           ${{ github.event.head_commit.message }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -253,7 +435,12 @@ jobs:
       if: always()
       run: |
         echo "=== Build Completed ==="
-        echo "ZIP file is available in the 'Artifacts' section below"
-        echo "Download: PhotoApp-Windows-v${{ steps.get_version.outputs.version }}"
+        echo "Files are available in the 'Artifacts' section below"
         echo ""
-        echo "If release creation failed, you can still download the ZIP file from artifacts"
+        echo "Available downloads:"
+        echo "1. PhotoApp-Windows-v${{ steps.get_version.outputs.version }} (ZIP archive)"
+        echo "2. PhotoApp-Installer-v${{ steps.get_version.outputs.version }} (Installer)"
+        echo ""
+        echo "The installer is recommended for easy installation!"
+        echo ""
+        echo "If release creation failed, you can still download files from artifacts"

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -110,9 +111,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       if (state is OrderLoaded) {
         final order = state.fullOrderForSorting;
 
-        final retouchDirectory = Directory('$selectedPath/РЕТУШЬ');
+        final retouchDirectory = Directory(path.join(selectedPath, 'РЕТУШЬ'));
         if (!await retouchDirectory.exists()) {
-          await retouchDirectory.create();
+          await retouchDirectory.create(recursive: true);
         }
 
         final Set<String> orderFileNames = {};
@@ -159,13 +160,13 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
         for (final fileEntity in sourceFiles) {
           if (fileEntity is File) {
-            final fileName = fileEntity.path.split('/').last;
+            final fileName = path.basename(fileEntity.path);
 
             if (isFileInOrder(fileName)) {
               matchedFiles++;
 
               final destinationFile =
-                  File('${retouchDirectory.path}/$fileName');
+                  File(path.join(retouchDirectory.path, fileName));
 
               if (!await destinationFile.exists()) {
                 try {
@@ -213,9 +214,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
         final order = orderState.fullOrderForSorting;
         final settings = settingsState.folderSettings;
 
-        final orderDirectory = Directory('$selectedPath/ЗАКАЗ');
+        final orderDirectory = Directory(path.join(selectedPath, 'ЗАКАЗ'));
         if (!await orderDirectory.exists()) {
-          await orderDirectory.create();
+          await orderDirectory.create(recursive: true);
         }
 
         final Set<String> orderSizes = {};
@@ -237,10 +238,11 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
         for (final size in orderSizes) {
           final ruName = sizeToRuName[size] ?? size;
-          final sizeDirectory = Directory('${orderDirectory.path}/$ruName');
+          final sizeDirectory =
+              Directory(path.join(orderDirectory.path, ruName));
 
           if (!await sizeDirectory.exists()) {
-            await sizeDirectory.create();
+            await sizeDirectory.create(recursive: true);
           }
         }
 
@@ -272,7 +274,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
           for (final fileEntity in sourceFiles) {
             if (fileEntity is File) {
-              final fileName = fileEntity.path.split('/').last;
+              final fileName = path.basename(fileEntity.path);
               final nameWithoutExtension = fileName.split('.').first;
 
               if (allOrderFiles.containsKey(nameWithoutExtension)) {
@@ -286,7 +288,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
                   final ruName = sizeToRuName[size] ?? size;
                   final sizeDirectory =
-                      Directory('${orderDirectory.path}/$ruName');
+                      Directory(path.join(orderDirectory.path, ruName));
 
                   String newFileName;
                   final intCount = int.tryParse(count.toString()) ?? 1;
@@ -298,7 +300,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                   }
 
                   final destinationFile =
-                      File('${sizeDirectory.path}/$newFileName');
+                      File(path.join(sizeDirectory.path, newFileName));
 
                   if (!await destinationFile.exists()) {
                     try {

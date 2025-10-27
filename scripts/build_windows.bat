@@ -41,6 +41,18 @@ if %errorlevel% equ 0 (
         echo ❌ Ошибка при создании ZIP архива
         exit /b 1
     )
+    
+    REM Проверяем наличие Inno Setup
+    where iscc >nul 2>&1
+    if %errorlevel% equ 0 (
+        echo.
+        echo 📦 Создаем установщик...
+        call scripts\create_windows_installer.bat
+    ) else (
+        echo.
+        echo ℹ️  Inno Setup не найден. Для создания установщика установите Inno Setup Compiler
+        echo    Скачать: https://jrsoftware.org/isdl.php
+    )
 ) else (
     echo ❌ Ошибка при сборке Windows приложения
     exit /b 1

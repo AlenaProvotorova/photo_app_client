@@ -27,6 +27,8 @@ dependencies:
   image_picker: ^1.0.7
   # Upload images for web:
   file_picker: ^6.1.1
+  # Path manipulation for cross-platform compatibility:
+  path: ^1.9.0
   # Window manager for desktop:
   window_manager: ^0.4.3
   desktop_window: ^0.4.2
