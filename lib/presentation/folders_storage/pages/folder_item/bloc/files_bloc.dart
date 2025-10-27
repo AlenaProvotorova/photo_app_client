@@ -23,6 +23,7 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
     on<UploadFiles>(_onUploadFiles);
     on<UploadFilesBatch>(_onUploadFilesBatch);
     on<DeleteAllFiles>(_onDeleteAllFiles);
+    on<RemoveFileLocally>(_onRemoveFileLocally);
   }
 
   Future<void> _onLoadFiles(
@@ -264,6 +265,18 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
       print('Delete all files exception: $e');
       emit(FilesError('Ошибка удаления файлов: $e'));
       DisplayMessage.showMessage(event.context, 'Ошибка удаления файлов: $e');
+    }
+  }
+
+  void _onRemoveFileLocally(
+    RemoveFileLocally event,
+    Emitter<FilesState> emit,
+  ) {
+    final currentState = state;
+    if (currentState is FilesLoaded) {
+      final updatedFiles =
+          currentState.files.where((file) => file.id != event.fileId).toList();
+      emit(FilesLoaded(files: updatedFiles));
     }
   }
 }

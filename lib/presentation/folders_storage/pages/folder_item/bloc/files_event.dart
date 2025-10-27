@@ -54,3 +54,9 @@ class DeleteAllFiles extends FilesEvent {
     required this.context,
   });
 }
+
+class RemoveFileLocally extends FilesEvent {
+  final int fileId;
+
+  RemoveFileLocally({required this.fileId});
+}

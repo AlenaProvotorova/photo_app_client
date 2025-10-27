@@ -48,15 +48,28 @@ class ImageDelete extends StatelessWidget {
   }
 
   Future<void> _handleDeleteFile(BuildContext context, int id) async {
+    // Сначала удаляем локально для плавной анимации
+    context.read<FilesBloc>().add(RemoveFileLocally(fileId: id));
+
+    // Ждем завершения анимации перед запросом на сервер
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // Теперь удаляем на сервере
     final result = await sl<RemoveFilesUseCase>().call(
       params: RemoveFilesReqParams(
         ids: [id],
         folderId: folderId,
       ),
     );
+
     result.fold(
-      (error) => DisplayMessage.showMessage(context, error.toString()),
+      (error) {
+        // Если произошла ошибка, перезагружаем список для восстановления
+        context.read<FilesBloc>().add(LoadFiles(folderId: folderId.toString()));
+        DisplayMessage.showMessage(context, error.toString());
+      },
       (success) {
+        // После успешного удаления на сервере, синхронизируем данные
         context.read<FilesBloc>().add(LoadFiles(folderId: folderId.toString()));
       },
     );

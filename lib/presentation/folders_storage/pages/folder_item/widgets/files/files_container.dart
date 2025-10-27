@@ -112,6 +112,7 @@ class FilesContainer extends StatelessWidget {
           crossAxisCount: MediaQuery.of(context).size.width < 500 ? 2 : 3,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
+          childAspectRatio: 1.0,
         ),
         itemCount: filesToRender.length,
         itemBuilder: (context, index) {
@@ -120,7 +121,10 @@ class FilesContainer extends StatelessWidget {
           final clientsBloc = context.read<ClientsBloc>();
           final orderBloc = context.read<OrderBloc>();
           final settingsBloc = context.read<FolderSettingsBloc>();
+          final userBloc = context.read<UserBloc>();
+
           return GestureDetector(
+            key: ValueKey(imageData.id),
             onTap: () {
               if (!isAdmin &&
                   clientsBloc.state is ClientsLoaded &&
