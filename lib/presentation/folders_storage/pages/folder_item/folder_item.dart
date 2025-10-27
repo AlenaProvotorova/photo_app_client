@@ -5,15 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:photo_app/core/components/app_bar_custom.dart';
+import 'package:photo_app/core/constants/api_url.dart';
+import 'package:photo_app/core/network/dio_client.dart';
 import 'package:photo_app/data/image_picker/repositories/desktop_image_picker.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
+import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
+import 'package:photo_app/service_locator.dart';
 import 'package:photo_app/data/image_picker/repositories/mobile_image_picker.dart';
 import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
-import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dart';
-import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
-import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
@@ -55,6 +58,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final OrderBloc _orderBloc;
   late final FolderSettingsBloc _folderSettingsBloc;
   bool _showSelected = false;
+  bool _hasUpdatedFirstSettingsAlert = false;
   @override
   void initState() {
     super.initState();
@@ -326,6 +330,20 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     }
   }
 
+  Future<void> _updateFirstSettingsAlert() async {
+    if (_hasUpdatedFirstSettingsAlert) return;
+
+    _hasUpdatedFirstSettingsAlert = true;
+    try {
+      await sl<DioClient>().patch(
+        '${ApiUrl.folderSettings}/${widget.folderId}',
+        data: {'firstSettingsAlert': true},
+      );
+    } catch (e) {
+      // Ошибка обновления игнорируется
+    }
+  }
+
   void _showDeleteAllFilesDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -470,52 +488,118 @@ class FolderItemScreenState extends State<FolderItemScreen> {
           BlocProvider(create: (context) => _sizesBloc),
           BlocProvider(create: (context) => _orderBloc),
         ],
-        child: Column(
-          children: [
-            ClientSelector(
-              folderId: widget.folderId,
-            ),
-            DateSelectionInfo(
-              folderId: widget.folderId,
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                border: Border.all(color: theme.colorScheme.primary),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(children: [
-                SwitchAllDigital(
-                  folderId: widget.folderId,
-                ),
-                OrderAlbum(
-                  folderId: widget.folderId,
-                )
-              ]),
-            ),
-            ShowSelectedButton(
-              showSelected: _showSelected,
-              onPressed: () {
-                setState(() {
-                  _showSelected = !_showSelected;
-                });
+        child: BlocBuilder<UserBloc, UserState>(
+          builder: (context, userState) {
+            final isAdmin = userState is UserLoaded && userState.user.isAdmin;
+
+            return BlocConsumer<FolderSettingsBloc, FolderSettingsState>(
+              listener: (context, state) {},
+              builder: (context, folderState) {
+                final showAlert = isAdmin &&
+                    folderState is FolderSettingsLoaded &&
+                    folderState.folderSettings.firstSettingsAlert == false;
+
+                if (showAlert) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _updateFirstSettingsAlert();
+                  });
+                }
+
+                return Column(
+                  children: [
+                    if (showAlert)
+                      Container(
+                        margin: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.withOpacity(0.1),
+                          border: Border.all(color: Colors.amber),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.amber.shade700,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
+                                style: TextStyle(
+                                  color: Colors.amber.shade800,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            TextButton(
+                              onPressed: () {
+                                context.go(
+                                    '/folder/${widget.folderPath}/settings');
+                              },
+                              child: Text(
+                                'Перейти в настройки',
+                                style: TextStyle(
+                                  color: Colors.amber.shade800,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ClientSelector(
+                      folderId: widget.folderId,
+                    ),
+                    DateSelectionInfo(
+                      folderId: widget.folderId,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.colorScheme.primary),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(children: [
+                        SwitchAllDigital(
+                          folderId: widget.folderId,
+                        ),
+                        OrderAlbum(
+                          folderId: widget.folderId,
+                        )
+                      ]),
+                    ),
+                    ShowSelectedButton(
+                      showSelected: _showSelected,
+                      onPressed: () {
+                        setState(() {
+                          _showSelected = !_showSelected;
+                        });
+                      },
+                    ),
+                    Expanded(
+                      child: FilesList(
+                        showSelected: _showSelected,
+                        folderId: widget.folderId,
+                        orderBloc: _orderBloc,
+                        clientsBloc: _clientsBloc,
+                      ),
+                    ),
+                    UploadFileButton(
+                      pickImages: (context) async {
+                        await _pickImages(context);
+                      },
+                      onDeleteAll: (context) =>
+                          _showDeleteAllFilesDialog(context),
+                    ),
+                  ],
+                );
               },
-            ),
-            Expanded(
-              child: FilesList(
-                showSelected: _showSelected,
-                folderId: widget.folderId,
-                orderBloc: _orderBloc,
-                clientsBloc: _clientsBloc,
-              ),
-            ),
-            UploadFileButton(
-              pickImages: (context) async {
-                await _pickImages(context);
-              },
-              onDeleteAll: (context) => _showDeleteAllFilesDialog(context),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

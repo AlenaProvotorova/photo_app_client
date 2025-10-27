@@ -29,6 +29,7 @@ class FolderSettings {
   final Setting sizeTwo;
   final Setting sizeThree;
   final DateTime? dateSelectTo;
+  final bool? firstSettingsAlert;
 
   FolderSettings({
     required this.id,
@@ -41,6 +42,7 @@ class FolderSettings {
     required this.sizeTwo,
     required this.sizeThree,
     this.dateSelectTo,
+    this.firstSettingsAlert,
   });
 
   factory FolderSettings.fromJson(Map<String, dynamic> json) {
@@ -57,6 +59,7 @@ class FolderSettings {
       dateSelectTo: json['dateSelectTo'] != null
           ? DateTime.parse(json['dateSelectTo'])
           : null,
+      firstSettingsAlert: json['firstSettingsAlert'],
     );
   }
 
