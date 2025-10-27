@@ -46,6 +46,15 @@ echo "🏗 Building web"
 flutter build web --release
 
 echo "📁 Post-build steps"
+# Генерируем уникальную версию для cache busting
+BUILD_VERSION=$(date +%Y%m%d-%H%M%S 2>/dev/null || echo "$(date +%s)")
+echo "📝 Setting build version to: $BUILD_VERSION"
+if [ -f "build/web/index.html" ]; then
+  sed -i.bak "s/<meta name=\"app-version\" content=\"[^\"]*\">/<meta name=\"app-version\" content=\"$BUILD_VERSION\">/" build/web/index.html || true
+  rm -f build/web/index.html.bak
+fi
+
+echo "📁 Post-build file operations"
 if [ -f "web_config/_redirects" ]; then
   cp web_config/_redirects build/web/
 fi
