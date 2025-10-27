@@ -78,7 +78,21 @@ jobs:
       
     - name: Create ZIP archive
       run: |
-        Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath "PhotoApp-Windows-${{ github.ref_name }}.zip" -Force
+        $buildDir = "build\windows\x64\runner\Release"
+        if (Test-Path $buildDir) {
+          echo "Found build directory: $buildDir"
+          $allFiles = Get-ChildItem -Path $buildDir -Recurse -File
+          if ($allFiles.Count -gt 0) {
+            Compress-Archive -LiteralPath $allFiles.FullName -DestinationPath "PhotoApp-Windows-${{ github.ref_name }}.zip" -Force
+            echo "Package created successfully"
+          } else {
+            echo "ERROR: No files found to compress"
+            exit 1
+          }
+        } else {
+          echo "ERROR: Build directory not found: $buildDir"
+          exit 1
+        }
           
     - name: Upload Windows artifact
       uses: actions/upload-artifact@v4
