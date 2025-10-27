@@ -507,85 +507,93 @@ class FolderItemScreenState extends State<FolderItemScreen> {
 
                 return Column(
                   children: [
-                    if (showAlert)
-                      Container(
-                        margin: const EdgeInsets.all(16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withOpacity(0.1),
-                          border: Border.all(color: Colors.amber),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.amber.shade700,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
-                                style: TextStyle(
-                                  color: Colors.amber.shade800,
-                                  fontSize: 14,
+                            if (showAlert)
+                              Container(
+                                margin: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.1),
+                                  border: Border.all(color: Colors.amber),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.info_outline,
+                                      color: Colors.amber.shade700,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
+                                        style: TextStyle(
+                                          color: Colors.amber.shade800,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    TextButton(
+                                      onPressed: () {
+                                        context.go(
+                                            '/folder/${widget.folderPath}/settings');
+                                      },
+                                      child: Text(
+                                        'Перейти в настройки',
+                                        style: TextStyle(
+                                          color: Colors.amber.shade800,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
+                            ClientSelector(
+                              folderId: widget.folderId,
                             ),
-                            const SizedBox(width: 12),
-                            TextButton(
+                            DateSelectionInfo(
+                              folderId: widget.folderId,
+                            ),
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: theme.colorScheme.primary),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(children: [
+                                SwitchAllDigital(
+                                  folderId: widget.folderId,
+                                ),
+                                OrderAlbum(
+                                  folderId: widget.folderId,
+                                )
+                              ]),
+                            ),
+                            ShowSelectedButton(
+                              showSelected: _showSelected,
                               onPressed: () {
-                                context.go(
-                                    '/folder/${widget.folderPath}/settings');
+                                setState(() {
+                                  _showSelected = !_showSelected;
+                                });
                               },
-                              child: Text(
-                                'Перейти в настройки',
-                                style: TextStyle(
-                                  color: Colors.amber.shade800,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
+                            ),
+                            FilesList(
+                              showSelected: _showSelected,
+                              folderId: widget.folderId,
+                              orderBloc: _orderBloc,
+                              clientsBloc: _clientsBloc,
                             ),
                           ],
                         ),
-                      ),
-                    ClientSelector(
-                      folderId: widget.folderId,
-                    ),
-                    DateSelectionInfo(
-                      folderId: widget.folderId,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: theme.colorScheme.primary),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(children: [
-                        SwitchAllDigital(
-                          folderId: widget.folderId,
-                        ),
-                        OrderAlbum(
-                          folderId: widget.folderId,
-                        )
-                      ]),
-                    ),
-                    ShowSelectedButton(
-                      showSelected: _showSelected,
-                      onPressed: () {
-                        setState(() {
-                          _showSelected = !_showSelected;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: FilesList(
-                        showSelected: _showSelected,
-                        folderId: widget.folderId,
-                        orderBloc: _orderBloc,
-                        clientsBloc: _clientsBloc,
                       ),
                     ),
                     UploadFileButton(

@@ -34,16 +34,12 @@ class FilesList extends StatelessWidget {
         } else if (state is FilesDeleting) {
           return _buildDeletingState(context, state);
         } else if (state is FilesLoaded) {
-          return Column(
-            children: [
-              FilesContainer(
-                files: state.files,
-                folderId: folderId,
-                orderBloc: orderBloc,
-                clientsBloc: clientsBloc,
-                showSelected: showSelected,
-              ),
-            ],
+          return FilesContainer(
+            files: state.files,
+            folderId: folderId,
+            orderBloc: orderBloc,
+            clientsBloc: clientsBloc,
+            showSelected: showSelected,
           );
         } else if (state is FilesError) {
           return Center(child: Text(state.message));
@@ -64,17 +60,16 @@ class FilesList extends StatelessWidget {
           progress: state.progress,
         ),
         if (state.existingFiles.isNotEmpty)
-          Expanded(
-            child: FilesContainer(
-              files: state.existingFiles,
-              folderId: folderId,
-              orderBloc: orderBloc,
-              clientsBloc: clientsBloc,
-              showSelected: showSelected,
-            ),
+          FilesContainer(
+            files: state.existingFiles,
+            folderId: folderId,
+            orderBloc: orderBloc,
+            clientsBloc: clientsBloc,
+            showSelected: showSelected,
           )
         else
-          const Expanded(
+          const SizedBox(
+            height: 200,
             child: Center(
               child: Text('Загрузка изображений...'),
             ),
@@ -98,17 +93,16 @@ class FilesList extends StatelessWidget {
           batchProgress: state.batchProgress,
         ),
         if (state.existingFiles.isNotEmpty)
-          Expanded(
-            child: FilesContainer(
-              files: state.existingFiles,
-              folderId: folderId,
-              orderBloc: orderBloc,
-              clientsBloc: clientsBloc,
-              showSelected: showSelected,
-            ),
+          FilesContainer(
+            files: state.existingFiles,
+            folderId: folderId,
+            orderBloc: orderBloc,
+            clientsBloc: clientsBloc,
+            showSelected: showSelected,
           )
         else
-          const Expanded(
+          const SizedBox(
+            height: 200,
             child: Center(
               child: Text('Загрузка изображений...'),
             ),

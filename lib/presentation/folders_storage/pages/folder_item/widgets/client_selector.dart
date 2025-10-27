@@ -56,7 +56,7 @@ class _ClientSelectorState extends State<ClientSelector> {
       child: BlocBuilder<ClientsBloc, ClientsState>(
         builder: (context, state) {
           if (state is ClientsLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const SizedBox.shrink();
           } else if (state is ClientsLoaded) {
             return Align(
               alignment: Alignment.centerLeft,

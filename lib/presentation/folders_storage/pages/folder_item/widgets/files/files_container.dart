@@ -49,7 +49,10 @@ class FilesContainer extends StatelessWidget {
     final filesToRender = filteredFiles;
 
     if (filesToRender.isEmpty) {
-      return const Expanded(child: EmptyContainer(text: 'Папка пуста'));
+      return const SizedBox(
+        height: 200,
+        child: EmptyContainer(text: 'Папка пуста'),
+      );
     }
 
     // Если это одиночный элемент (для состояния загрузки)
@@ -105,70 +108,70 @@ class FilesContainer extends StatelessWidget {
       );
     }
 
-    return Expanded(
-      child: GridView.builder(
-        padding: const EdgeInsets.all(10),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width < 500 ? 2 : 3,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: filesToRender.length,
-        itemBuilder: (context, index) {
-          final imageData = filesToRender[index];
-          final sizesBloc = context.read<SizesBloc>();
-          final clientsBloc = context.read<ClientsBloc>();
-          final orderBloc = context.read<OrderBloc>();
-          final settingsBloc = context.read<FolderSettingsBloc>();
-          final userBloc = context.read<UserBloc>();
-
-          return GestureDetector(
-            key: ValueKey(imageData.id),
-            onTap: () {
-              if (!isAdmin &&
-                  clientsBloc.state is ClientsLoaded &&
-                  (clientsBloc.state as ClientsLoaded).selectedClient == null) {
-                return;
-              }
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return MultiBlocProvider(
-                      providers: [
-                        BlocProvider.value(value: sizesBloc),
-                        BlocProvider.value(value: clientsBloc),
-                        BlocProvider.value(value: orderBloc),
-                        BlocProvider.value(value: settingsBloc),
-                        BlocProvider.value(value: userBloc),
-                      ],
-                      child: ImageCarousel(
-                        images: filesToRender,
-                        initialIndex: index,
-                        folderId: int.parse(folderId),
-                        clientId: clientsBloc.state is ClientsLoaded &&
-                                (clientsBloc.state as ClientsLoaded)
-                                        .selectedClient !=
-                                    null
-                            ? (clientsBloc.state as ClientsLoaded)
-                                .selectedClient!
-                                .id
-                            : null,
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-            child: ImageCardContainer(
-              url: imageData.url,
-              id: imageData.id,
-              folderId: int.parse(folderId),
-              originalName: imageData.originalName,
-            ),
-          );
-        },
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(10),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: MediaQuery.of(context).size.width < 500 ? 2 : 3,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.0,
       ),
+      itemCount: filesToRender.length,
+      itemBuilder: (context, index) {
+        final imageData = filesToRender[index];
+        final sizesBloc = context.read<SizesBloc>();
+        final clientsBloc = context.read<ClientsBloc>();
+        final orderBloc = context.read<OrderBloc>();
+        final settingsBloc = context.read<FolderSettingsBloc>();
+        final userBloc = context.read<UserBloc>();
+
+        return GestureDetector(
+          key: ValueKey(imageData.id),
+          onTap: () {
+            if (!isAdmin &&
+                clientsBloc.state is ClientsLoaded &&
+                (clientsBloc.state as ClientsLoaded).selectedClient == null) {
+              return;
+            }
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return MultiBlocProvider(
+                    providers: [
+                      BlocProvider.value(value: sizesBloc),
+                      BlocProvider.value(value: clientsBloc),
+                      BlocProvider.value(value: orderBloc),
+                      BlocProvider.value(value: settingsBloc),
+                      BlocProvider.value(value: userBloc),
+                    ],
+                    child: ImageCarousel(
+                      images: filesToRender,
+                      initialIndex: index,
+                      folderId: int.parse(folderId),
+                      clientId: clientsBloc.state is ClientsLoaded &&
+                              (clientsBloc.state as ClientsLoaded)
+                                      .selectedClient !=
+                                  null
+                          ? (clientsBloc.state as ClientsLoaded)
+                              .selectedClient!
+                              .id
+                          : null,
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+          child: ImageCardContainer(
+            url: imageData.url,
+            id: imageData.id,
+            folderId: int.parse(folderId),
+            originalName: imageData.originalName,
+          ),
+        );
+      },
     );
   }
 }
