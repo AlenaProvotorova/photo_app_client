@@ -134,6 +134,10 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
     }
   }
 
+  void _openFolder(BuildContext context) {
+    router.GoRouter.of(context).go('/folder/${widget.folderPath}');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -279,6 +283,29 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
                             },
                           ));
                         },
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () => _openFolder(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text('Перейти в папку'),
+                            SizedBox(width: 8),
+                            Icon(Icons.arrow_forward),
+                          ],
+                        ),
                       ),
                     ],
                   ),

@@ -424,18 +424,20 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                         IconButton(
                           style: IconButton.styleFrom(
                             backgroundColor:
-                                theme.colorScheme.error.withOpacity(0.1),
-                            side: BorderSide(color: theme.colorScheme.error),
+                                theme.colorScheme.primary.withOpacity(0.1),
+                            side: BorderSide(color: theme.colorScheme.primary),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () => _showDeleteAllFilesDialog(context),
+                          onPressed: () {
+                            context.go('/folder/${widget.folderPath}/settings');
+                          },
                           icon: Icon(
-                            Icons.delete_outline,
-                            color: theme.colorScheme.error,
+                            Icons.settings_outlined,
+                            color: theme.colorScheme.primary,
                           ),
-                          tooltip: 'Удалить все файлы',
+                          tooltip: 'Настройки папки',
                         ),
                       ],
                     );
@@ -511,6 +513,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
               pickImages: (context) async {
                 await _pickImages(context);
               },
+              onDeleteAll: (context) => _showDeleteAllFilesDialog(context),
             ),
           ],
         ),

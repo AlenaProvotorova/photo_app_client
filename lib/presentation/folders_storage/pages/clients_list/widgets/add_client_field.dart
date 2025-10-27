@@ -1,10 +1,45 @@
 import 'package:flutter/material.dart';
 
-class AddClientField extends StatelessWidget {
+class AddClientField extends StatefulWidget {
   final TextEditingController controllerName;
   final void Function() onSubmit;
   const AddClientField(
       {super.key, required this.controllerName, required this.onSubmit});
+
+  @override
+  State<AddClientField> createState() => _AddClientFieldState();
+}
+
+class _AddClientFieldState extends State<AddClientField> {
+  bool _isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isButtonEnabled = widget.controllerName.text.trim().isNotEmpty;
+    widget.controllerName.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controllerName.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    final isNotEmpty = widget.controllerName.text.trim().isNotEmpty;
+    if (_isButtonEnabled != isNotEmpty) {
+      setState(() {
+        _isButtonEnabled = isNotEmpty;
+      });
+    }
+  }
+
+  void _onSubmit() {
+    if (_isButtonEnabled) {
+      widget.onSubmit();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +50,7 @@ class AddClientField extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
-                controller: controllerName,
+                controller: widget.controllerName,
                 decoration: InputDecoration(
                   hintText: 'Введите имя и фамилию',
                   border: const OutlineInputBorder(
@@ -26,14 +61,29 @@ class AddClientField extends StatelessWidget {
                   ),
                   hintStyle: theme.textTheme.titleSmall,
                 ),
-                onSubmitted: (_) => onSubmit(),
+                onSubmitted: (_) => _onSubmit(),
               ),
             ),
             const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: onSubmit,
-              child:
-                  const Text('Добавить', style: TextStyle(color: Colors.white)),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _isButtonEnabled ? _onSubmit : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isButtonEnabled
+                      ? theme.colorScheme.primary
+                      : Colors.grey,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Добавить'),
+              ),
             ),
           ],
         ),
