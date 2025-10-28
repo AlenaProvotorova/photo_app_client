@@ -66,12 +66,6 @@ class FolderTile extends StatelessWidget {
               DisplayMessage.showMessage(context, 'Ссылка скопирована в буфер');
             },
           ),
-          PopupMenuAction(
-            title: 'Настройки для папки',
-            onTap: () {
-              context.go('/folder/${folder.url}/settings');
-            },
-          ),
         ],
       ),
       onTap: () {

@@ -382,51 +382,101 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBarCustom(
-        title: '',
-        onPress: () => context.go('/home'),
-        showLeading: true,
-        actions: [
-          Container(
-            margin: const EdgeInsets.all(8),
-            height: 36,
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (context) => _userBloc),
-                BlocProvider(create: (context) => _orderBloc),
-              ],
-              child: BlocBuilder<UserBloc, UserState>(
-                builder: (context, state) {
-                  if (state is UserLoaded && state.user.isAdmin) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            side: BorderSide(color: theme.colorScheme.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: _inRetouching,
-                          child: const Text('В ретушь'),
-                        ),
-                        const SizedBox(width: 8),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            side: BorderSide(color: theme.colorScheme.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: _sortingRetouching,
-                          child: const Text('Сортировка ретуши'),
-                        ),
-                        const SizedBox(width: 8),
-                        TextButton(
+    return BlocProvider.value(
+      value: _userBloc,
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (context, userState) {
+          final isAdmin = userState is UserLoaded && userState.user.isAdmin;
+
+          return Scaffold(
+            appBar: AppBarCustom(
+              title: '',
+              onPress: () => context.go('/home'),
+              showLeading: isAdmin,
+              actions: [
+                Container(
+                  margin: const EdgeInsets.all(8),
+                  height: 36,
+                  child: MultiBlocProvider(
+                    providers: [
+                      BlocProvider(create: (context) => _userBloc),
+                      BlocProvider(create: (context) => _orderBloc),
+                    ],
+                    child: BlocBuilder<UserBloc, UserState>(
+                      builder: (context, state) {
+                        if (state is UserLoaded && state.user.isAdmin) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  side: BorderSide(
+                                      color: theme.colorScheme.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: _inRetouching,
+                                child: const Text('В ретушь'),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  side: BorderSide(
+                                      color: theme.colorScheme.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: _sortingRetouching,
+                                child: const Text('Сортировка ретуши'),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  side: BorderSide(
+                                      color: theme.colorScheme.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context.go(
+                                      '/folder/${widget.folderPath}/full-order');
+                                },
+                                child: const Text('Весь заказ'),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                style: IconButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.primary
+                                      .withOpacity(0.1),
+                                  side: BorderSide(
+                                      color: theme.colorScheme.primary),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context.go(
+                                      '/folder/${widget.folderPath}/settings');
+                                },
+                                icon: Icon(
+                                  Icons.settings_outlined,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                tooltip: 'Настройки папки',
+                              ),
+                            ],
+                          );
+                        }
+                        return TextButton(
                           style: TextButton.styleFrom(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             side: BorderSide(color: theme.colorScheme.primary),
@@ -439,178 +489,148 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                                 .go('/folder/${widget.folderPath}/full-order');
                           },
                           child: const Text('Весь заказ'),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          style: IconButton.styleFrom(
-                            backgroundColor:
-                                theme.colorScheme.primary.withOpacity(0.1),
-                            side: BorderSide(color: theme.colorScheme.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            body: MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (context) => _userBloc),
+                BlocProvider(create: (context) => _filesBloc),
+                BlocProvider(create: (context) => _clientsBloc),
+                BlocProvider(create: (context) => _folderSettingsBloc),
+                BlocProvider(create: (context) => _sizesBloc),
+                BlocProvider(create: (context) => _orderBloc),
+              ],
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, userState) {
+                  final isAdmin =
+                      userState is UserLoaded && userState.user.isAdmin;
+
+                  return BlocConsumer<FolderSettingsBloc, FolderSettingsState>(
+                    listener: (context, state) {},
+                    builder: (context, folderState) {
+                      final showAlert = isAdmin &&
+                          folderState is FolderSettingsLoaded &&
+                          folderState.folderSettings.firstSettingsAlert ==
+                              false;
+
+                      if (showAlert) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          _updateFirstSettingsAlert();
+                        });
+                      }
+
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  if (showAlert)
+                                    Container(
+                                      margin: const EdgeInsets.all(16),
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.withOpacity(0.1),
+                                        border: Border.all(color: Colors.amber),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.info_outline,
+                                            color: Colors.amber.shade700,
+                                            size: 24,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Text(
+                                              'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
+                                              style: TextStyle(
+                                                color: Colors.amber.shade800,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          TextButton(
+                                            onPressed: () {
+                                              context.go(
+                                                  '/folder/${widget.folderPath}/settings');
+                                            },
+                                            child: Text(
+                                              'Перейти в настройки',
+                                              style: TextStyle(
+                                                color: Colors.amber.shade800,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ClientSelector(
+                                    folderId: widget.folderId,
+                                  ),
+                                  DateSelectionInfo(
+                                    folderId: widget.folderId,
+                                  ),
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: theme.colorScheme.primary),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Column(children: [
+                                      SwitchAllDigital(
+                                        folderId: widget.folderId,
+                                      ),
+                                      OrderAlbum(
+                                        folderId: widget.folderId,
+                                      )
+                                    ]),
+                                  ),
+                                  ShowSelectedButton(
+                                    showSelected: _showSelected,
+                                    onPressed: () {
+                                      setState(() {
+                                        _showSelected = !_showSelected;
+                                      });
+                                    },
+                                  ),
+                                  FilesList(
+                                    showSelected: _showSelected,
+                                    folderId: widget.folderId,
+                                    orderBloc: _orderBloc,
+                                    clientsBloc: _clientsBloc,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          onPressed: () {
-                            context.go('/folder/${widget.folderPath}/settings');
-                          },
-                          icon: Icon(
-                            Icons.settings_outlined,
-                            color: theme.colorScheme.primary,
+                          UploadFileButton(
+                            pickImages: (context) async {
+                              await _pickImages(context);
+                            },
+                            onDeleteAll: (context) =>
+                                _showDeleteAllFilesDialog(context),
                           ),
-                          tooltip: 'Настройки папки',
-                        ),
-                      ],
-                    );
-                  }
-                  return TextButton(
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      side: BorderSide(color: theme.colorScheme.primary),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () {
-                      context.go('/folder/${widget.folderPath}/full-order');
+                        ],
+                      );
                     },
-                    child: const Text('Весь заказ'),
                   );
                 },
               ),
             ),
-          ),
-        ],
-      ),
-      body: MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) => _userBloc),
-          BlocProvider(create: (context) => _filesBloc),
-          BlocProvider(create: (context) => _clientsBloc),
-          BlocProvider(create: (context) => _folderSettingsBloc),
-          BlocProvider(create: (context) => _sizesBloc),
-          BlocProvider(create: (context) => _orderBloc),
-        ],
-        child: BlocBuilder<UserBloc, UserState>(
-          builder: (context, userState) {
-            final isAdmin = userState is UserLoaded && userState.user.isAdmin;
-
-            return BlocConsumer<FolderSettingsBloc, FolderSettingsState>(
-              listener: (context, state) {},
-              builder: (context, folderState) {
-                final showAlert = isAdmin &&
-                    folderState is FolderSettingsLoaded &&
-                    folderState.folderSettings.firstSettingsAlert == false;
-
-                if (showAlert) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _updateFirstSettingsAlert();
-                  });
-                }
-
-                return Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            if (showAlert)
-                              Container(
-                                margin: const EdgeInsets.all(16),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.1),
-                                  border: Border.all(color: Colors.amber),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.info_outline,
-                                      color: Colors.amber.shade700,
-                                      size: 24,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
-                                        style: TextStyle(
-                                          color: Colors.amber.shade800,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    TextButton(
-                                      onPressed: () {
-                                        context.go(
-                                            '/folder/${widget.folderPath}/settings');
-                                      },
-                                      child: Text(
-                                        'Перейти в настройки',
-                                        style: TextStyle(
-                                          color: Colors.amber.shade800,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ClientSelector(
-                              folderId: widget.folderId,
-                            ),
-                            DateSelectionInfo(
-                              folderId: widget.folderId,
-                            ),
-                            Container(
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: theme.colorScheme.primary),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(children: [
-                                SwitchAllDigital(
-                                  folderId: widget.folderId,
-                                ),
-                                OrderAlbum(
-                                  folderId: widget.folderId,
-                                )
-                              ]),
-                            ),
-                            ShowSelectedButton(
-                              showSelected: _showSelected,
-                              onPressed: () {
-                                setState(() {
-                                  _showSelected = !_showSelected;
-                                });
-                              },
-                            ),
-                            FilesList(
-                              showSelected: _showSelected,
-                              folderId: widget.folderId,
-                              orderBloc: _orderBloc,
-                              clientsBloc: _clientsBloc,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    UploadFileButton(
-                      pickImages: (context) async {
-                        await _pickImages(context);
-                      },
-                      onDeleteAll: (context) =>
-                          _showDeleteAllFilesDialog(context),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+          );
+        },
       ),
     );
   }

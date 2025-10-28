@@ -206,7 +206,7 @@ class _FolderSettingsScreenState extends State<FolderSettingsScreen> {
         child: Scaffold(
           appBar: AppBarCustom(
             onPress: () {
-              context.go('/home');
+              context.go('/folder/${widget.folderPath}');
             },
             showLeading: true,
             title: 'Настройки папки',

@@ -37,16 +37,20 @@ class _OrderTableState extends State<OrderTable> {
     _contentScrollController = ScrollController();
 
     _contentScrollController.addListener(() {
-      if (_contentScrollController.hasClients &&
-          _headerScrollController.hasClients) {
-        _headerScrollController.jumpTo(_contentScrollController.offset);
+      if (_headerScrollController.hasClients &&
+          _contentScrollController.hasClients) {
+        if (_headerScrollController.offset != _contentScrollController.offset) {
+          _headerScrollController.jumpTo(_contentScrollController.offset);
+        }
       }
     });
 
     _headerScrollController.addListener(() {
       if (_headerScrollController.hasClients &&
           _contentScrollController.hasClients) {
-        _contentScrollController.jumpTo(_headerScrollController.offset);
+        if (_contentScrollController.offset != _headerScrollController.offset) {
+          _contentScrollController.jumpTo(_headerScrollController.offset);
+        }
       }
     });
   }
@@ -63,37 +67,26 @@ class _OrderTableState extends State<OrderTable> {
     final nestedData = _getNestedRows();
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final availableWidth = screenWidth - 32; // Учитываем отступы
+    final availableWidth = screenWidth;
 
-    final maxFileNameWidth = _calculateMaxFileNameWidth();
-    final firstColumnWidth = math.max(200.0, maxFileNameWidth + 32);
+    final double contentWidth = math.max(1200.0, availableWidth);
 
-    final costColumnWidth = 400.0;
-    final minOtherColumnWidth = 120.0; // Увеличиваем минимальную ширину для веб
+    final firstColumnWidth = contentWidth * 0.2;
+
+    final costColumnWidth = contentWidth * 0.15;
 
     final otherColumnsCount = widget.photos.length + widget.sizes.length;
+    final otherColumnsTotalWidth = contentWidth * 0.65;
 
-    // Рассчитываем минимальную ширину таблицы
-    final minTableWidth = firstColumnWidth +
-        (otherColumnsCount * minOtherColumnWidth) +
-        costColumnWidth;
-
-    // Если минимальная ширина больше доступной, используем минимальную ширину для прокрутки
-    final tableWidth = math.max(minTableWidth, availableWidth);
-
-    final otherColumnWidth = minTableWidth > availableWidth
-        ? minOtherColumnWidth
-        : math.max(
-            minOtherColumnWidth,
-            (availableWidth - firstColumnWidth - costColumnWidth) /
-                otherColumnsCount,
-          );
+    final otherColumnWidth = otherColumnsCount > 0
+        ? otherColumnsTotalWidth / otherColumnsCount
+        : 0.0;
 
     return Column(
       children: [
         Expanded(
           child: Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            margin: const EdgeInsets.fromLTRB(8, 0, 8, 12),
             child: Stack(
               children: [
                 Positioned(
@@ -108,12 +101,8 @@ class _OrderTableState extends State<OrderTable> {
                       controller: _headerScrollController,
                       scrollDirection: Axis.horizontal,
                       physics: const ClampingScrollPhysics(),
-                      clipBehavior: Clip.none,
                       child: SizedBox(
-                        width: firstColumnWidth +
-                            (widget.photos.length + widget.sizes.length) *
-                                otherColumnWidth +
-                            costColumnWidth,
+                        width: contentWidth,
                         child: Table(
                           border: TableBorder.all(
                             color: const Color(0xFFE4E4E4),
@@ -248,7 +237,7 @@ class _OrderTableState extends State<OrderTable> {
                   ),
                 ),
                 Positioned(
-                  top: 56,
+                  top: 66,
                   left: 0,
                   right: 0,
                   bottom: 0,
@@ -260,9 +249,8 @@ class _OrderTableState extends State<OrderTable> {
                         controller: _contentScrollController,
                         scrollDirection: Axis.horizontal,
                         physics: const ClampingScrollPhysics(),
-                        clipBehavior: Clip.none,
                         child: SizedBox(
-                          width: tableWidth,
+                          width: contentWidth,
                           child: Table(
                             border: TableBorder.all(
                               color: const Color(0xFFE4E4E4),
