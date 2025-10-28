@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photo_app/data/clients/models/client.dart';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
+import 'dart:typed_data';
+import 'package:flutter/rendering.dart';
 
 class OrderTable extends StatefulWidget {
   final Map<String, dynamic> fullOrderForTable;
@@ -23,10 +26,10 @@ class OrderTable extends StatefulWidget {
   });
 
   @override
-  State<OrderTable> createState() => _OrderTableState();
+  State<OrderTable> createState() => OrderTableState();
 }
 
-class _OrderTableState extends State<OrderTable> {
+class OrderTableState extends State<OrderTable> {
   late ScrollController _headerScrollController;
   late ScrollController _contentScrollController;
 
@@ -60,6 +63,248 @@ class _OrderTableState extends State<OrderTable> {
     _headerScrollController.dispose();
     _contentScrollController.dispose();
     super.dispose();
+  }
+
+  Future<Uint8List> captureFullImage(BuildContext context) async {
+    // Use fixed width for export
+    final double contentWidth = 1200.0;
+
+    final firstColumnWidth = contentWidth * 0.2;
+    final costColumnWidth = contentWidth * 0.15;
+    final otherColumnsCount = widget.photos.length + widget.sizes.length;
+    final otherColumnsTotalWidth = contentWidth * 0.65;
+    final otherColumnWidth = otherColumnsCount > 0
+        ? otherColumnsTotalWidth / otherColumnsCount
+        : 0.0;
+
+    final repaintKey = GlobalKey();
+
+    final nestedData = _getNestedRows();
+
+    Widget buildHeader() {
+      return SizedBox(
+        width: contentWidth,
+        child: Table(
+          border: TableBorder.all(
+            color: const Color(0xFFE4E4E4),
+            width: 1,
+          ),
+          columnWidths: {
+            0: FixedColumnWidth(firstColumnWidth),
+            ...Map.fromIterable(
+              List.generate(widget.photos.length, (index) => index + 1),
+              key: (index) => index + 1,
+              value: (index) => FixedColumnWidth(otherColumnWidth),
+            ),
+            ...Map.fromIterable(
+              List.generate(widget.sizes.length,
+                  (index) => index + widget.photos.length + 1),
+              key: (index) => index + widget.photos.length + 1,
+              value: (index) => FixedColumnWidth(otherColumnWidth),
+            ),
+            widget.photos.length + widget.sizes.length + 1:
+                FixedColumnWidth(costColumnWidth),
+          },
+          children: [
+            TableRow(
+              decoration: BoxDecoration(color: Colors.grey[100]),
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'В общую',
+                    style: widget.theme.textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    maxLines: 1,
+                  ),
+                ),
+                ...widget.photos.map(
+                  (photo) => Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          photo['name'],
+                          style: widget.theme.textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          maxLines: 1,
+                        ),
+                        if (photo['price'] != null && photo['price'] > 0)
+                          Text(
+                            '${photo['price']} ₽',
+                            style: widget.theme.textTheme.titleMedium?.copyWith(
+                              fontSize: (widget.theme.textTheme.titleMedium
+                                          ?.fontSize ??
+                                      16) *
+                                  0.7,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            maxLines: 1,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                ...widget.sizes.map(
+                  (size) => Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          size['name'].toString().split(' (')[0],
+                          style: widget.theme.textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          maxLines: 1,
+                        ),
+                        if (size['price'] != null && size['price'] > 0)
+                          Text(
+                            '${size['price']} ₽',
+                            style: widget.theme.textTheme.titleMedium?.copyWith(
+                              fontSize: (widget.theme.textTheme.titleMedium
+                                          ?.fontSize ??
+                                      16) *
+                                  0.7,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            maxLines: 1,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Стоимость',
+                    style: widget.theme.textTheme.titleMedium,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget buildBody() {
+      return SizedBox(
+        width: contentWidth,
+        child: Table(
+          border: TableBorder.all(
+            color: const Color(0xFFE4E4E4),
+            width: 1,
+          ),
+          columnWidths: {
+            0: FixedColumnWidth(firstColumnWidth),
+            ...Map.fromIterable(
+              List.generate(widget.photos.length, (index) => index + 1),
+              key: (index) => index + 1,
+              value: (index) => FixedColumnWidth(otherColumnWidth),
+            ),
+            ...Map.fromIterable(
+              List.generate(widget.sizes.length,
+                  (index) => index + widget.photos.length + 1),
+              key: (index) => index + widget.photos.length + 1,
+              value: (index) => FixedColumnWidth(otherColumnWidth),
+            ),
+            widget.photos.length + widget.sizes.length + 1:
+                FixedColumnWidth(costColumnWidth),
+          },
+          children: nestedData.rows.map((dataRow) {
+            return TableRow(
+              decoration: dataRow.color != null
+                  ? BoxDecoration(
+                      color: dataRow.color!.resolve({})?.withOpacity(0.1))
+                  : null,
+              children: dataRow.cells.map((cell) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  child: cell.child,
+                );
+              }).toList(),
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    Widget buildFooter() {
+      return Container(
+        width: contentWidth,
+        margin: const EdgeInsets.only(top: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.orange[50],
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.orange[300]!),
+        ),
+        child: Text(
+          'ОБЩИЙ ИТОГ: ${nestedData.grandTotal.toStringAsFixed(0)} ₽',
+          style: widget.theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.orange[800],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    final overlay = Overlay.of(context);
+    final entry = OverlayEntry(
+      builder: (ctx) => Positioned(
+        left: -10000,
+        top: -10000,
+        child: RepaintBoundary(
+          key: repaintKey,
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: contentWidth,
+              child: IntrinsicHeight(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    buildHeader(),
+                    buildBody(),
+                    buildFooter(),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(entry);
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    try {
+      final boundary = repaintKey.currentContext!.findRenderObject()
+          as RenderRepaintBoundary;
+      // Use higher pixel ratio for better quality
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      print(
+          'Изображение создано: ${image.width}x${image.height}, размер: ${pngBytes.length} байт');
+      return pngBytes;
+    } finally {
+      entry.remove();
+    }
   }
 
   @override

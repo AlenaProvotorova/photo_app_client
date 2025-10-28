@@ -12,8 +12,14 @@ import 'package:photo_app/entities/folder_settings/bloc/folder_settings_bloc.dar
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_event.dart';
 import 'package:photo_app/entities/folder_settings/bloc/folder_settings_state.dart';
 import 'widgets/order_table.dart';
+import 'package:photo_app/entities/user/bloc/user_bloc.dart';
+import 'package:photo_app/entities/user/bloc/user_event.dart';
+import 'package:photo_app/entities/user/bloc/user_state.dart';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 
-class FullOrderScreen extends StatelessWidget {
+class FullOrderScreen extends StatefulWidget {
   final String folderId;
   final String folderPath;
   const FullOrderScreen({
@@ -23,29 +29,93 @@ class FullOrderScreen extends StatelessWidget {
   });
 
   @override
+  State<FullOrderScreen> createState() => _FullOrderScreenState();
+}
+
+class _FullOrderScreenState extends State<FullOrderScreen> {
+  final tableKey = GlobalKey<OrderTableState>();
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) =>
-              ClientsBloc()..add(LoadClients(folderId: folderId)),
-        ),
-        BlocProvider(
-          create: (context) => OrderBloc()..add(LoadOrder(folderId: folderId)),
+              ClientsBloc()..add(LoadClients(folderId: widget.folderId)),
         ),
         BlocProvider(
           create: (context) =>
-              FolderSettingsBloc()..add(LoadFolderSettings(folderId: folderId)),
+              OrderBloc()..add(LoadOrder(folderId: widget.folderId)),
+        ),
+        BlocProvider(
+          create: (context) => FolderSettingsBloc()
+            ..add(LoadFolderSettings(folderId: widget.folderId)),
         ),
       ],
       child: Scaffold(
         appBar: AppBarCustom(
           onPress: () {
-            context.go('/folder/$folderPath');
+            context.go('/folder/${widget.folderPath}');
           },
           showLeading: true,
           title: 'Весь заказ',
+          actions: [
+            BlocProvider(
+              create: (context) => UserBloc()..add(LoadUser()),
+              child: BlocBuilder<UserBloc, UserState>(
+                builder: (context, userState) {
+                  final bool isAdmin =
+                      userState is UserLoaded && userState.user.isAdmin;
+                  if (!isAdmin) return const SizedBox.shrink();
+                  return IconButton(
+                    tooltip: 'Сохранить как изображение',
+                    icon: const Icon(Icons.download),
+                    onPressed: () async {
+                      final orderTableState = tableKey.currentState;
+                      if (orderTableState == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Таблица не найдена')),
+                        );
+                        return;
+                      }
+                      try {
+                        final Uint8List bytes =
+                            await orderTableState.captureFullImage(context);
+
+                        final String suggestedName =
+                            'заказ-${widget.folderPath}.png';
+
+                        String? outputFile = await FilePicker.platform.saveFile(
+                          dialogTitle: 'Сохранить заказ как изображение',
+                          fileName: suggestedName,
+                          type: FileType.custom,
+                          allowedExtensions: ['png'],
+                        );
+
+                        if (outputFile == null) {
+                          return;
+                        }
+
+                        final file = File(outputFile);
+                        await file.writeAsBytes(bytes);
+
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Сохранено: $outputFile')),
+                        );
+                      } catch (e, stackTrace) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Ошибка сохранения: $e')),
+                        );
+                      }
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         body: BlocBuilder<OrderBloc, OrderState>(
           builder: (context, state) {
@@ -135,6 +205,7 @@ class FullOrderScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: OrderTable(
+                                  key: tableKey,
                                   fullOrderForTable: state.fullOrderForTable,
                                   sizes: sizes,
                                   photos: photos,
