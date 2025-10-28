@@ -50,9 +50,11 @@
         Header set Cache-Control "public, max-age=31536000"
     </FilesMatch>
     
-    # Кэширование для HTML
+    # Кэширование для HTML — отключено (принудительное обновление на мобильных)
     <FilesMatch "\.(html)$">
-        Header set Cache-Control "public, max-age=3600"
+        Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
     </FilesMatch>
     
     # Безопасность
