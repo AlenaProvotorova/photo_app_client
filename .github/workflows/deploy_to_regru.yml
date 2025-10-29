@@ -82,7 +82,7 @@ jobs:
         protocol: ftps  # Попробуйте ftps вместо ftp
         port: 21  # Или 22 для SFTP, 990 для FTPS
         local-dir: ./build/web/
-        server-dir: ./www/fastselect.ru/
+        server-dir: ./
         dangerous-clean-slate: false  # Не удалять существующие файлы
         exclude: |
           **/.git*
