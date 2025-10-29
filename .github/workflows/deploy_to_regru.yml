@@ -61,9 +61,10 @@ jobs:
         RewriteEngine On
         RewriteBase /
         
-        # Принудительное перенаправление на HTTPS
-        RewriteCond %{HTTPS} off
-        RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+        # ВАЖНО: Убрано принудительное перенаправление на HTTPS
+        # Если оно нужно, включите в настройках ISPmanager вместо .htaccess
+        # RewriteCond %{HTTPS} off
+        # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
         
         # Не перенаправлять существующие файлы и папки
         RewriteCond %{REQUEST_FILENAME} !-f
