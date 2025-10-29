@@ -42,8 +42,8 @@ echo "✅ Environment set to production"
 echo "📚 Pub get"
 flutter pub get
 
-echo "🏗 Building web"
-flutter build web --release
+echo "🏗 Building web (HTML renderer)"
+flutter build web --release --web-renderer html
 
 echo "📁 Post-build steps"
 # Генерируем уникальную версию для cache busting

@@ -21,10 +21,12 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    # Replace X-Frame-Options with CSP frame-ancestors to allow safe embedding in trusted in-app browsers
+    # Разрешаем встраивание в популярные мобильные приложения и их браузеры
+    Content-Security-Policy = "frame-ancestors 'self' https://*.telegram.org https://web.telegram.org https://t.me https://*.facebook.com https://*.instagram.com https://*.vk.com https://*.ok.ru https://*.twitter.com https://*.x.com;"
 
 # Кэширование для статических ресурсов
 [[headers]]

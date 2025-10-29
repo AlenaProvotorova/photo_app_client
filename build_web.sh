@@ -8,8 +8,8 @@ ls -la
 echo "🔍 Проверяем Flutter..."
 flutter --version
 
-echo "🛠 Сборка Flutter Web..."
-flutter build web --verbose
+echo "🛠 Сборка Flutter Web (HTML renderer для максимальной совместимости)..."
+flutter build web --release --web-renderer html
 
 echo "📁 Проверяем результат сборки..."
 if [ -d "build/web" ]; then
