@@ -1,0 +1,101 @@
+name: Deploy to Reg.ru
+
+on:
+  push:
+    branches:
+      - main  # Запускается при пуше в main
+      - master  # Или master, если используете его
+  workflow_dispatch:  # Позволяет запускать вручную
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # Раскомментируйте, если используете environment secrets:
+    # environment: КУПКГ
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.27.0'
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: flutter pub get
+      
+    - name: Build web app
+      run: flutter build web --release --web-renderer html
+      
+    - name: Create .htaccess for Reg.ru
+      run: |
+        cat > build/web/.htaccess << 'EOF'
+        # Включить сжатие
+        <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/plain
+            AddOutputFilterByType DEFLATE text/html
+            AddOutputFilterByType DEFLATE text/xml
+            AddOutputFilterByType DEFLATE text/css
+            AddOutputFilterByType DEFLATE application/xml
+            AddOutputFilterByType DEFLATE application/xhtml+xml
+            AddOutputFilterByType DEFLATE application/rss+xml
+            AddOutputFilterByType DEFLATE application/javascript
+            AddOutputFilterByType DEFLATE application/x-javascript
+        </IfModule>
+        
+        # Кэширование
+        <IfModule mod_expires.c>
+            ExpiresActive on
+            ExpiresByType text/css "access plus 1 year"
+            ExpiresByType application/javascript "access plus 1 year"
+            ExpiresByType image/png "access plus 1 year"
+            ExpiresByType image/jpg "access plus 1 year"
+            ExpiresByType image/jpeg "access plus 1 year"
+            ExpiresByType image/gif "access plus 1 year"
+            ExpiresByType image/svg+xml "access plus 1 year"
+        </IfModule>
+        
+        # SPA routing - перенаправление всех запросов на index.html
+        RewriteEngine On
+        RewriteBase /
+        
+        # Принудительное перенаправление на HTTPS
+        RewriteCond %{HTTPS} off
+        RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+        
+        # Не перенаправлять существующие файлы и папки
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        
+        # Перенаправлять все остальные запросы на index.html
+        RewriteRule . /index.html [L]
+        EOF
+        
+    - name: Deploy to Reg.ru via SFTP/FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.REG_RU_FTP_HOST }}
+        username: ${{ secrets.REG_RU_FTP_USER }}
+        password: ${{ secrets.REG_RU_FTP_PASSWORD }}
+        protocol: ftps  # Попробуйте ftps вместо ftp
+        port: 21  # Или 22 для SFTP, 990 для FTPS
+        local-dir: ./build/web/
+        server-dir: ./www/fastselect.ru/
+        dangerous-clean-slate: false  # Не удалять существующие файлы
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.DS_Store
+          .git
+          .gitignore
+          
+    - name: Deployment summary
+      run: |
+        echo "✅ Deployment completed successfully!"
+        echo "📦 Build directory: build/web"
+        echo "🌐 Deployed to: Reg.ru /www/fastselect.ru"
+        echo "🔗 Site URL: https://fastselect.ru"
+
