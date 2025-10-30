@@ -5,9 +5,9 @@ void main() async {
 
   final dio = Dio();
 
-  // Тестируем продакшн URL
-  final productionUrl = 'https://photoappserver-production.up.railway.app/api/';
-  final productionBaseUrl = 'https://photoappserver-production.up.railway.app/';
+  // Тестируем продакшн URL (обновите при необходимости)
+  final productionUrl = 'https://api.fastselect.ru/api/';
+  final productionBaseUrl = 'https://api.fastselect.ru/';
 
   try {
     print('📡 Тестируем подключение к продакшн серверу...');

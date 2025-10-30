@@ -7,8 +7,8 @@ if [ $# -eq 0 ]; then
     echo "Использование: $0 <environment>"
     echo "Доступные окружения:"
     echo "  development - локальная разработка (http://127.0.0.1:3000/api/)"
-    echo "  staging     - тестовый сервер (https://photoappserver-staging.up.railway.app/api/)"
-    echo "  production  - продакшн сервер (https://photoappserver-production.up.railway.app/api/)"
+    echo "  staging     - тестовый сервер (http://127.0.0.1:3000/api/)"
+    echo "  production  - продакшн сервер (https://api.fastselect.ru/api/)"
     exit 1
 fi
 
@@ -26,13 +26,13 @@ case $ENVIRONMENT in
         echo "🔧 Переключаемся на staging окружение..."
         sed -i.bak 's/static const Environment _currentEnvironment = Environment\.[^;]*;/static const Environment _currentEnvironment = Environment.staging;/' lib/core/constants/environment.dart
         echo "✅ Переключено на staging"
-        echo "📡 API URL: https://photoappserver-staging.up.railway.app/api/"
+        echo "📡 API URL: http://127.0.0.1:3000/api/"
         ;;
     "production"|"prod")
         echo "🔧 Переключаемся на production окружение..."
         sed -i.bak 's/static const Environment _currentEnvironment = Environment\.[^;]*;/static const Environment _currentEnvironment = Environment.production;/' lib/core/constants/environment.dart
         echo "✅ Переключено на production"
-        echo "📡 API URL: https://photoappserver-production.up.railway.app/api/"
+        echo "📡 API URL: https://api.fastselect.ru/api/"
         ;;
     *)
         echo "❌ Неизвестное окружение: $ENVIRONMENT"
