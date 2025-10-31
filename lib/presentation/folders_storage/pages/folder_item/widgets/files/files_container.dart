@@ -165,7 +165,7 @@ class FilesContainer extends StatelessWidget {
             );
           },
           child: ImageCardContainer(
-            url: imageData.fullUrl,
+            url: imageData.fullThumbnailUrl,
             id: imageData.id,
             folderId: int.parse(folderId),
             originalName: imageData.originalName,

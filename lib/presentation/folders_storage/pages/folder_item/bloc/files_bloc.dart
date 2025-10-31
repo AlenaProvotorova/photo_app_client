@@ -43,7 +43,37 @@ class FilesBloc extends Bloc<FilesEvent, FilesState> {
           if (data == null || data is! List) {
             throw Exception('Неверный формат данных от сервера');
           }
-          final files = data.map((json) => File.fromJson(json)).toList();
+          // Фильтруем null значения и корректно обрабатываем файлы
+          final files = <File>[];
+          for (var item in data) {
+            if (item == null) {
+              if (kDebugMode) {
+                print('⚠️ Пропущен null элемент в массиве файлов');
+              }
+              continue;
+            }
+            try {
+              // Проверяем тип перед приведением
+              if (item is! Map<String, dynamic>) {
+                if (kDebugMode) {
+                  print('⚠️ Некорректный тип элемента файла: ${item.runtimeType}');
+                }
+                continue;
+              }
+              final file = File.fromJson(item);
+              files.add(file);
+            } catch (e) {
+              if (kDebugMode) {
+                print('⚠️ Ошибка парсинга файла: $e. Элемент: $item');
+              }
+              // Продолжаем обработку остальных файлов
+            }
+          }
+          // Логируем всегда, чтобы видеть в проде
+          print('📁 Files loaded: ${files.length} из ${data.length} элементов');
+          if (kDebugMode) {
+            print('✅ Успешно загружено ${files.length} файлов из ${data.length} элементов');
+          }
           emit(FilesLoaded(files: files));
         },
       );
