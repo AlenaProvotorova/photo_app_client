@@ -100,7 +100,7 @@ class FilesContainer extends StatelessWidget {
           );
         },
         child: ImageCardContainer(
-          url: imageData.url,
+          url: imageData.fullUrl,
           id: imageData.id,
           folderId: int.parse(folderId),
           originalName: imageData.originalName,
@@ -165,7 +165,7 @@ class FilesContainer extends StatelessWidget {
             );
           },
           child: ImageCardContainer(
-            url: imageData.url,
+            url: imageData.fullUrl,
             id: imageData.id,
             folderId: int.parse(folderId),
             originalName: imageData.originalName,

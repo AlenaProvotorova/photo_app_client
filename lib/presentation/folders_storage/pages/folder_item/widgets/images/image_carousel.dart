@@ -129,7 +129,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                         maxScale: 4.0,
                         child: Center(
                           child: Image.network(
-                            widget.images[index].url,
+                            widget.images[index].fullUrl,
                             fit: BoxFit.contain,
                           ),
                         ),

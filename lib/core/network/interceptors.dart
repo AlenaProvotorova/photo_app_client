@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:photo_app/core/utils/token_storage.dart';
 
@@ -21,7 +22,10 @@ class LoggerInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     final token = await TokenStorage.loadToken();
-    options.headers['Authorization'] = 'Bearer $token';
+    // Устанавливаем токен только если он существует
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
     final requestPath = '${options.baseUrl}${options.path}';
 
     logger.i('${options.method} request ==> $requestPath'); //Info log
@@ -42,13 +46,10 @@ class LoggerInterceptor extends Interceptor {
 class CorsInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // Устанавливаем только безопасные заголовки
+    // Origin устанавливается браузером автоматически и не может быть задан вручную
     options.headers['Content-Type'] = 'application/json';
     options.headers['Accept'] = 'application/json';
-
-    // Add Origin header to help server identify the request source
-    if (options.headers['Origin'] == null) {
-      options.headers['Origin'] = 'http://localhost:3000'; // Desktop app origin
-    }
 
     handler.next(options);
   }
@@ -80,20 +81,34 @@ class CorsInterceptor extends Interceptor {
   }
 }
 
-/// Error handling interceptor for better CORS error management
+/// Error handling interceptor for better error management
 class ErrorHandlingInterceptor extends Interceptor {
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('ErrorHandlingInterceptor - Error type: ${err.type}'); // Debug
-    print(
-        'ErrorHandlingInterceptor - Status code: ${err.response?.statusCode}'); // Debug
-    print('ErrorHandlingInterceptor - Error message: ${err.message}'); // Debug
-    print(
-        'ErrorHandlingInterceptor - URL: ${err.requestOptions.baseUrl}${err.requestOptions.path}'); // Debug
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    // Логируем только в debug режиме
+    if (kDebugMode) {
+      print('ErrorHandlingInterceptor - Error type: ${err.type}');
+      print('ErrorHandlingInterceptor - Status code: ${err.response?.statusCode}');
+      print('ErrorHandlingInterceptor - Error message: ${err.message}');
+      print('ErrorHandlingInterceptor - URL: ${err.requestOptions.baseUrl}${err.requestOptions.path}');
+    }
+
+    // Обработка 401 Unauthorized - очищаем токен
+    if (err.response?.statusCode == 401) {
+      if (kDebugMode) {
+        print('401 Unauthorized detected - clearing token');
+      }
+      await TokenStorage.deleteToken();
+      // Продолжаем обработку ошибки - UI слой обработает редирект через AuthGuard
+      handler.next(err);
+      return;
+    }
 
     // Handle CORS errors specifically
     if (err.type == DioExceptionType.connectionError) {
-      print('Connection error detected'); // Debug
+      if (kDebugMode) {
+        print('Connection error detected');
+      }
       // Network error - could be CORS related
       final newError = DioException(
         requestOptions: err.requestOptions,
@@ -106,7 +121,9 @@ class ErrorHandlingInterceptor extends Interceptor {
     }
 
     if (err.response?.statusCode == 0) {
-      print('CORS error detected (status code 0)'); // Debug
+      if (kDebugMode) {
+        print('CORS error detected (status code 0)');
+      }
       // CORS error typically returns status code 0
       final newError = DioException(
         requestOptions: err.requestOptions,

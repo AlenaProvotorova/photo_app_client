@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:photo_app/core/constants/api_url.dart';
 import 'package:photo_app/core/constants/environment.dart';
 
@@ -25,7 +26,11 @@ class DioClient {
                 const Duration(minutes: 5), // Увеличено для batch загрузок
             maxRedirects: 5,
           ),
-        )..interceptors.addAll([LoggerInterceptor()]);
+        )..interceptors.addAll([
+            LoggerInterceptor(), // Всегда добавляем для установки токена, логи контролируются внутри
+            if (kIsWeb) CorsInterceptor(),
+            ErrorHandlingInterceptor(),
+          ]);
 
   Options get _sendTimeoutOption => Options(
         sendTimeout: const Duration(minutes: 5), // Увеличено для batch загрузок

@@ -19,7 +19,7 @@ class EnvironmentConfig {
 
   // API URLs for different environments
   static const String _developmentUrl = 'http://127.0.0.1:3000/api/';
-  static const String _stagingUrl = 'http://127.0.0.1:3000/api/';
+  static const String _stagingUrl = 'https://api.fastselect.ru/api/';
   static const String _productionUrl = 'https://api.fastselect.ru/api/';
 
   // Frontend URLs for different environments

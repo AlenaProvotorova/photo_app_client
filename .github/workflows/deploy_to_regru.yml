@@ -26,8 +26,18 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
       
-    - name: Build web app
-      run: flutter build web --release --web-renderer html
+    - name: Build web app (with API base override)
+      env:
+        PROD_API_BASE_URL: ${{ secrets.PROD_API_BASE_URL }}
+      run: |
+        if [ -n "$PROD_API_BASE_URL" ]; then
+          echo "Using PROD_API_BASE_URL from secrets"
+          flutter build web --release --web-renderer html \
+            --dart-define=API_BASE_URL=$PROD_API_BASE_URL
+        else
+          echo "No PROD_API_BASE_URL secret set, building without override (uses EnvironmentConfig)"
+          flutter build web --release --web-renderer html
+        fi
       
     - name: Create .htaccess for Reg.ru
       run: |

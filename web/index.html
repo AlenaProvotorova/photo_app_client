@@ -123,17 +123,6 @@
         }
       }
       
-      // Настройка Flutter
-      window.flutterConfiguration = {
-        renderer: useHtmlRenderer ? 'html' : 'auto',
-        useColorEmoji: false
-      };
-      
-      // Дополнительная настройка для отключения SW через конфигурацию
-      if (disableServiceWorker) {
-        window.flutterConfiguration.serviceWorkerVersion = null;
-      }
-      
       // Дополнительные настройки для мобильных устройств
       if (isMobile) {
         // Предотвращаем зум по двойному тапу

@@ -7,8 +7,8 @@ if [ $# -eq 0 ]; then
     echo "Использование: $0 <environment>"
     echo "Доступные окружения:"
     echo "  development - локальная разработка (http://127.0.0.1:3000/api/)"
-    echo "  staging     - тестовый сервер (http://127.0.0.1:3000/api/)"
-    echo "  production  - продакшн сервер (https://api.fastselect.ru/api/)"
+    echo "  staging     - тестовый сервер (настраивается отдельно)"
+    echo "  production  - продакшн сервер (рекомендуется через --dart-define=API_BASE_URL)"
     exit 1
 fi
 
@@ -26,13 +26,13 @@ case $ENVIRONMENT in
         echo "🔧 Переключаемся на staging окружение..."
         sed -i.bak 's/static const Environment _currentEnvironment = Environment\.[^;]*;/static const Environment _currentEnvironment = Environment.staging;/' lib/core/constants/environment.dart
         echo "✅ Переключено на staging"
-        echo "📡 API URL: http://127.0.0.1:3000/api/"
+        echo "📡 API URL берётся из EnvironmentConfig (может быть переопределён через --dart-define=API_BASE_URL)"
         ;;
     "production"|"prod")
         echo "🔧 Переключаемся на production окружение..."
         sed -i.bak 's/static const Environment _currentEnvironment = Environment\.[^;]*;/static const Environment _currentEnvironment = Environment.production;/' lib/core/constants/environment.dart
         echo "✅ Переключено на production"
-        echo "📡 API URL: https://api.fastselect.ru/api/"
+        echo "📡 Рекомендуется задавать PROD URL через --dart-define=API_BASE_URL=https://api.<домен>/api/"
         ;;
     *)
         echo "❌ Неизвестное окружение: $ENVIRONMENT"
@@ -40,7 +40,3 @@ case $ENVIRONMENT in
         exit 1
         ;;
 esac
-
-echo ""
-echo "🧪 Тестируем подключение к API..."
-dart scripts/test_api.dart

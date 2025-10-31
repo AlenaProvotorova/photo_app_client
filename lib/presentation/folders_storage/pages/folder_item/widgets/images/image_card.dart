@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_app/core/theme/app_filters.dart';
 
@@ -43,12 +44,33 @@ class ImageCard extends StatelessWidget {
               );
             },
             errorBuilder: (context, error, stackTrace) {
+              if (kDebugMode) {
+                print('Image load error for URL: $url');
+                print('Error: $error');
+                print('StackTrace: $stackTrace');
+              }
               return Container(
                 color: Colors.grey[200],
-                child: const Center(
-                  child: Icon(
-                    Icons.error_outline,
-                    color: Colors.grey,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.grey,
+                      ),
+                      if (kDebugMode)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Error loading image',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               );
