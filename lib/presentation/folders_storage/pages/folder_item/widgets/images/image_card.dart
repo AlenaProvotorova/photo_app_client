@@ -54,61 +54,67 @@ class ImageCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: ColorFiltered(
-          colorFilter: disabled ? AppFilters.gray : AppFilters.transparent,
-          child: Center(
-            child: Image.network(
-              url,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                // Логируем всегда в веб-версии для отладки в проде
-                if (kIsWeb) {
-                  print('❌ Image load error for URL: $url');
-                  print('Error: $error');
-                  if (kDebugMode) {
-                    print('StackTrace: $stackTrace');
-                  }
-                }
-                return Container(
-                  color: Colors.grey[200],
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.grey,
-                        ),
-                        if (kDebugMode)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Error loading image',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+        child: disabled
+            ? ColorFiltered(
+                colorFilter: AppFilters.gray,
+                child: _buildImage(url, imageSize),
+              )
+            : _buildImage(url, imageSize),
+      ),
+    );
+  }
+
+  Widget _buildImage(String url, double imageSize) {
+    return Center(
+      child: Image.network(
+        url,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
             ),
-          ),
-        ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          // Логируем всегда в веб-версии для отладки в проде
+          if (kIsWeb) {
+            print('❌ Image load error for URL: $url');
+            print('Error: $error');
+            if (kDebugMode) {
+              print('StackTrace: $stackTrace');
+            }
+          }
+          return Container(
+            color: Colors.grey[200],
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.grey,
+                  ),
+                  if (kDebugMode)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Error loading image',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

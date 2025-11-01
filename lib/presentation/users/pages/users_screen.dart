@@ -114,10 +114,13 @@ class _UsersScreenContent extends StatelessWidget {
                     horizontalMargin: 16,
                     columns: [
                       DataColumn(
-                        label: Text(
-                          'Имя',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                        label: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 400),
+                          child: Text(
+                            'Имя',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -143,9 +146,13 @@ class _UsersScreenContent extends StatelessWidget {
                       return DataRow(
                         cells: [
                           DataCell(
-                            Text(
-                              user.name,
-                              style: theme.textTheme.bodyMedium,
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 400),
+                              child: Text(
+                                user.name,
+                                style: theme.textTheme.bodyMedium,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ),
                           DataCell(
