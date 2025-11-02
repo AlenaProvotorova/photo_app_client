@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photo_app/core/theme/app_images.dart';
 
 class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -28,13 +27,8 @@ class AppBarCustom extends StatelessWidget implements PreferredSizeWidget {
       leading: showLeading
           ? IconButton(
               onPressed: onPress,
-              icon: ColorFiltered(
-                colorFilter: const ColorFilter.mode(
-                  Colors.black,
-                  BlendMode.srcIn,
-                ),
-                child: AppImages.arrowBackImage,
-              ),
+              icon: const Icon(Icons.arrow_back),
+              color: Colors.black,
             )
           : null,
     );

@@ -46,11 +46,14 @@ echo "🏗 Building web (HTML renderer)"
 flutter build web --release --web-renderer html
 
 echo "📁 Post-build steps"
-# Генерируем уникальную версию для cache busting
+# Генерируем уникальную версию для cache busting (timestamp)
 BUILD_VERSION=$(date +%Y%m%d-%H%M%S 2>/dev/null || echo "$(date +%s)")
 echo "📝 Setting build version to: $BUILD_VERSION"
 if [ -f "build/web/index.html" ]; then
+  # Заменяем версию в meta теге
   sed -i.bak "s/<meta name=\"app-version\" content=\"[^\"]*\">/<meta name=\"app-version\" content=\"$BUILD_VERSION\">/" build/web/index.html || true
+  # Заменяем версию в query параметре flutter_bootstrap.js
+  sed -i.bak "s/flutter_bootstrap.js?v=[^\"]*/flutter_bootstrap.js?v=$BUILD_VERSION/" build/web/index.html || true
   rm -f build/web/index.html.bak
 fi
 

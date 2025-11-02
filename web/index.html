@@ -17,7 +17,8 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <!-- Version tag for cache busting on deployment -->
-  <meta name="app-version" content="1.0.2">
+  <!-- Version will be replaced during build -->
+  <meta name="app-version" content="BUILD_TIMESTAMP">
 
   <!-- Prevent caching on all browsers including mobile -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -153,8 +154,63 @@
           userAgent: ua
         });
       }
+      
+      // Проверка обновления версии приложения (автоматическая перезагрузка при новом деплое)
+      var checkVersion = function() {
+        var currentVersion = document.querySelector('meta[name="app-version"]')?.getAttribute('content') || '';
+        
+        // Пропускаем проверку если версия еще не установлена (build timestamp)
+        if (currentVersion === 'BUILD_TIMESTAMP') {
+          return;
+        }
+        
+        var storedVersion = localStorage.getItem('app-version');
+        
+        // Если версия изменилась, перезагружаем страницу
+        if (storedVersion && storedVersion !== currentVersion) {
+          console.log('🔄 New version detected (' + currentVersion + ')! Reloading...');
+          localStorage.setItem('app-version', currentVersion);
+          window.location.reload(true);
+          return;
+        }
+        
+        // Сохраняем текущую версию
+        if (currentVersion) {
+          localStorage.setItem('app-version', currentVersion);
+        }
+        
+        // Проверяем новую версию на сервере каждые 2 минуты
+        setInterval(function() {
+          fetch(window.location.href, {cache: 'no-store', headers: {'Cache-Control': 'no-cache'}})
+            .then(function(response) {
+              return response.text();
+            })
+            .then(function(html) {
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(html, 'text/html');
+              var newVersion = doc.querySelector('meta[name="app-version"]')?.getAttribute('content') || '';
+              
+              if (newVersion && newVersion !== 'BUILD_TIMESTAMP' && newVersion !== currentVersion) {
+                console.log('🔄 New version available (' + newVersion + ')! Reloading...');
+                localStorage.setItem('app-version', newVersion);
+                window.location.reload(true);
+              }
+            })
+            .catch(function(err) {
+              // Игнорируем ошибки проверки (сеть может быть недоступна)
+              console.debug('Version check failed:', err);
+            });
+        }, 120000); // Проверяем каждые 2 минуты
+      };
+      
+      // Запускаем проверку версии после загрузки DOM
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkVersion);
+      } else {
+        checkVersion();
+      }
     })();
   </script>
-  <script src="flutter_bootstrap.js?v=1.0.2" async></script>
+  <script src="flutter_bootstrap.js?v=BUILD_TIMESTAMP" async></script>
 </body>
 </html>
