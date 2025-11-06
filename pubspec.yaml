@@ -35,6 +35,7 @@ dependencies:
   file_selector: ^1.0.3
   # Drag and drop for desktop:
   desktop_drop: ^0.7.0
+  excel: ^4.0.4
   
   equatable: ^2.0.5
 

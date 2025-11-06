@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/rendering.dart';
+import 'package:excel/excel.dart' hide Border;
 
 class OrderTable extends StatefulWidget {
   final Map<String, dynamic> fullOrderForTable;
@@ -66,7 +67,6 @@ class OrderTableState extends State<OrderTable> {
   }
 
   Future<Uint8List> captureFullImage(BuildContext context) async {
-    // Use fixed width for export
     final double contentWidth = 1200.0;
 
     final firstColumnWidth = contentWidth * 0.2;
@@ -294,17 +294,215 @@ class OrderTableState extends State<OrderTable> {
     try {
       final boundary = repaintKey.currentContext!.findRenderObject()
           as RenderRepaintBoundary;
-      // Use higher pixel ratio for better quality
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      print(
-          'Изображение создано: ${image.width}x${image.height}, размер: ${pngBytes.length} байт');
       return pngBytes;
     } finally {
       entry.remove();
     }
+  }
+
+  Future<Uint8List> exportToExcel() async {
+    final excel = Excel.createExcel();
+    excel.delete('Sheet1');
+    final sheet = excel['Заказ'];
+
+    int rowIndex = 0;
+    int colIndex = 0;
+
+    sheet
+        .cell(CellIndex.indexByColumnRow(
+            columnIndex: colIndex++, rowIndex: rowIndex))
+        .value = TextCellValue('В общую');
+
+    for (final photo in widget.photos) {
+      final photoName = photo['name'].toString().split(' (')[0];
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex++, rowIndex: rowIndex))
+          .value = TextCellValue(photoName);
+    }
+
+    for (final size in widget.sizes) {
+      final sizeName = size['name'].toString().split(' (')[0];
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex++, rowIndex: rowIndex))
+          .value = TextCellValue(sizeName);
+    }
+
+    sheet
+        .cell(CellIndex.indexByColumnRow(
+            columnIndex: colIndex, rowIndex: rowIndex))
+        .value = TextCellValue('Стоимость');
+
+    rowIndex++;
+
+    final Map<String, List<MapEntry<String, dynamic>>> groupedOrders = {};
+    for (final entry in widget.fullOrderForTable.entries) {
+      final clientName = entry.value['clientName']?.toString() ?? '';
+      if (!groupedOrders.containsKey(clientName)) {
+        groupedOrders[clientName] = [];
+      }
+      groupedOrders[clientName]!.add(entry);
+    }
+
+    final sortedClientNames = groupedOrders.keys.toList()
+      ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    double grandTotal = 0.0;
+
+    for (final clientName in sortedClientNames) {
+      final clientOrders = groupedOrders[clientName]!;
+      final client = widget.clients.firstWhere(
+        (c) => c.name == clientName,
+        orElse: () => Client(
+            id: 0,
+            name: clientName,
+            folderId: 0,
+            orderDigital: false,
+            orderAlbum: false),
+      );
+
+      colIndex = 0;
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex++, rowIndex: rowIndex))
+          .value = TextCellValue(client.name);
+      for (int i = 0; i < widget.photos.length + widget.sizes.length; i++) {
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: colIndex++, rowIndex: rowIndex))
+            .value = TextCellValue('');
+      }
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex, rowIndex: rowIndex))
+          .value = TextCellValue('');
+      rowIndex++;
+
+      double clientTotal = 0.0;
+
+      for (final orderEntry in clientOrders) {
+        final orderData = orderEntry.value;
+        colIndex = 0;
+
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: colIndex++, rowIndex: rowIndex))
+            .value = TextCellValue(orderData['fileName']?.toString() ?? '');
+
+        for (final photo in widget.photos) {
+          final count = orderData['sizes']?[photo['key']] ?? 0;
+          final int photoCount = count is int
+              ? count
+              : (int.tryParse(count?.toString() ?? '0') ?? 0);
+          if (photoCount == 1) {
+            sheet
+                .cell(CellIndex.indexByColumnRow(
+                    columnIndex: colIndex++, rowIndex: rowIndex))
+                .value = TextCellValue('✓');
+          } else {
+            sheet
+                .cell(CellIndex.indexByColumnRow(
+                    columnIndex: colIndex++, rowIndex: rowIndex))
+                .value = TextCellValue('-');
+          }
+        }
+
+        for (final size in widget.sizes) {
+          final count = orderData['sizes']?[size['key']] ?? 0;
+          final int sizeCount = count is int
+              ? count
+              : (int.tryParse(count?.toString() ?? '0') ?? 0);
+          if (sizeCount > 0) {
+            sheet
+                .cell(CellIndex.indexByColumnRow(
+                    columnIndex: colIndex++, rowIndex: rowIndex))
+                .value = IntCellValue(sizeCount);
+          } else {
+            sheet
+                .cell(CellIndex.indexByColumnRow(
+                    columnIndex: colIndex++, rowIndex: rowIndex))
+                .value = TextCellValue('-');
+          }
+        }
+
+        final rowTotal = _calculateRowTotal(orderData);
+        clientTotal += rowTotal;
+        if (rowTotal > 0) {
+          sheet
+              .cell(CellIndex.indexByColumnRow(
+                  columnIndex: colIndex, rowIndex: rowIndex))
+              .value = IntCellValue(rowTotal.toInt());
+        } else {
+          sheet
+              .cell(CellIndex.indexByColumnRow(
+                  columnIndex: colIndex, rowIndex: rowIndex))
+              .value = TextCellValue('');
+        }
+
+        rowIndex++;
+      }
+
+      if (client.orderDigital) {
+        colIndex = 0;
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: colIndex++, rowIndex: rowIndex))
+            .value = TextCellValue('+ все фото в цифровом виде');
+        for (int i = 0; i < widget.photos.length + widget.sizes.length; i++) {
+          sheet
+              .cell(CellIndex.indexByColumnRow(
+                  columnIndex: colIndex++, rowIndex: rowIndex))
+              .value = TextCellValue('');
+        }
+        if (widget.digitalPhotoPrice > 0) {
+          sheet
+              .cell(CellIndex.indexByColumnRow(
+                  columnIndex: colIndex, rowIndex: rowIndex))
+              .value = IntCellValue(widget.digitalPhotoPrice);
+        } else {
+          sheet
+              .cell(CellIndex.indexByColumnRow(
+                  columnIndex: colIndex, rowIndex: rowIndex))
+              .value = TextCellValue('');
+        }
+        clientTotal += widget.digitalPhotoPrice;
+        rowIndex++;
+      }
+
+      colIndex = 0;
+      for (int i = 0; i < widget.photos.length + widget.sizes.length + 1; i++) {
+        sheet
+            .cell(CellIndex.indexByColumnRow(
+                columnIndex: colIndex++, rowIndex: rowIndex))
+            .value = TextCellValue('');
+      }
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex, rowIndex: rowIndex))
+          .value = TextCellValue('ИТОГО: ${clientTotal.toInt()} ₽');
+      grandTotal += clientTotal;
+      rowIndex++;
+    }
+
+    colIndex = 0;
+    for (int i = 0; i < widget.photos.length + widget.sizes.length + 1; i++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(
+              columnIndex: colIndex++, rowIndex: rowIndex))
+          .value = TextCellValue('');
+    }
+    sheet
+        .cell(CellIndex.indexByColumnRow(
+            columnIndex: colIndex, rowIndex: rowIndex))
+        .value = TextCellValue('ОБЩИЙ ИТОГ: ${grandTotal.toInt()} ₽');
+
+    final excelBytes = excel.encode()!;
+    return Uint8List.fromList(excelBytes);
   }
 
   @override

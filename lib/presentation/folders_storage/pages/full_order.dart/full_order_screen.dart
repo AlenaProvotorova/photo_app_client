@@ -69,7 +69,7 @@ class _FullOrderScreenState extends State<FullOrderScreen> {
                       userState is UserLoaded && userState.user.isAdmin;
                   if (!isAdmin) return const SizedBox.shrink();
                   return IconButton(
-                    tooltip: 'Сохранить как изображение',
+                    tooltip: 'Выгрузить в Excel',
                     icon: const Icon(Icons.download),
                     onPressed: () async {
                       final orderTableState = tableKey.currentState;
@@ -81,16 +81,16 @@ class _FullOrderScreenState extends State<FullOrderScreen> {
                       }
                       try {
                         final Uint8List bytes =
-                            await orderTableState.captureFullImage(context);
+                            await orderTableState.exportToExcel();
 
                         final String suggestedName =
-                            'заказ-${widget.folderPath}.png';
+                            'заказ-${widget.folderPath}.xlsx';
 
                         String? outputFile = await FilePicker.platform.saveFile(
-                          dialogTitle: 'Сохранить заказ как изображение',
+                          dialogTitle: 'Сохранить заказ в Excel',
                           fileName: suggestedName,
                           type: FileType.custom,
-                          allowedExtensions: ['png'],
+                          allowedExtensions: ['xlsx'],
                         );
 
                         if (outputFile == null) {
