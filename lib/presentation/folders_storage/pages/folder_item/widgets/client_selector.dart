@@ -87,6 +87,7 @@ class _ClientSelectorState extends State<ClientSelector> {
                       color: Colors.black,
                       fontSize: 16,
                     ),
+                    value: state.selectedClient?.name,
                     items: state.namesList
                         .map<DropdownMenuItem<String>>((Client client) {
                       return DropdownMenuItem<String>(

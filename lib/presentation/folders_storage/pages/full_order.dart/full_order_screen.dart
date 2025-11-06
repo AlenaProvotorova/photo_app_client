@@ -15,6 +15,7 @@ import 'widgets/order_table.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_event.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -22,10 +23,12 @@ import 'package:file_picker/file_picker.dart';
 class FullOrderScreen extends StatefulWidget {
   final String folderId;
   final String folderPath;
+  final String? clientId;
   const FullOrderScreen({
     super.key,
     required this.folderId,
     required this.folderPath,
+    this.clientId,
   });
 
   @override
@@ -38,11 +41,26 @@ class _FullOrderScreenState extends State<FullOrderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) =>
-              ClientsBloc()..add(LoadClients(folderId: widget.folderId)),
+          create: (context) {
+            final bloc = ClientsBloc()
+              ..add(LoadClients(folderId: widget.folderId));
+            // Если есть clientId в query параметрах, загружаем клиента после загрузки списка
+            if (widget.clientId != null) {
+              // Используем одноразовую подписку
+              StreamSubscription? subscription;
+              subscription = bloc.stream.listen((state) {
+                if (state is ClientsLoaded && state.selectedClient == null) {
+                  bloc.add(LoadClientById(clientId: widget.clientId!));
+                  subscription?.cancel();
+                }
+              });
+            }
+            return bloc;
+          },
         ),
         BlocProvider(
           create: (context) =>
@@ -56,7 +74,12 @@ class _FullOrderScreenState extends State<FullOrderScreen> {
       child: Scaffold(
         appBar: AppBarCustom(
           onPress: () {
-            context.go('/folder/${widget.folderPath}');
+            // При возврате передаем clientId обратно, если он был выбран
+            String url = '/folder/${widget.folderPath}';
+            if (widget.clientId != null) {
+              url += '?clientId=${widget.clientId}';
+            }
+            context.go(url);
           },
           showLeading: true,
           title: 'Весь заказ',

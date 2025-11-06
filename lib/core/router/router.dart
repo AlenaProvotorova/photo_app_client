@@ -35,7 +35,12 @@ final router = GoRouter(
       builder: (context, state) {
         final folderPath = state.pathParameters['folderPath']!;
         final folderId = folderPath.split('_').first;
-        return FolderItemScreen(folderId: folderId, folderPath: folderPath);
+        final clientId = state.uri.queryParameters['clientId'];
+        return FolderItemScreen(
+          folderId: folderId,
+          folderPath: folderPath,
+          clientId: clientId,
+        );
       },
     ),
     GoRoute(
@@ -51,7 +56,12 @@ final router = GoRouter(
       builder: (context, state) {
         final folderPath = state.pathParameters['folderPath']!;
         final folderId = folderPath.split('_').first;
-        return FullOrderScreen(folderId: folderId, folderPath: folderPath);
+        final clientId = state.uri.queryParameters['clientId'];
+        return FullOrderScreen(
+          folderId: folderId,
+          folderPath: folderPath,
+          clientId: clientId,
+        );
       },
     ),
   ],

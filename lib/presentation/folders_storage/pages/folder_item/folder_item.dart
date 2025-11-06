@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -18,6 +19,7 @@ import 'package:photo_app/data/image_picker/repositories/web_image_picker.dart';
 import 'package:photo_app/domain/image_picker/repositories/image_picker.dart';
 import 'package:photo_app/entities/clients/bloc/clients_bloc.dart';
 import 'package:photo_app/entities/clients/bloc/clients_event.dart';
+import 'package:photo_app/entities/clients/bloc/clients_state.dart';
 import 'package:photo_app/entities/order/bloc/order_bloc.dart';
 import 'package:photo_app/entities/order/bloc/order_event.dart';
 import 'package:photo_app/entities/order/bloc/order_state.dart';
@@ -43,10 +45,12 @@ import 'package:photo_app/data/image_picker/models/image_data.dart';
 class FolderItemScreen extends StatefulWidget {
   final String folderId;
   final String folderPath;
+  final String? clientId;
   const FolderItemScreen({
     super.key,
     required this.folderId,
     required this.folderPath,
+    this.clientId,
   });
 
   @override
@@ -63,6 +67,9 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   late final FolderSettingsBloc _folderSettingsBloc;
   bool _showSelected = false;
   bool _hasUpdatedFirstSettingsAlert = false;
+  bool _hasRestoredClient = false;
+  StreamSubscription? _clientRestoreSubscription;
+  
   @override
   void initState() {
     super.initState();
@@ -78,6 +85,28 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
     _orderBloc = OrderBloc()..add(LoadOrder(folderId: widget.folderId));
+    
+    // Восстанавливаем выбранного клиента из параметров виджета после построения виджета
+    if (widget.clientId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_hasRestoredClient && mounted) {
+          _hasRestoredClient = true;
+          // Ждем загрузки клиентов, затем загружаем выбранного клиента
+          _clientRestoreSubscription = _clientsBloc.stream.listen((state) {
+            if (state is ClientsLoaded && state.selectedClient == null) {
+              _clientsBloc.add(LoadClientById(clientId: widget.clientId!));
+              _clientRestoreSubscription?.cancel();
+            }
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _clientRestoreSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _pickImages(context) async {
@@ -408,6 +437,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                     providers: [
                       BlocProvider(create: (context) => _userBloc),
                       BlocProvider(create: (context) => _orderBloc),
+                      BlocProvider(create: (context) => _clientsBloc),
                     ],
                     child: BlocBuilder<UserBloc, UserState>(
                       builder: (context, state) {
@@ -443,21 +473,29 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                                 child: const Text('Сортировка ретуши'),
                               ),
                               const SizedBox(width: 8),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  side: BorderSide(
-                                      color: theme.colorScheme.primary),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  context.go(
-                                      '/folder/${widget.folderPath}/full-order');
+                              BlocBuilder<ClientsBloc, ClientsState>(
+                                builder: (context, clientsState) {
+                                  return TextButton(
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      side: BorderSide(
+                                          color: theme.colorScheme.primary),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      String url = '/folder/${widget.folderPath}/full-order';
+                                      if (clientsState is ClientsLoaded &&
+                                          clientsState.selectedClient != null) {
+                                        url += '?clientId=${clientsState.selectedClient!.id}';
+                                      }
+                                      context.go(url);
+                                    },
+                                    child: const Text('Весь заказ'),
+                                  );
                                 },
-                                child: const Text('Весь заказ'),
                               ),
                               const SizedBox(width: 8),
                               IconButton(
@@ -483,19 +521,27 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                             ],
                           );
                         }
-                        return TextButton(
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            side: BorderSide(color: theme.colorScheme.primary),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: () {
-                            context
-                                .go('/folder/${widget.folderPath}/full-order');
+                        return BlocBuilder<ClientsBloc, ClientsState>(
+                          builder: (context, clientsState) {
+                            return TextButton(
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                side: BorderSide(color: theme.colorScheme.primary),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                String url = '/folder/${widget.folderPath}/full-order';
+                                if (clientsState is ClientsLoaded &&
+                                    clientsState.selectedClient != null) {
+                                  url += '?clientId=${clientsState.selectedClient!.id}';
+                                }
+                                context.go(url);
+                              },
+                              child: const Text('Весь заказ'),
+                            );
                           },
-                          child: const Text('Весь заказ'),
                         );
                       },
                     ),
