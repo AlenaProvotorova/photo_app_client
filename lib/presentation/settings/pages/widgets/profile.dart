@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:photo_app/core/utils/token_storage.dart';
+import 'package:photo_app/data/auth/services/login_data_service.dart';
 import 'package:photo_app/entities/user/bloc/user_bloc.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
+
+  Future<void> _handleLogout(BuildContext context) async {
+    await TokenStorage.deleteToken();
+    await LoginDataService.clearSavedLoginData();
+    if (context.mounted) {
+      context.go('/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,11 +27,8 @@ class Profile extends StatelessWidget {
         } else if (state is UserLoaded) {
           return ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 600),
-            child: Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   height: 80,
@@ -35,8 +43,9 @@ class Profile extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
+                const SizedBox(width: 16),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
@@ -50,6 +59,15 @@ class Profile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     )
                   ],
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () => _handleLogout(context),
+                  icon: Icon(
+                    Icons.logout,
+                    color: theme.colorScheme.error,
+                  ),
+                  tooltip: 'Выйти из профиля',
                 ),
               ],
             ),

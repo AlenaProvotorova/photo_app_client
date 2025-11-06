@@ -67,13 +67,6 @@ class FilesList extends StatelessWidget {
             clientsBloc: clientsBloc,
             showSelected: showSelected,
           )
-        else
-          const SizedBox(
-            height: 200,
-            child: Center(
-              child: Text('Загрузка изображений...'),
-            ),
-          ),
       ],
     );
   }
@@ -100,13 +93,6 @@ class FilesList extends StatelessWidget {
             clientsBloc: clientsBloc,
             showSelected: showSelected,
           )
-        else
-          const SizedBox(
-            height: 200,
-            child: Center(
-              child: Text('Загрузка изображений...'),
-            ),
-          ),
       ],
     );
   }

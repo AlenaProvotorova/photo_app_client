@@ -26,8 +26,7 @@ class SettingsScreen extends StatelessWidget {
             builder: (context, userState) {
               if (userState is UserLoaded) {
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,

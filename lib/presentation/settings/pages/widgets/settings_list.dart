@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_app/entities/watermark/watermark_bloc.dart';
 import 'package:photo_app/entities/watermark/watermark_event.dart';
 import 'package:photo_app/presentation/settings/pages/widgets/watermark/upload_watermark.dart';
-import 'package:photo_app/presentation/settings/pages/widgets/logout.dart';
 
 class SettingsList extends StatelessWidget {
   final String userId;
@@ -14,12 +13,10 @@ class SettingsList extends StatelessWidget {
     return BlocProvider(
       create: (context) => WatermarkBloc()..add(LoadWatermark(userId: userId)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 30),
         child: Column(
           children: [
             UploadWatermarkWidget(userId: userId),
-            const SizedBox(height: 32),
-            const Logout(),
           ],
         ),
       ),

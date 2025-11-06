@@ -8,8 +8,7 @@ class WatermarkCard extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    print('url $url');
-    const imageSize = 150.0;
+    const imageSize = 200.0;
     return Container(
       width: imageSize,
       height: imageSize,
@@ -23,7 +22,6 @@ class WatermarkCard extends StatelessWidget {
           url,
           width: imageSize,
           height: imageSize,
-          fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
 

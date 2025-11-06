@@ -28,6 +28,7 @@ import 'package:photo_app/entities/user/bloc/user_event.dart';
 import 'package:photo_app/entities/user/bloc/user_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_bloc.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_event.dart';
+import 'package:photo_app/presentation/folders_storage/pages/folder_item/bloc/files_state.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/client_selector.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/date_selection_info.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/files/files_list.dart';
@@ -36,6 +37,8 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/switch_all_digital.dart';
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:photo_app/core/components/file_drop_zone.dart';
+import 'package:photo_app/data/image_picker/models/image_data.dart';
 
 class FolderItemScreen extends StatefulWidget {
   final String folderId;
@@ -80,19 +83,23 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   Future<void> _pickImages(context) async {
     final selectedImages = await _imagePickerService.pickImages();
     if (selectedImages.isNotEmpty) {
-      if (selectedImages.length > 10) {
-        _filesBloc.add(UploadFilesBatch(
-          folderId: widget.folderId,
-          images: selectedImages,
-          context: context,
-        ));
-      } else {
-        _filesBloc.add(UploadFiles(
-          folderId: widget.folderId,
-          images: selectedImages,
-          context: context,
-        ));
-      }
+      _handleImageUpload(selectedImages);
+    }
+  }
+
+  void _handleImageUpload(List<ImageData> images) {
+    if (images.length > 10) {
+      _filesBloc.add(UploadFilesBatch(
+        folderId: widget.folderId,
+        images: images,
+        context: context,
+      ));
+    } else {
+      _filesBloc.add(UploadFiles(
+        folderId: widget.folderId,
+        images: images,
+        context: context,
+      ));
     }
   }
 
@@ -524,105 +531,140 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                         });
                       }
 
-                      return Column(
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  if (showAlert)
-                                    Container(
-                                      margin: const EdgeInsets.all(16),
-                                      padding: const EdgeInsets.all(16),
-                                      decoration: BoxDecoration(
-                                        color: Colors.amber.withOpacity(0.1),
-                                        border: Border.all(color: Colors.amber),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.info_outline,
-                                            color: Colors.amber.shade700,
-                                            size: 24,
+                      return BlocBuilder<FilesBloc, FilesState>(
+                        builder: (context, filesState) {
+                          final hasFiles = filesState is FilesLoaded &&
+                              filesState.files.isNotEmpty;
+                          final isUploading = filesState is FilesUploading ||
+                              filesState is FilesBatchUploading ||
+                              filesState is FilesDeleting;
+                          final showDropZone = isAdmin &&
+                              !isUploading &&
+                              (filesState is FilesLoading || !hasFiles);
+
+                          return Column(
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      if (showAlert)
+                                        Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.amber.withOpacity(0.1),
+                                            border:
+                                                Border.all(color: Colors.amber),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
-                                              style: TextStyle(
-                                                color: Colors.amber.shade800,
-                                                fontSize: 14,
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.info_outline,
+                                                color: Colors.amber.shade700,
+                                                size: 24,
                                               ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          TextButton(
-                                            onPressed: () {
-                                              context.go(
-                                                  '/folder/${widget.folderPath}/settings');
-                                            },
-                                            child: Text(
-                                              'Перейти в настройки',
-                                              style: TextStyle(
-                                                color: Colors.amber.shade800,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(
+                                                  'Вам необходимо установить настройки для папки, прежде чем поделитесь ссылкой на нее с клиентами.',
+                                                  style: TextStyle(
+                                                    color:
+                                                        Colors.amber.shade800,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
+                                              const SizedBox(width: 12),
+                                              TextButton(
+                                                onPressed: () {
+                                                  context.go(
+                                                      '/folder/${widget.folderPath}/settings');
+                                                },
+                                                child: Text(
+                                                  'Перейти в настройки',
+                                                  style: TextStyle(
+                                                    color:
+                                                        Colors.amber.shade800,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ClientSelector(
-                                    folderId: widget.folderId,
-                                  ),
-                                  DateSelectionInfo(
-                                    folderId: widget.folderId,
-                                  ),
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: theme.colorScheme.primary),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Column(children: [
-                                      SwitchAllDigital(
+                                        ),
+                                      ClientSelector(
                                         folderId: widget.folderId,
                                       ),
-                                      OrderAlbum(
+                                      DateSelectionInfo(
                                         folderId: widget.folderId,
-                                      )
-                                    ]),
+                                      ),
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: theme.colorScheme.primary),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Column(children: [
+                                          SwitchAllDigital(
+                                            folderId: widget.folderId,
+                                          ),
+                                          OrderAlbum(
+                                            folderId: widget.folderId,
+                                          )
+                                        ]),
+                                      ),
+                                      ShowSelectedButton(
+                                        showSelected: _showSelected,
+                                        onPressed: () {
+                                          setState(() {
+                                            _showSelected = !_showSelected;
+                                          });
+                                        },
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                        child: FileDropZone(
+                                          visible: showDropZone,
+                                          onFilesDropped: (images) {
+                                            _handleImageUpload(images);
+                                          },
+                                          emptyMessage:
+                                              'Перетащите фотографии сюда для загрузки',
+                                          dragMessage:
+                                              'Отпустите фотографии для загрузки',
+                                          fullWidth: true,
+                                          child: FilesList(
+                                            showSelected: _showSelected,
+                                            folderId: widget.folderId,
+                                            orderBloc: _orderBloc,
+                                            clientsBloc: _clientsBloc,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  ShowSelectedButton(
-                                    showSelected: _showSelected,
-                                    onPressed: () {
-                                      setState(() {
-                                        _showSelected = !_showSelected;
-                                      });
-                                    },
-                                  ),
-                                  FilesList(
-                                    showSelected: _showSelected,
-                                    folderId: widget.folderId,
-                                    orderBloc: _orderBloc,
-                                    clientsBloc: _clientsBloc,
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                          UploadFileButton(
-                            pickImages: (context) async {
-                              await _pickImages(context);
-                            },
-                            onDeleteAll: (context) =>
-                                _showDeleteAllFilesDialog(context),
-                          ),
-                        ],
+                              UploadFileButton(
+                                pickImages: (context) async {
+                                  await _pickImages(context);
+                                },
+                                onDeleteAll: (context) =>
+                                    _showDeleteAllFilesDialog(context),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                   );

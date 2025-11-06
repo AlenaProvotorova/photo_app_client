@@ -73,7 +73,7 @@ class _OrderAlbumState extends State<OrderAlbum> {
               builder: (context, settingsState) {
                 if (settingsState is FolderSettingsLoaded) {
                   return Padding(
-                    padding: const EdgeInsets.only(left: 8, bottom: 8),
+                    padding: const EdgeInsets.only(top: 8, left: 8, bottom: 8),
                     child: Row(
                       children: [
                         Switch(

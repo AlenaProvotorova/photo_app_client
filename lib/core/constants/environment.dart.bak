@@ -8,7 +8,7 @@ class EnvironmentConfig {
   // Optional override via --dart-define=API_BASE_URL=...
   static const String _apiBaseUrlOverride =
       String.fromEnvironment('API_BASE_URL');
-  static const Environment _currentEnvironment = Environment.development;
+  static const Environment _currentEnvironment = Environment.production;
 
   static Environment get current => _currentEnvironment;
 

@@ -33,6 +33,8 @@ dependencies:
   window_manager: ^0.4.3
   desktop_window: ^0.4.2
   file_selector: ^1.0.3
+  # Drag and drop for desktop:
+  desktop_drop: ^0.7.0
   
   equatable: ^2.0.5
 

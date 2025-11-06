@@ -27,31 +27,17 @@ class DateSelectionInfo extends StatelessWidget {
             return const SizedBox.shrink();
           }
 
-          final now = DateTime.now();
-          final daysUntilDeadline = dateSelectTo.difference(now).inDays;
-
-          Color backgroundColor;
-          if (daysUntilDeadline < 0) {
-            backgroundColor = theme.colorScheme.error.withOpacity(0.1);
-          } else if (daysUntilDeadline <= 3) {
-            backgroundColor = theme.colorScheme.error.withOpacity(0.1);
-          } else {
-            backgroundColor = theme.colorScheme.primaryContainer;
-          }
-
           final dateFormatter = DateFormat('dd.MM.yyyy');
           final formattedDate = dateFormatter.format(dateSelectTo);
 
           return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: backgroundColor,
+              color: theme.colorScheme.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: daysUntilDeadline <= 3
-                    ? theme.colorScheme.error.withOpacity(0.3)
-                    : theme.colorScheme.primary.withOpacity(0.3),
+                color: theme.colorScheme.error.withOpacity(0.3),
                 width: 1,
               ),
             ),
@@ -59,19 +45,14 @@ class DateSelectionInfo extends StatelessWidget {
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: daysUntilDeadline <= 3
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.primary,
+                  color: theme.colorScheme.error,
                   size: 20,
                 ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Необходимо выбрать фото до $formattedDate. После этой даты выбор будет недоступен',
                     style: TextStyle(
-                      color: daysUntilDeadline <= 3
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.primary,
+                      color: theme.colorScheme.error,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),

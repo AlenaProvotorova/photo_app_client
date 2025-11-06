@@ -50,8 +50,8 @@ class FilesContainer extends StatelessWidget {
 
     if (filesToRender.isEmpty) {
       return const SizedBox(
-        height: 200,
-        child: EmptyContainer(text: 'Папка пуста'),
+        height: 400,
+        child: EmptyContainer(text: ''),
       );
     }
 
