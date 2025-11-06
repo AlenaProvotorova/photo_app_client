@@ -32,6 +32,10 @@ class _ImageCarouselState extends State<ImageCarousel> {
   late PageController _pageController;
   late FocusNode _focusNode;
   int _currentIndex = 0;
+  bool _hasUnconfirmedChanges = false;
+  final Map<int, GlobalKey> _containerKeys = {};
+  bool _isHandlingPageChange = false;
+  final Map<int, bool> _expandedStates = {};
 
   @override
   void initState() {
@@ -42,10 +46,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
     // Listen to page changes to update current index
     _pageController.addListener(() {
-      if (_pageController.page != null) {
-        setState(() {
-          _currentIndex = _pageController.page!.round();
-        });
+      if (_pageController.page != null && !_isHandlingPageChange) {
+        final newIndex = _pageController.page!.round();
+        if (newIndex != _currentIndex) {
+          _handlePageChange(newIndex);
+        }
       }
     });
 
@@ -59,6 +64,109 @@ class _ImageCarouselState extends State<ImageCarousel> {
     }
   }
 
+  void _handlePageChange(int newIndex) async {
+    if (_hasUnconfirmedChanges) {
+      _isHandlingPageChange = true;
+      _pageController.jumpToPage(_currentIndex);
+
+      final shouldProceed = await _showConfirmationDialog();
+      if (!shouldProceed) {
+        _cancelCurrentChanges();
+      } else {
+        _confirmCurrentChanges();
+      }
+      _isHandlingPageChange = false;
+
+      if (newIndex > _currentIndex) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _pageController.previousPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    } else {
+      setState(() {
+        _currentIndex = newIndex;
+        _hasUnconfirmedChanges = false;
+      });
+      final newImageKey = _containerKeys[newIndex];
+      if (newImageKey?.currentState != null) {
+        final state = newImageKey!.currentState as dynamic;
+        state?.widget?.onUnconfirmedChangesChanged?.call(false);
+      }
+    }
+  }
+
+  Future<bool> _showConfirmationDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Неподтвержденные изменения'),
+              content:
+                  const Text('Вы не подтвердили изменение текущей фотографии'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  child: const Text('Отменить изменение'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Подтвердить изменение'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  void _confirmCurrentChanges() {
+    final currentKey = _containerKeys[_currentIndex];
+    if (currentKey?.currentState != null) {
+      final state = currentKey!.currentState as dynamic;
+      state?.confirmChanges();
+    }
+    setState(() {
+      _hasUnconfirmedChanges = false;
+    });
+  }
+
+  void _cancelCurrentChanges() {
+    final currentKey = _containerKeys[_currentIndex];
+    if (currentKey?.currentState != null) {
+      final state = currentKey!.currentState as dynamic;
+      state?.cancelChanges();
+    }
+    setState(() {
+      _hasUnconfirmedChanges = false;
+    });
+  }
+
+  void _onUnconfirmedChangesChanged(int imageId, bool hasChanges) {
+    if (imageId == widget.images[_currentIndex].id) {
+      setState(() {
+        _hasUnconfirmedChanges = hasChanges;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -66,8 +174,16 @@ class _ImageCarouselState extends State<ImageCarousel> {
     super.dispose();
   }
 
-  void _goToPreviousPage() {
+  Future<void> _goToPreviousPage() async {
     if (_currentIndex > 0) {
+      if (_hasUnconfirmedChanges) {
+        final shouldProceed = await _showConfirmationDialog();
+        if (!shouldProceed) {
+          _cancelCurrentChanges();
+        } else {
+          _confirmCurrentChanges();
+        }
+      }
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -75,8 +191,16 @@ class _ImageCarouselState extends State<ImageCarousel> {
     }
   }
 
-  void _goToNextPage() {
+  Future<void> _goToNextPage() async {
     if (_currentIndex < widget.images.length - 1) {
+      if (_hasUnconfirmedChanges) {
+        final shouldProceed = await _showConfirmationDialog();
+        if (!shouldProceed) {
+          _cancelCurrentChanges();
+        } else {
+          _confirmCurrentChanges();
+        }
+      }
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -107,12 +231,12 @@ class _ImageCarouselState extends State<ImageCarousel> {
         body: KeyboardListener(
           autofocus: true,
           focusNode: _focusNode,
-          onKeyEvent: (event) {
+          onKeyEvent: (event) async {
             if (event is KeyDownEvent) {
               if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                _goToPreviousPage();
+                await _goToPreviousPage();
               } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                _goToNextPage();
+                await _goToNextPage();
               }
             }
           },
@@ -121,7 +245,21 @@ class _ImageCarouselState extends State<ImageCarousel> {
               PageView.builder(
                 controller: _pageController,
                 itemCount: widget.images.length,
+                physics: _hasUnconfirmedChanges
+                    ? const NeverScrollableScrollPhysics()
+                    : const PageScrollPhysics(),
+                onPageChanged: (index) {
+                  if (!_isHandlingPageChange) {
+                    setState(() {
+                      _currentIndex = index;
+                      _hasUnconfirmedChanges = false;
+                    });
+                  }
+                },
                 itemBuilder: (context, index) {
+                  if (!_containerKeys.containsKey(index)) {
+                    _containerKeys[index] = GlobalKey();
+                  }
                   return Stack(
                     children: [
                       InteractiveViewer(
@@ -161,8 +299,24 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                       ),
                                       width: 400,
                                       child: ImageOrderContainer(
+                                        key: _containerKeys[index],
                                         imageId: widget.images[index].id,
                                         folderId: widget.folderId,
+                                        initialExpanded:
+                                            _expandedStates[index] ?? true,
+                                        onExpandedChanged: (isExpanded) {
+                                          setState(() {
+                                            _expandedStates[index] = isExpanded;
+                                          });
+                                        },
+                                        onUnconfirmedChangesChanged:
+                                            (hasChanges) {
+                                          if (index == _currentIndex) {
+                                            _onUnconfirmedChangesChanged(
+                                                widget.images[index].id,
+                                                hasChanges);
+                                          }
+                                        },
                                       ),
                                     ),
                                   ],
@@ -177,7 +331,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   );
                 },
               ),
-              // Left arrow button
               Positioned(
                 left: 16,
                 top: 0,
@@ -213,7 +366,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   ),
                 ),
               ),
-              // Right arrow button
               Positioned(
                 right: 16,
                 top: 0,

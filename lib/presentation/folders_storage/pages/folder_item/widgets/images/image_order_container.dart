@@ -11,11 +11,17 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 class ImageOrderContainer extends StatefulWidget {
   final int imageId;
   final int folderId;
+  final ValueChanged<bool>? onUnconfirmedChangesChanged;
+  final bool? initialExpanded;
+  final ValueChanged<bool>? onExpandedChanged;
 
   const ImageOrderContainer({
     super.key,
     required this.imageId,
     required this.folderId,
+    this.onUnconfirmedChangesChanged,
+    this.initialExpanded,
+    this.onExpandedChanged,
   });
 
   @override
@@ -26,7 +32,41 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
   bool _hasUnconfirmedChanges = false;
   VoidCallback? _photosConfirmCallback;
   VoidCallback? _sizesConfirmCallback;
-  bool _isExpanded = true;
+  late bool _isExpanded;
+  bool _photosHasChanges = false;
+  bool _sizesHasChanges = false;
+  Map<String, bool>? _savedPhotosChanges;
+  Map<String, int>? _savedSizesChanges;
+  final GlobalKey _photosContainerKey = GlobalKey();
+  final GlobalKey _sizesContainerKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.initialExpanded ?? true;
+  }
+
+  @override
+  void didUpdateWidget(ImageOrderContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialExpanded != null &&
+        widget.initialExpanded != oldWidget.initialExpanded) {
+      setState(() {
+        _isExpanded = widget.initialExpanded!;
+      });
+    }
+  }
+
+  void confirmChanges() {
+    _confirmAllChanges();
+  }
+
+  void cancelChanges() {
+    setState(() {
+      _hasUnconfirmedChanges = false;
+    });
+    widget.onUnconfirmedChangesChanged?.call(false);
+  }
 
   bool _hasAnySettings(BuildContext context) {
     final folderSettingsState = context.read<FolderSettingsBloc>().state;
@@ -43,7 +83,6 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
     final settings = folderSettingsState.folderSettings;
     final orderAlbum = clientsState.selectedClient!.orderAlbum;
 
-    // Проверяем дополнительные фото
     bool hasAdditionalPhotos = false;
     if (orderAlbum == false) {
       hasAdditionalPhotos = settings.photoThree.show;
@@ -53,7 +92,6 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
           settings.photoThree.show;
     }
 
-    // Проверяем размеры печати
     bool hasSizes = settings.sizeOne.show ||
         settings.sizeTwo.show ||
         settings.sizeThree.show;
@@ -71,12 +109,12 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
 
             return Column(
               children: [
-                // Кнопка сворачивания
                 InkWell(
                   onTap: () {
                     setState(() {
                       _isExpanded = !_isExpanded;
                     });
+                    widget.onExpandedChanged?.call(_isExpanded);
                   },
                   child: Container(
                     padding: const EdgeInsets.only(top: 16, bottom: 8),
@@ -84,7 +122,7 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Transform.rotate(
-                          angle: 3.14159, // 180 градусов в радианах
+                          angle: 3.14159,
                           child: Icon(
                             _isExpanded
                                 ? Icons.keyboard_arrow_up
@@ -105,18 +143,28 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
                         ? Column(
                             children: [
                               ImageAdditionalPhotosContainer(
+                                key: _photosContainerKey,
                                 imageId: widget.imageId,
                                 folderId: widget.folderId,
                                 onChangesMade: _onChangesMade,
                                 onConfirmCallback: (callback) =>
                                     _photosConfirmCallback = callback,
+                                onHasChangesChanged: _onPhotosHasChangesChanged,
+                                savedPendingChanges: _savedPhotosChanges,
+                                onPendingChangesChanged:
+                                    _onPhotosPendingChangesChanged,
                               ),
                               ImagePrintSelectorContainer(
+                                key: _sizesContainerKey,
                                 imageId: widget.imageId,
                                 folderId: widget.folderId,
                                 onChangesMade: _onChangesMade,
                                 onConfirmCallback: (callback) =>
                                     _sizesConfirmCallback = callback,
+                                onHasChangesChanged: _onSizesHasChangesChanged,
+                                savedPendingChanges: _savedSizesChanges,
+                                onPendingChangesChanged:
+                                    _onSizesPendingChangesChanged,
                               ),
                               if (hasSettings) ...[
                                 const SizedBox(height: 16),
@@ -155,18 +203,61 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
   }
 
   void _onChangesMade() {
+    _checkIfHasChanges();
+  }
+
+  void _onPhotosPendingChangesChanged(Map<String, bool> changes) {
     setState(() {
-      _hasUnconfirmedChanges = true;
+      if (changes.isNotEmpty) {
+        _savedPhotosChanges = Map<String, bool>.from(changes);
+      } else {
+        _savedPhotosChanges = null;
+      }
     });
   }
 
+  void _onSizesPendingChangesChanged(Map<String, int> changes) {
+    setState(() {
+      if (changes.isNotEmpty) {
+        _savedSizesChanges = Map<String, int>.from(changes);
+      } else {
+        _savedSizesChanges = null;
+      }
+    });
+  }
+
+  void _checkIfHasChanges() {
+    final hasChanges = _photosHasChanges || _sizesHasChanges;
+
+    setState(() {
+      _hasUnconfirmedChanges = hasChanges;
+    });
+    widget.onUnconfirmedChangesChanged?.call(hasChanges);
+  }
+
+  void _onPhotosHasChangesChanged(bool hasChanges) {
+    setState(() {
+      _photosHasChanges = hasChanges;
+    });
+    _checkIfHasChanges();
+  }
+
+  void _onSizesHasChangesChanged(bool hasChanges) {
+    setState(() {
+      _sizesHasChanges = hasChanges;
+    });
+    _checkIfHasChanges();
+  }
+
   void _confirmAllChanges() {
-    // Подтверждаем изменения в обоих контейнерах
     _photosConfirmCallback?.call();
     _sizesConfirmCallback?.call();
 
     setState(() {
       _hasUnconfirmedChanges = false;
+      _savedPhotosChanges = null;
+      _savedSizesChanges = null;
     });
+    widget.onUnconfirmedChangesChanged?.call(false);
   }
 }

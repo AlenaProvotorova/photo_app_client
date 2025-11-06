@@ -17,12 +17,18 @@ class ImagePrintSelectorContainer extends StatefulWidget {
   final int folderId;
   final Function()? onChangesMade;
   final Function(VoidCallback)? onConfirmCallback;
+  final Function(bool)? onHasChangesChanged;
+  final Map<String, int>? savedPendingChanges;
+  final Function(Map<String, int>)? onPendingChangesChanged;
   const ImagePrintSelectorContainer({
     super.key,
     required this.imageId,
     required this.folderId,
     this.onChangesMade,
     this.onConfirmCallback,
+    this.onHasChangesChanged,
+    this.savedPendingChanges,
+    this.onPendingChangesChanged,
   });
 
   @override
@@ -36,6 +42,7 @@ class _ImagePrintSelectorContainerState
   Map<String, int> _pendingChanges = {};
   bool _hasUnconfirmedChanges = false;
   Map<String, int> _confirmedChanges = {};
+  Map<String, int> _initialValues = {};
 
   final List<String> sizesNames = [
     'sizeOne',
@@ -46,12 +53,27 @@ class _ImagePrintSelectorContainerState
   @override
   void initState() {
     super.initState();
+    // Восстанавливаем сохраненные изменения, если они есть
+    if (widget.savedPendingChanges != null &&
+        widget.savedPendingChanges!.isNotEmpty) {
+      _pendingChanges = Map<String, int>.from(widget.savedPendingChanges!);
+      _hasUnconfirmedChanges = _pendingChanges.isNotEmpty;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Регистрируем callback для подтверждения
       if (widget.onConfirmCallback != null) {
         widget.onConfirmCallback!(confirmChanges);
       }
+      // Проверяем изменения после восстановления
+      if (_pendingChanges.isNotEmpty) {
+        _checkIfHasChanges();
+      }
     });
+  }
+
+  // Метод для получения текущих изменений
+  Map<String, int> getPendingChanges() {
+    return Map<String, int>.from(_pendingChanges);
   }
 
   bool _isOrderBlocked() {
@@ -76,6 +98,22 @@ class _ImagePrintSelectorContainerState
     }
 
     return false;
+  }
+
+  bool _hasChanges() {
+    // Проверяем, есть ли изменения по сравнению с первоначальными значениями
+    for (final entry in _pendingChanges.entries) {
+      final initialValue = _initialValues[entry.key] ?? 0;
+      if (entry.value != initialValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _checkIfHasChanges() {
+    final hasChanges = _hasChanges();
+    widget.onHasChangesChanged?.call(hasChanges);
   }
 
   @override
@@ -103,6 +141,16 @@ class _ImagePrintSelectorContainerState
       final result = orders.entries
           .where((element) => element.key == sizeName)
           .fold(0, (sum, entry) => sum + entry.value);
+
+      // Сохраняем первоначальные значения при первой загрузке
+      if (!_initialValues.containsKey(sizeName)) {
+        _initialValues[sizeName] = result;
+        // Проверяем изменения после инициализации
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _checkIfHasChanges();
+        });
+      }
+
       return result;
     }
 
@@ -159,11 +207,18 @@ class _ImagePrintSelectorContainerState
                                 }
 
                                 // Получаем текущее значение (приоритет: pendingChanges -> confirmedChanges -> defaultQuantity)
-                                int currentQuantity =
-                                    _pendingChanges[sizeName] ??
-                                        _confirmedChanges[sizeName] ??
-                                        getDefaultQuantity(
-                                            sizeName, orderState);
+                                // Если есть сохраненные изменения, используем их
+                                int currentQuantity;
+                                if (_pendingChanges.containsKey(sizeName)) {
+                                  currentQuantity = _pendingChanges[sizeName]!;
+                                } else if (_confirmedChanges
+                                    .containsKey(sizeName)) {
+                                  currentQuantity =
+                                      _confirmedChanges[sizeName]!;
+                                } else {
+                                  currentQuantity =
+                                      getDefaultQuantity(sizeName, orderState);
+                                }
 
                                 return ImagePrintSelector(
                                   size: displayName,
@@ -174,11 +229,22 @@ class _ImagePrintSelectorContainerState
                                   isConfirmed: !_hasUnconfirmedChanges,
                                   isBlocked: _isOrderBlocked(),
                                   onQuantityChanged: (newQuantity) {
+                                    final initialValue =
+                                        _initialValues[sizeName] ?? 0;
+
                                     setState(() {
-                                      _pendingChanges[sizeName] = newQuantity;
-                                      _hasUnconfirmedChanges = true;
+                                      if (newQuantity == initialValue) {
+                                        _pendingChanges.remove(sizeName);
+                                      } else {
+                                        _pendingChanges[sizeName] = newQuantity;
+                                      }
+                                      _hasUnconfirmedChanges =
+                                          _pendingChanges.isNotEmpty;
                                     });
-                                    // Уведомляем родительский компонент об изменениях
+
+                                    widget.onPendingChangesChanged?.call(
+                                        Map<String, int>.from(_pendingChanges));
+                                    _checkIfHasChanges();
                                     if (widget.onChangesMade != null) {
                                       widget.onChangesMade!();
                                     }
@@ -218,11 +284,13 @@ class _ImagePrintSelectorContainerState
       }
 
       setState(() {
-        // Сохраняем подтвержденные изменения
+        _initialValues.addAll(_pendingChanges);
         _confirmedChanges.addAll(_pendingChanges);
         _pendingChanges.clear();
         _hasUnconfirmedChanges = false;
       });
+      widget.onPendingChangesChanged?.call({});
+      _checkIfHasChanges();
     }
   }
 }

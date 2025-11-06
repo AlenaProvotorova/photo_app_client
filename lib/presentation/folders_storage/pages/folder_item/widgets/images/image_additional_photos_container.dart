@@ -15,12 +15,18 @@ class ImageAdditionalPhotosContainer extends StatefulWidget {
   final int folderId;
   final Function()? onChangesMade;
   final Function(VoidCallback)? onConfirmCallback;
+  final Function(bool)? onHasChangesChanged;
+  final Map<String, bool>? savedPendingChanges;
+  final Function(Map<String, bool>)? onPendingChangesChanged;
   const ImageAdditionalPhotosContainer({
     super.key,
     required this.imageId,
     required this.folderId,
     this.onChangesMade,
     this.onConfirmCallback,
+    this.onHasChangesChanged,
+    this.savedPendingChanges,
+    this.onPendingChangesChanged,
   });
 
   @override
@@ -34,8 +40,8 @@ class _ImageAdditionalPhotosContainerState
   bool _photoTwo = false;
   bool _photoThree = false;
 
-  // Локальные изменения для подтверждения
   Map<String, bool> _pendingChanges = {};
+  Map<String, bool> _initialValues = {};
 
   void _updateSwitchValuesFromOrder(
       Map<String, Map<String, int>> orderForCarusel) {
@@ -47,8 +53,30 @@ class _ImageAdditionalPhotosContainerState
         _photoOne = imageOrders['photoOne'] == 1;
         _photoTwo = imageOrders['photoTwo'] == 1;
         _photoThree = imageOrders['photoThree'] == 1;
+
+        if (_initialValues.isEmpty) {
+          _initialValues['photoOne'] = _photoOne;
+          _initialValues['photoTwo'] = _photoTwo;
+          _initialValues['photoThree'] = _photoThree;
+        }
       });
+      _checkIfHasChanges();
     }
+  }
+
+  bool _hasChanges() {
+    for (final entry in _pendingChanges.entries) {
+      final initialValue = _initialValues[entry.key] ?? false;
+      if (entry.value != initialValue) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _checkIfHasChanges() {
+    final hasChanges = _hasChanges();
+    widget.onHasChangesChanged?.call(hasChanges);
   }
 
   void _initializeSwitchValues() {
@@ -62,7 +90,6 @@ class _ImageAdditionalPhotosContainerState
     final folderSettingsState = context.read<FolderSettingsBloc>().state;
     final userState = context.read<UserBloc>().state;
 
-    // Если пользователь админ, блокировка не применяется
     if (userState is UserLoaded && userState.user.isAdmin) {
       return false;
     }
@@ -70,7 +97,6 @@ class _ImageAdditionalPhotosContainerState
     if (folderSettingsState is FolderSettingsLoaded) {
       final dateSelectTo = folderSettingsState.folderSettings.dateSelectTo;
 
-      // Если дата не установлена, блокировка не применяется
       if (dateSelectTo == null) {
         return false;
       }
@@ -78,7 +104,6 @@ class _ImageAdditionalPhotosContainerState
       final now = DateTime.now();
       final daysUntilDeadline = dateSelectTo.difference(now).inDays;
 
-      // Блокируем, если текущая дата больше dateSelectTo
       return daysUntilDeadline < 0;
     }
 
@@ -88,13 +113,40 @@ class _ImageAdditionalPhotosContainerState
   @override
   void initState() {
     super.initState();
+    if (widget.savedPendingChanges != null &&
+        widget.savedPendingChanges!.isNotEmpty) {
+      _pendingChanges = Map<String, bool>.from(widget.savedPendingChanges!);
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeSwitchValues();
-      // Регистрируем callback для подтверждения
+      if (_pendingChanges.isNotEmpty) {
+        setState(() {
+          _pendingChanges.forEach((key, value) {
+            switch (key) {
+              case 'photoOne':
+                _photoOne = value;
+                break;
+              case 'photoTwo':
+                _photoTwo = value;
+                break;
+              case 'photoThree':
+                _photoThree = value;
+                break;
+            }
+          });
+        });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _checkIfHasChanges();
+        });
+      }
       if (widget.onConfirmCallback != null) {
         widget.onConfirmCallback!(confirmChanges);
       }
     });
+  }
+
+  Map<String, bool> getPendingChanges() {
+    return Map<String, bool>.from(_pendingChanges);
   }
 
   @override
@@ -126,7 +178,6 @@ class _ImageAdditionalPhotosContainerState
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Получаем информацию о клиенте для проверки orderAlbum
                         BlocBuilder<ClientsBloc, ClientsState>(
                           builder: (context, clientState) {
                             bool showPhotoOne = false;
@@ -139,11 +190,9 @@ class _ImageAdditionalPhotosContainerState
                                   clientState.selectedClient!.orderAlbum;
 
                               if (orderAlbum == false) {
-                                // Если orderAlbum = false, показываем только photoThree
                                 showPhotoThree =
                                     state.folderSettings.photoThree.show;
                               } else {
-                                // Если orderAlbum = true или null, показываем все доступные фото
                                 showPhotoOne =
                                     state.folderSettings.photoOne.show;
                                 showPhotoTwo =
@@ -152,7 +201,6 @@ class _ImageAdditionalPhotosContainerState
                                     state.folderSettings.photoThree.show;
                               }
                             } else {
-                              // Если клиент не выбран, показываем все доступные фото
                               showPhotoOne = state.folderSettings.photoOne.show;
                               showPhotoTwo = state.folderSettings.photoTwo.show;
                               showPhotoThree =
@@ -258,12 +306,21 @@ class _ImageAdditionalPhotosContainerState
   }
 
   void _updateOrder(String formatName, bool value) {
-    // Сохраняем изменения локально
+    final initialValue = _initialValues[formatName] ?? false;
+
     setState(() {
-      _pendingChanges[formatName] = value;
+      if (value == initialValue) {
+        _pendingChanges.remove(formatName);
+      } else {
+        _pendingChanges[formatName] = value;
+      }
     });
 
-    // Уведомляем родительский компонент об изменениях
+    widget.onPendingChangesChanged
+        ?.call(Map<String, bool>.from(_pendingChanges));
+
+    _checkIfHasChanges();
+
     if (widget.onChangesMade != null) {
       widget.onChangesMade!();
     }
@@ -274,12 +331,10 @@ class _ImageAdditionalPhotosContainerState
     if (clientState is ClientsLoaded && clientState.selectedClient != null) {
       final orderBloc = context.read<OrderBloc>();
 
-      // Применяем все изменения
       for (final entry in _pendingChanges.entries) {
         final formatName = entry.key;
         final value = entry.value;
 
-        // Для типов фото, которые должны иметь единственный выбор
         if (['photoOne', 'photoTwo', 'photoThree'].contains(formatName)) {
           final event = UpdateSingleSelectionOrder(
             fileId: widget.imageId.toString(),
@@ -290,7 +345,6 @@ class _ImageAdditionalPhotosContainerState
           );
           orderBloc.add(event);
         } else {
-          // Для остальных типов используем обычное обновление
           final event = UpdateOrder(
             fileId: widget.imageId.toString(),
             clientId: clientState.selectedClient!.id.toString(),
@@ -303,12 +357,19 @@ class _ImageAdditionalPhotosContainerState
       }
 
       setState(() {
+        _initialValues.clear();
+        _initialValues.addAll({
+          'photoOne': _photoOne,
+          'photoTwo': _photoTwo,
+          'photoThree': _photoThree,
+        });
         _pendingChanges.clear();
       });
+      widget.onPendingChangesChanged?.call({});
+      _checkIfHasChanges();
     }
   }
 
-  // Формирует отображаемое название с ценой
   String _getDisplayName(String? ruName, int? price) {
     String displayName = ruName ?? '';
     if (price != null && price != 0) {
