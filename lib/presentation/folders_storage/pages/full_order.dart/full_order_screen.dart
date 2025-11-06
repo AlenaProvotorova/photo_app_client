@@ -104,7 +104,7 @@ class _FullOrderScreenState extends State<FullOrderScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Сохранено: $outputFile')),
                         );
-                      } catch (e, stackTrace) {
+                      } catch (e) {
                         if (!mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Ошибка сохранения: $e')),
