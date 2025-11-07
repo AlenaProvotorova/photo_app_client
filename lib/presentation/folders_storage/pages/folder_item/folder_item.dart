@@ -69,7 +69,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   bool _hasUpdatedFirstSettingsAlert = false;
   bool _hasRestoredClient = false;
   StreamSubscription? _clientRestoreSubscription;
-  
+
   @override
   void initState() {
     super.initState();
@@ -85,7 +85,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
       ..add(LoadFolderSettings(folderId: widget.folderId));
     _sizesBloc = SizesBloc()..add(LoadSizes());
     _orderBloc = OrderBloc()..add(LoadOrder(folderId: widget.folderId));
-    
+
     // Восстанавливаем выбранного клиента из параметров виджета после построения виджета
     if (widget.clientId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -415,6 +415,77 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     );
   }
 
+  void _showConsentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+              maxHeight: 600,
+            ),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Согласие на обработку персональных данных (далее - Согласие)',
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(
+                  height: 400,
+                  child: SingleChildScrollView(
+                    child: Text(
+                      '''Выбирая фотографии для заказа, я соглашаюсь на обработку моих персональных данных, в соответствии со ст. 9 Федерального закона от 27.07.2006 Nº 152-Ф3 «О персональных данных» (далее - 152-Ф3), свободно, своей волей и в своем интересе я (далее - пользователь) даю согласие:
+
+Оператору персональных данных (далее Оператор) в следующем объеме:
+
+• общие: имя;
+
+• с целью: для взаимодействия Оператора с пользователем;
+
+Оператор вправе:
+
+• осуществлять с моими персональными данными: сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, блокирование, удаление, поручение обработки персональных данных третьим лицам, уничтожение и уничтожение части персональных данных.
+
+Я проинформирован (-а) о праве на получение информации, касающейся обработки персональных данных, в соответствии с 152-Ф3, и уведомлен (-а), что данное Согласие может быть отозвано мной в любой момент посредством направления заявления в письменном виде по адресу местонахождения Оператора.''',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -486,10 +557,12 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                                       ),
                                     ),
                                     onPressed: () {
-                                      String url = '/folder/${widget.folderPath}/full-order';
+                                      String url =
+                                          '/folder/${widget.folderPath}/full-order';
                                       if (clientsState is ClientsLoaded &&
                                           clientsState.selectedClient != null) {
-                                        url += '?clientId=${clientsState.selectedClient!.id}';
+                                        url +=
+                                            '?clientId=${clientsState.selectedClient!.id}';
                                       }
                                       context.go(url);
                                     },
@@ -525,17 +598,21 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                           builder: (context, clientsState) {
                             return TextButton(
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                side: BorderSide(color: theme.colorScheme.primary),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                side: BorderSide(
+                                    color: theme.colorScheme.primary),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               onPressed: () {
-                                String url = '/folder/${widget.folderPath}/full-order';
+                                String url =
+                                    '/folder/${widget.folderPath}/full-order';
                                 if (clientsState is ClientsLoaded &&
                                     clientsState.selectedClient != null) {
-                                  url += '?clientId=${clientsState.selectedClient!.id}';
+                                  url +=
+                                      '?clientId=${clientsState.selectedClient!.id}';
                                 }
                                 context.go(url);
                               },
@@ -707,6 +784,27 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                                 },
                                 onDeleteAll: (context) =>
                                     _showDeleteAllFilesDialog(context),
+                              ),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                color: Colors.grey[200],
+                                child: Center(
+                                  child: GestureDetector(
+                                    onTap: () => _showConsentDialog(context),
+                                    child: Text(
+                                      'Согласие на обработку персональных данных',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[700],
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           );
