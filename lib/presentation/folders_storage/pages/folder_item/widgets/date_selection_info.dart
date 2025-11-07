@@ -50,7 +50,7 @@ class DateSelectionInfo extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    'Необходимо выбрать фото до $formattedDate. После этой даты выбор будет недоступен',
+                    '  Необходимо выбрать фото до $formattedDate. После этой даты выбор будет недоступен',
                     style: TextStyle(
                       color: theme.colorScheme.error,
                       fontSize: 14,

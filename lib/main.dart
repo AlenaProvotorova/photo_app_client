@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:photo_app/core/router/router.dart';
 import 'package:photo_app/core/utils/client_storage.dart';
 import 'package:photo_app/core/utils/token_storage.dart';
+import 'package:photo_app/core/utils/folder_dialog_storage.dart';
 import 'package:photo_app/core/theme/theme.dart';
 import 'package:photo_app/data/auth/services/login_data_service.dart';
 import 'package:photo_app/data/auth/models/login_data.dart';
@@ -20,6 +21,7 @@ void main() async {
   await TokenStorage.init();
   await ClientStorage.init();
   await LoginDataService.init();
+  await FolderDialogStorage.init();
 
   runApp(const MyApp());
 }

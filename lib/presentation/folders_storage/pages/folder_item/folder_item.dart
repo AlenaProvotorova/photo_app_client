@@ -40,6 +40,7 @@ import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets
 import 'package:photo_app/presentation/folders_storage/pages/folder_item/widgets/upload_file_button.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_app/core/components/file_drop_zone.dart';
+import 'package:photo_app/core/utils/folder_dialog_storage.dart';
 import 'package:photo_app/data/image_picker/models/image_data.dart';
 
 class FolderItemScreen extends StatefulWidget {
@@ -68,6 +69,7 @@ class FolderItemScreenState extends State<FolderItemScreen> {
   bool _showSelected = false;
   bool _hasUpdatedFirstSettingsAlert = false;
   bool _hasRestoredClient = false;
+  bool _hasCheckedFirstVisitDialog = false;
   StreamSubscription? _clientRestoreSubscription;
 
   @override
@@ -486,6 +488,30 @@ class FolderItemScreenState extends State<FolderItemScreen> {
     );
   }
 
+  void _showFirstVisitDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Информация'),
+          content: const Text(
+            'Для начала формирования заказа необходимо выбрать фамилию из списка',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                FolderDialogStorage.markDialogShown(widget.folderId);
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -639,6 +665,22 @@ class FolderItemScreenState extends State<FolderItemScreen> {
                 builder: (context, userState) {
                   final isAdmin =
                       userState is UserLoaded && userState.user.isAdmin;
+
+                  // Показываем диалог при первом заходе для не-админов
+                  if (!isAdmin &&
+                      userState is UserLoaded &&
+                      !_hasCheckedFirstVisitDialog) {
+                    _hasCheckedFirstVisitDialog = true;
+                    final hasDialogBeenShown =
+                        FolderDialogStorage.hasDialogBeenShown(widget.folderId);
+                    if (!hasDialogBeenShown) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          _showFirstVisitDialog(context);
+                        }
+                      });
+                    }
+                  }
 
                   return BlocConsumer<FolderSettingsBloc, FolderSettingsState>(
                     listener: (context, state) {},
