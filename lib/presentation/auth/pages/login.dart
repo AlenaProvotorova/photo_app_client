@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoginEnabled = false;
   bool isPasswordEnabled = false;
   bool _rememberMe = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -51,25 +52,60 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  bool get isLoginButtonEnabled => isLoginEnabled && isPasswordEnabled;
-  Future<void> _login() async {
-    final result = await sl<SignInUseCase>().call(
-        params: SignInReqParams(
-      email: _userEmailController.text,
-      password: _passwordController.text,
-    ));
+  bool get isLoginButtonEnabled =>
+      isLoginEnabled && isPasswordEnabled && !_isLoading;
 
-    result.fold((e) {
-      DisplayMessage.showMessage(context, e);
-    }, (data) {
-      // Сохраняем данные входа, если пользователь выбрал "Запомнить меня"
-      LoginDataService.saveLoginData(
+  Future<void> _login() async {
+    // Блокируем кнопку
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Засекаем время начала запроса
+    final startTime = DateTime.now();
+
+    try {
+      final result = await sl<SignInUseCase>().call(
+          params: SignInReqParams(
         email: _userEmailController.text,
         password: _passwordController.text,
-        rememberMe: _rememberMe,
-      );
-      context.go('/home');
-    });
+      ));
+
+      // Вычисляем оставшееся время до 3 секунд
+      final elapsed = DateTime.now().difference(startTime);
+      final remainingTime = Duration(seconds: 3) - elapsed;
+
+      // Ждем минимум 3 секунды с момента нажатия
+      if (remainingTime.inMilliseconds > 0) {
+        await Future.delayed(remainingTime);
+      }
+
+      result.fold((e) {
+        DisplayMessage.showMessage(context, e);
+        // Разблокируем кнопку при ошибке
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }, (data) {
+        // Сохраняем данные входа, если пользователь выбрал "Запомнить меня"
+        LoginDataService.saveLoginData(
+          email: _userEmailController.text,
+          password: _passwordController.text,
+          rememberMe: _rememberMe,
+        );
+        context.go('/home');
+        // Кнопка останется заблокированной при успешном входе (переход на другую страницу)
+      });
+    } catch (e) {
+      // Разблокируем кнопку при исключении
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _updateLoginState() {
@@ -112,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         : null;
     return Expanded(
-      flex: 2,
+      flex: 3,
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500),
@@ -175,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 20),
                         PrimaryButton(
-                          title: 'Войти',
+                          title: _isLoading ? 'Вход...' : 'Войти',
                           onPress: onPressed,
                           disabled: !isLoginButtonEnabled,
                         ),

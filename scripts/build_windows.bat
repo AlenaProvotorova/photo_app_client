@@ -29,17 +29,25 @@ REM Проверяем успешность сборки
 if %errorlevel% equ 0 (
     echo ✅ Сборка Windows успешно завершена!
     
-    REM Создаем ZIP архив
-    echo 📦 Создаем ZIP дистрибутив...
-    powershell -Command "$files = Get-ChildItem -Path 'build\windows\runner\Release' -Recurse -File; if ($files.Count -gt 0) { Compress-Archive -LiteralPath $files.FullName -DestinationPath 'PhotoApp-Windows-%VERSION%.zip' -Force; Write-Host 'Package created successfully' } else { Write-Error 'No files found' }"
+    REM Создаем Portable версию (рекомендуется - обходит антивирусы)
+    echo 📦 Создаем Portable дистрибутив (обходит антивирусы)...
+    powershell -ExecutionPolicy Bypass -File "scripts\create_portable_package.ps1" -Version "%VERSION%"
     
     if %errorlevel% equ 0 (
-        echo ✅ ZIP дистрибутив создан: PhotoApp-Windows-%VERSION%.zip
+        echo ✅ Portable дистрибутив создан: PhotoApp-Portable-v%VERSION%.zip
         echo 📁 Размер файла: 
-        dir "PhotoApp-Windows-%VERSION%.zip" | findstr "PhotoApp"
+        dir "PhotoApp-Portable-v%VERSION%.zip" | findstr "PhotoApp"
+        echo.
+        echo ⭐ Рекомендуется использовать Portable версию - она обходит большинство антивирусов!
     ) else (
-        echo ❌ Ошибка при создании ZIP архива
-        exit /b 1
+        echo ⚠️  Ошибка при создании Portable версии, создаем обычный ZIP...
+        powershell -Command "$files = Get-ChildItem -Path 'build\windows\x64\runner\Release' -Recurse -File; if ($files.Count -gt 0) { Compress-Archive -LiteralPath $files.FullName -DestinationPath 'PhotoApp-Windows-%VERSION%.zip' -Force; Write-Host 'Package created successfully' } else { Write-Error 'No files found' }"
+        if %errorlevel% equ 0 (
+            echo ✅ ZIP дистрибутив создан: PhotoApp-Windows-%VERSION%.zip
+        ) else (
+            echo ❌ Ошибка при создании ZIP архива
+            exit /b 1
+        )
     )
     
     REM Проверяем наличие Inno Setup

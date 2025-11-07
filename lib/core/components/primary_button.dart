@@ -15,18 +15,19 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
           color: disabled ? Colors.grey : theme.colorScheme.primary,
           borderRadius: BorderRadius.circular(12)),
-      child: IntrinsicWidth(
-        child: TextButton(
-          onPressed: disabled ? null : onPress,
-          child: Text(
-            title,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+      child: TextButton(
+        onPressed: disabled ? null : onPress,
+        child: Text(
+          title,
+          style: const TextStyle(
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+          textAlign: TextAlign.center,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
