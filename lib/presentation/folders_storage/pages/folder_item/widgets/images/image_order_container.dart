@@ -28,7 +28,8 @@ class ImageOrderContainer extends StatefulWidget {
   State<ImageOrderContainer> createState() => _ImageOrderContainerState();
 }
 
-class _ImageOrderContainerState extends State<ImageOrderContainer> {
+class _ImageOrderContainerState extends State<ImageOrderContainer>
+    with SingleTickerProviderStateMixin {
   bool _hasUnconfirmedChanges = false;
   VoidCallback? _photosConfirmCallback;
   VoidCallback? _sizesConfirmCallback;
@@ -39,21 +40,43 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
   Map<String, int>? _savedSizesChanges;
   final GlobalKey _photosContainerKey = GlobalKey();
   final GlobalKey _sizesContainerKey = GlobalKey();
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _isExpanded = widget.initialExpanded ?? true;
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _slideAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOutCubic,
+    );
+    _animationController.value = _isExpanded ? 1.0 : 0.0;
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(ImageOrderContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialExpanded != null &&
-        widget.initialExpanded != oldWidget.initialExpanded) {
-      setState(() {
-        _isExpanded = widget.initialExpanded!;
-      });
+    if (widget.initialExpanded != null) {
+      final targetExpanded = widget.initialExpanded!;
+      if (targetExpanded != _isExpanded) {
+        setState(() {
+          _isExpanded = targetExpanded;
+        });
+        _animationController.animateTo(
+          targetExpanded ? 1.0 : 0.0,
+        );
+      }
     }
   }
 
@@ -107,92 +130,163 @@ class _ImageOrderContainerState extends State<ImageOrderContainer> {
           builder: (context, settingsState) {
             final hasSettings = _hasAnySettings(context);
 
-            return Column(
+            return Stack(
+              clipBehavior: Clip.none,
               children: [
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                    widget.onExpandedChanged?.call(_isExpanded);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.only(top: 16, bottom: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Transform.rotate(
-                          angle: 3.14159,
-                          child: Icon(
-                            _isExpanded
-                                ? Icons.keyboard_arrow_up
-                                : Icons.keyboard_arrow_down,
-                            color: Colors.grey,
-                            size: 28,
-                          ),
+                AnimatedBuilder(
+                  animation: _slideAnimation,
+                  builder: (context, child) {
+                    final collapseValue = 1.0 - _slideAnimation.value;
+
+                    const resizeButtonHeight = 56.0;
+                    final minHeight = resizeButtonHeight;
+                    final contentOpacity = _slideAnimation.value;
+
+                    return Container(
+                      constraints: BoxConstraints(
+                        minHeight: minHeight,
+                      ),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(16),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: ClipRect(
-                    child: _isExpanded
-                        ? Column(
-                            children: [
-                              ImageAdditionalPhotosContainer(
-                                key: _photosContainerKey,
-                                imageId: widget.imageId,
-                                folderId: widget.folderId,
-                                onChangesMade: _onChangesMade,
-                                onConfirmCallback: (callback) =>
-                                    _photosConfirmCallback = callback,
-                                onHasChangesChanged: _onPhotosHasChangesChanged,
-                                savedPendingChanges: _savedPhotosChanges,
-                                onPendingChangesChanged:
-                                    _onPhotosPendingChangesChanged,
-                              ),
-                              ImagePrintSelectorContainer(
-                                key: _sizesContainerKey,
-                                imageId: widget.imageId,
-                                folderId: widget.folderId,
-                                onChangesMade: _onChangesMade,
-                                onConfirmCallback: (callback) =>
-                                    _sizesConfirmCallback = callback,
-                                onHasChangesChanged: _onSizesHasChangesChanged,
-                                savedPendingChanges: _savedSizesChanges,
-                                onPendingChangesChanged:
-                                    _onSizesPendingChangesChanged,
-                              ),
-                              if (hasSettings) ...[
-                                const SizedBox(height: 16),
-                                ConfirmationButton(
-                                  hasUnconfirmedChanges: _hasUnconfirmedChanges,
-                                  onConfirm: _confirmAllChanges,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                final newExpanded = !_isExpanded;
+                                setState(() {
+                                  _isExpanded = newExpanded;
+                                });
+                                _animationController.animateTo(
+                                  newExpanded ? 1.0 : 0.0,
+                                );
+                                widget.onExpandedChanged?.call(newExpanded);
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
                                 ),
-                              ] else
-                                Container(
-                                  margin: const EdgeInsets.only(top: 16),
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Text(
-                                    'Нет форматов для выбора',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      _isExpanded
+                                          ? Icons.keyboard_double_arrow_down
+                                          : Icons.keyboard_double_arrow_up,
+                                      color: Colors.grey[700],
+                                      size: 20,
                                     ),
-                                    textAlign: TextAlign.center,
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Изменить размер',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey[700],
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          ClipRect(
+                            child: SizeTransition(
+                              sizeFactor: _slideAnimation,
+                              axisAlignment: -1.0,
+                              child: Opacity(
+                                opacity: contentOpacity,
+                                child: IgnorePointer(
+                                  ignoring: collapseValue > 0.5,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ImageAdditionalPhotosContainer(
+                                              key: _photosContainerKey,
+                                              imageId: widget.imageId,
+                                              folderId: widget.folderId,
+                                              onChangesMade: _onChangesMade,
+                                              onConfirmCallback: (callback) =>
+                                                  _photosConfirmCallback =
+                                                      callback,
+                                              onHasChangesChanged:
+                                                  _onPhotosHasChangesChanged,
+                                              savedPendingChanges:
+                                                  _savedPhotosChanges,
+                                              onPendingChangesChanged:
+                                                  _onPhotosPendingChangesChanged,
+                                            ),
+                                            ImagePrintSelectorContainer(
+                                              key: _sizesContainerKey,
+                                              imageId: widget.imageId,
+                                              folderId: widget.folderId,
+                                              onChangesMade: _onChangesMade,
+                                              onConfirmCallback: (callback) =>
+                                                  _sizesConfirmCallback =
+                                                      callback,
+                                              onHasChangesChanged:
+                                                  _onSizesHasChangesChanged,
+                                              savedPendingChanges:
+                                                  _savedSizesChanges,
+                                              onPendingChangesChanged:
+                                                  _onSizesPendingChangesChanged,
+                                            ),
+                                            if (hasSettings) ...[
+                                              const SizedBox(height: 16),
+                                              ConfirmationButton(
+                                                hasUnconfirmedChanges:
+                                                    _hasUnconfirmedChanges,
+                                                onConfirm: _confirmAllChanges,
+                                              ),
+                                            ] else
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    top: 16),
+                                                padding:
+                                                    const EdgeInsets.all(16),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey[200],
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: const Text(
+                                                  'Нет форматов для выбора',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                    ],
                                   ),
                                 ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             );

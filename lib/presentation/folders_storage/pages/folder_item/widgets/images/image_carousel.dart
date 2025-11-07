@@ -35,7 +35,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
   bool _hasUnconfirmedChanges = false;
   final Map<int, GlobalKey> _containerKeys = {};
   bool _isHandlingPageChange = false;
-  final Map<int, bool> _expandedStates = {};
+  bool _isExpanded = true;
 
   @override
   void initState() {
@@ -44,7 +44,6 @@ class _ImageCarouselState extends State<ImageCarousel> {
     _currentIndex = widget.initialIndex;
     _focusNode = FocusNode();
 
-    // Listen to page changes to update current index
     _pageController.addListener(() {
       if (_pageController.page != null && !_isHandlingPageChange) {
         final newIndex = _pageController.page!.round();
@@ -291,22 +290,15 @@ class _ImageCarouselState extends State<ImageCarousel> {
                                           right: 16,
                                           top: 0,
                                           bottom: 16),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(16),
-                                        ),
-                                      ),
                                       width: 400,
                                       child: ImageOrderContainer(
                                         key: _containerKeys[index],
                                         imageId: widget.images[index].id,
                                         folderId: widget.folderId,
-                                        initialExpanded:
-                                            _expandedStates[index] ?? true,
+                                        initialExpanded: _isExpanded,
                                         onExpandedChanged: (isExpanded) {
                                           setState(() {
-                                            _expandedStates[index] = isExpanded;
+                                            _isExpanded = isExpanded;
                                           });
                                         },
                                         onUnconfirmedChangesChanged:

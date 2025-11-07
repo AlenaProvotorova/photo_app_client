@@ -53,25 +53,21 @@ class _ImagePrintSelectorContainerState
   @override
   void initState() {
     super.initState();
-    // Восстанавливаем сохраненные изменения, если они есть
     if (widget.savedPendingChanges != null &&
         widget.savedPendingChanges!.isNotEmpty) {
       _pendingChanges = Map<String, int>.from(widget.savedPendingChanges!);
       _hasUnconfirmedChanges = _pendingChanges.isNotEmpty;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Регистрируем callback для подтверждения
       if (widget.onConfirmCallback != null) {
         widget.onConfirmCallback!(confirmChanges);
       }
-      // Проверяем изменения после восстановления
       if (_pendingChanges.isNotEmpty) {
         _checkIfHasChanges();
       }
     });
   }
 
-  // Метод для получения текущих изменений
   Map<String, int> getPendingChanges() {
     return Map<String, int>.from(_pendingChanges);
   }
@@ -101,7 +97,6 @@ class _ImagePrintSelectorContainerState
   }
 
   bool _hasChanges() {
-    // Проверяем, есть ли изменения по сравнению с первоначальными значениями
     for (final entry in _pendingChanges.entries) {
       final initialValue = _initialValues[entry.key] ?? 0;
       if (entry.value != initialValue) {
@@ -142,10 +137,8 @@ class _ImagePrintSelectorContainerState
           .where((element) => element.key == sizeName)
           .fold(0, (sum, entry) => sum + entry.value);
 
-      // Сохраняем первоначальные значения при первой загрузке
       if (!_initialValues.containsKey(sizeName)) {
         _initialValues[sizeName] = result;
-        // Проверяем изменения после инициализации
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _checkIfHasChanges();
         });
@@ -163,7 +156,6 @@ class _ImagePrintSelectorContainerState
       child: BlocListener<OrderBloc, OrderState>(
         listener: (context, orderState) {
           if (orderState is OrderLoaded) {
-            // Когда данные обновились с сервера, очищаем подтвержденные изменения
             setState(() {
               _confirmedChanges.clear();
             });
@@ -206,8 +198,6 @@ class _ImagePrintSelectorContainerState
                                   displayName += ' ($price ₽)';
                                 }
 
-                                // Получаем текущее значение (приоритет: pendingChanges -> confirmedChanges -> defaultQuantity)
-                                // Если есть сохраненные изменения, используем их
                                 int currentQuantity;
                                 if (_pendingChanges.containsKey(sizeName)) {
                                   currentQuantity = _pendingChanges[sizeName]!;
