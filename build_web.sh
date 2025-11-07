@@ -23,7 +23,9 @@ else
     exit 1
 fi
 
-echo "📁 Копирование _redirects в build/web..."
+echo "📁 Копирование конфигурационных файлов в build/web..."
+
+# Копируем _redirects для Netlify
 if [ -f "web_config/_redirects" ]; then
     cp web_config/_redirects build/web/
     echo "✅ _redirects скопирован"
@@ -31,6 +33,14 @@ else
     echo "⚠️ Файл web_config/_redirects не найден"
 fi
 
-echo "✅ Готово! Теперь можно загружать build/web на Netlify"
+# Копируем .htaccess для Reg.ru и других Apache хостингов
+if [ -f "web_config/.htaccess" ]; then
+    cp web_config/.htaccess build/web/
+    echo "✅ .htaccess скопирован"
+else
+    echo "⚠️ Файл web_config/.htaccess не найден"
+fi
+
+echo "✅ Готово! Теперь можно загружать build/web на хостинг"
 echo "📋 Финальное содержимое build/web:"
 ls -la build/web/

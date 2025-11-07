@@ -107,18 +107,65 @@ class File {
     }
     
     if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
+      // ВАЖНО: Принудительно преобразуем HTTP в HTTPS для production и staging
+      // Это решает проблему Mixed Content, когда API возвращает HTTP URL
+      if (processedUrl.startsWith('http://')) {
+        if (EnvironmentConfig.isProduction || EnvironmentConfig.isStaging) {
+          processedUrl = processedUrl.replaceFirst('http://', 'https://');
+          if (kIsWeb) {
+            print('🔒 Upgraded HTTP to HTTPS: $processedUrl');
+          }
+        } else if (kIsWeb) {
+          // В development тоже логируем для диагностики
+          print('⚠️ HTTP URL detected in development: $processedUrl');
+        }
+      }
+      
+      // Дополнительная проверка: если URL содержит api.fastselect.ru или fastselect.ru
+      // но использует HTTP, принудительно преобразуем в HTTPS
+      if (processedUrl.contains('api.fastselect.ru') || processedUrl.contains('fastselect.ru')) {
+        if (processedUrl.startsWith('http://')) {
+          processedUrl = processedUrl.replaceFirst('http://', 'https://');
+          if (kIsWeb) {
+            print('🔒 Force upgraded HTTP to HTTPS for fastselect.ru domain: $processedUrl');
+          }
+        }
+      }
+      
+      // Логируем финальный URL для диагностики проблем с сертификатом
+      if (kIsWeb && (EnvironmentConfig.isProduction || EnvironmentConfig.isStaging)) {
+        print('📸 Image URL (final): $processedUrl');
+      }
+      
       return processedUrl;
     }
     
     // Получаем base URL без /api в конце для статических файлов
     final apiBaseUrl = EnvironmentConfig.apiBaseURL;
     // Убираем /api/ из конца, если есть
-    final baseUrl = apiBaseUrl.replaceAll(RegExp(r'/api/?$'), '');
+    var baseUrl = apiBaseUrl.replaceAll(RegExp(r'/api/?$'), '');
+    
+    // ВАЖНО: Принудительно преобразуем HTTP в HTTPS для production и staging
+    // Это гарантирует, что даже если baseUrl по какой-то причине содержит HTTP, мы используем HTTPS
+    if ((EnvironmentConfig.isProduction || EnvironmentConfig.isStaging) && 
+        baseUrl.startsWith('http://')) {
+      baseUrl = baseUrl.replaceFirst('http://', 'https://');
+      if (kIsWeb) {
+        print('🔒 Upgraded baseUrl HTTP to HTTPS: $baseUrl');
+      }
+    }
     
     // Обеспечиваем, что url начинается с /
     final cleanUrl = processedUrl.startsWith('/') ? processedUrl : '/$processedUrl';
     
-    return '$baseUrl$cleanUrl';
+    final finalUrl = '$baseUrl$cleanUrl';
+    
+    // Логируем сформированный URL для диагностики
+    if (kIsWeb && (EnvironmentConfig.isProduction || EnvironmentConfig.isStaging)) {
+      print('📸 Image URL (constructed): $finalUrl');
+    }
+    
+    return finalUrl;
   }
 
   /// Возвращает полный URL миниатюры изображения
@@ -143,17 +190,53 @@ class File {
     }
     
     if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
-      // URL уже полный (CDN или другой внешний источник)
-      if (kIsWeb) {
-        print('📸 Full thumbnail URL (CDN): $processedUrl');
+      // ВАЖНО: Принудительно преобразуем HTTP в HTTPS для production и staging
+      // Это решает проблему Mixed Content, когда API возвращает HTTP URL
+      if (processedUrl.startsWith('http://')) {
+        if (EnvironmentConfig.isProduction || EnvironmentConfig.isStaging) {
+          processedUrl = processedUrl.replaceFirst('http://', 'https://');
+          if (kIsWeb) {
+            print('🔒 Upgraded HTTP to HTTPS (thumbnail): $processedUrl');
+          }
+        } else if (kIsWeb) {
+          // В development тоже логируем для диагностики
+          print('⚠️ HTTP thumbnail URL detected in development: $processedUrl');
+        }
       }
+      
+      // Дополнительная проверка: если URL содержит api.fastselect.ru или fastselect.ru
+      // но использует HTTP, принудительно преобразуем в HTTPS
+      if (processedUrl.contains('api.fastselect.ru') || processedUrl.contains('fastselect.ru')) {
+        if (processedUrl.startsWith('http://')) {
+          processedUrl = processedUrl.replaceFirst('http://', 'https://');
+          if (kIsWeb) {
+            print('🔒 Force upgraded HTTP to HTTPS for fastselect.ru domain (thumbnail): $processedUrl');
+          }
+        }
+      }
+      
+      // Логируем финальный URL для диагностики проблем с сертификатом
+      if (kIsWeb && (EnvironmentConfig.isProduction || EnvironmentConfig.isStaging)) {
+        print('📸 Thumbnail URL (final): $processedUrl');
+      }
+      
       return processedUrl;
     }
     
     // Получаем base URL без /api в конце для статических файлов
     final apiBaseUrl = EnvironmentConfig.apiBaseURL;
     // Убираем /api/ из конца, если есть
-    final baseUrl = apiBaseUrl.replaceAll(RegExp(r'/api/?$'), '');
+    var baseUrl = apiBaseUrl.replaceAll(RegExp(r'/api/?$'), '');
+    
+    // ВАЖНО: Принудительно преобразуем HTTP в HTTPS для production и staging
+    // Это гарантирует, что даже если baseUrl по какой-то причине содержит HTTP, мы используем HTTPS
+    if ((EnvironmentConfig.isProduction || EnvironmentConfig.isStaging) && 
+        baseUrl.startsWith('http://')) {
+      baseUrl = baseUrl.replaceFirst('http://', 'https://');
+      if (kIsWeb) {
+        print('🔒 Upgraded baseUrl HTTP to HTTPS (thumbnail): $baseUrl');
+      }
+    }
     
     // Обеспечиваем, что url начинается с /
     final cleanUrl = processedUrl.startsWith('/') ? processedUrl : '/$processedUrl';

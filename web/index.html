@@ -32,6 +32,10 @@
   <meta name="author" content="Photo App Team">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
+  <!-- Принудительное преобразование HTTP в HTTPS для всех ресурсов -->
+  <!-- ВАЖНО: Не устанавливаем CSP через meta tag, так как он конфликтует с CSP из .htaccess -->
+  <!-- CSP настраивается через .htaccess для полного контроля -->
+  
   <!-- Android Chrome meta tags -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0175C2">

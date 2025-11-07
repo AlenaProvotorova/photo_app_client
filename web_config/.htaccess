@@ -62,11 +62,26 @@
     Header always set X-Frame-Options DENY
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # HSTS - принудительное использование HTTPS (только для HTTPS соединений)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+    
+    # CSP с upgrade-insecure-requests - автоматически преобразует HTTP в HTTPS
+    # Flutter Web требует unsafe-inline для скриптов и стилей
+    # ВАЖНО: script-src и style-src должны быть указаны ПЕРЕД default-src, чтобы переопределить его
+    Header always set Content-Security-Policy "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; style-src 'self' 'unsafe-inline' https: data: blob:; default-src 'self' https: data: blob:; img-src 'self' https: data: blob:; font-src 'self' https: data: blob:; connect-src 'self' https: data: blob:; frame-src 'self' https:; frame-ancestors 'self' https://*.telegram.org https://web.telegram.org https://t.me https://*.facebook.com https://*.instagram.com https://*.vk.com https://*.ok.ru https://*.twitter.com https://*.x.com; upgrade-insecure-requests; block-all-mixed-content;"
 </IfModule>
 
 # SPA routing - перенаправление всех запросов на index.html
 RewriteEngine On
 RewriteBase /
+
+# ВАЖНО: Редирект HTTP → HTTPS отключен, так как он уже настроен на уровне хостинга reg.ru
+# Если редирект не настроен в панели управления хостингом, раскомментируйте следующие строки:
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# 
+# Примечание: CSP с upgrade-insecure-requests автоматически преобразует HTTP в HTTPS для ресурсов
 
 # Не перенаправлять существующие файлы и папки
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -74,10 +89,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 # Перенаправлять все остальные запросы на index.html
 RewriteRule . /index.html [L]
-
-# Принудительное перенаправление на HTTPS (раскомментировать после настройки SSL)
-# RewriteCond %{HTTPS} off
-# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Сжатие для лучшей производительности
 <IfModule mod_gzip.c>

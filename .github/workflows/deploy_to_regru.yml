@@ -39,50 +39,21 @@ jobs:
           flutter build web --release --web-renderer html
         fi
       
-    - name: Create .htaccess for Reg.ru
+    - name: Copy .htaccess for Reg.ru
       run: |
-        cat > build/web/.htaccess << 'EOF'
-        # Включить сжатие
-        <IfModule mod_deflate.c>
-            AddOutputFilterByType DEFLATE text/plain
-            AddOutputFilterByType DEFLATE text/html
-            AddOutputFilterByType DEFLATE text/xml
-            AddOutputFilterByType DEFLATE text/css
-            AddOutputFilterByType DEFLATE application/xml
-            AddOutputFilterByType DEFLATE application/xhtml+xml
-            AddOutputFilterByType DEFLATE application/rss+xml
-            AddOutputFilterByType DEFLATE application/javascript
-            AddOutputFilterByType DEFLATE application/x-javascript
-        </IfModule>
-        
-        # Кэширование
-        <IfModule mod_expires.c>
-            ExpiresActive on
-            ExpiresByType text/css "access plus 1 year"
-            ExpiresByType application/javascript "access plus 1 year"
-            ExpiresByType image/png "access plus 1 year"
-            ExpiresByType image/jpg "access plus 1 year"
-            ExpiresByType image/jpeg "access plus 1 year"
-            ExpiresByType image/gif "access plus 1 year"
-            ExpiresByType image/svg+xml "access plus 1 year"
-        </IfModule>
-        
-        # SPA routing - перенаправление всех запросов на index.html
-        RewriteEngine On
-        RewriteBase /
-        
-        # ВАЖНО: Убрано принудительное перенаправление на HTTPS
-        # Если оно нужно, включите в настройках ISPmanager вместо .htaccess
-        # RewriteCond %{HTTPS} off
-        # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-        
-        # Не перенаправлять существующие файлы и папки
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteCond %{REQUEST_FILENAME} !-d
-        
-        # Перенаправлять все остальные запросы на index.html
-        RewriteRule . /index.html [L]
-        EOF
+        if [ -f "web_config/.htaccess" ]; then
+          cp web_config/.htaccess build/web/.htaccess
+          echo "✅ .htaccess copied from web_config/.htaccess"
+        else
+          echo "⚠️ web_config/.htaccess not found, creating minimal .htaccess"
+          echo "# SPA routing" > build/web/.htaccess
+          echo "RewriteEngine On" >> build/web/.htaccess
+          echo "RewriteBase /" >> build/web/.htaccess
+          echo "# Редирект HTTP → HTTPS отключен (настраивается на уровне хостинга)" >> build/web/.htaccess
+          echo "RewriteCond %{REQUEST_FILENAME} !-f" >> build/web/.htaccess
+          echo "RewriteCond %{REQUEST_FILENAME} !-d" >> build/web/.htaccess
+          echo "RewriteRule . /index.html [L]" >> build/web/.htaccess
+        fi
         
     - name: Deploy to Reg.ru via SFTP/FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
